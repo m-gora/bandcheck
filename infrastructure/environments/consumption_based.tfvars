@@ -1,0 +1,5 @@
+resource_group_name = "bandcheck"
+location            = "West Europe"
+app_name            = "bandcheck"
+backend_sku         = "B1"
+domain_name         = "bandcheck.marcodoes.tech"
