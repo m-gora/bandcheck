@@ -1,3 +1,27 @@
+############
+# Entra ID #
+############
+
+resource "time_rotating" "password" {
+  rotation_days = 180
+}
+
+resource "azuread_application" "this" {
+  display_name     = "Bandcheck"
+  description      = "App Registration for Microsoft Social Logins"
+  sign_in_audience = "AzureADMultipleOrgs"
+
+  password {
+    display_name = "client-secret"
+    start_date   = time_rotating.password.id
+    end_date     = timeadd(time_rotating.password.id, "2160h")
+  }
+
+  single_page_application {
+    redirect_uris = [ for url in local.origin_urls: "https://${url}/signin-callback" ]
+  }
+}
+
 ##################
 # Resource Group #
 ##################
@@ -169,9 +193,10 @@ resource "azurerm_linux_function_app" "backend" {
 
     login {}
 
-    microsoft_v2 {
-      client_id = var.social_logins.microsoft
-      client_secret_setting_name = "MicrosoftClientSecret"
+    active_directory_v2 {
+      client_id = azuread_application.this.client_id
+      client_secret_setting_name = "AZURE_AD_CLIENT_SECRET"
+      tenant_auth_endpoint = "https://login.microsoftonline.com/v2.0/${data.azurerm_client_config.current.tenant_id}"
     }
   }
   
@@ -179,13 +204,18 @@ resource "azurerm_linux_function_app" "backend" {
     minimum_tls_version = "1.3"
 
     cors {
-      allowed_origins     = ["${var.domain_name}", "${azurerm_static_web_app.frontend.default_host_name}"]
+      allowed_origins     = local.origin_urls
       support_credentials = false
     }
 
     application_stack {
       node_version = "20"
     }
+  }
+
+  app_settings = {
+    "WEBSITE_RUN_FROM_PACKAGE" = "1"
+    "AZURE_AD_CLIENT_SECRET"   = tolist(azuread_application.this.password).0.value
   }
 }
 

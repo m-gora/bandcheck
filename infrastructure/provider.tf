@@ -6,12 +6,18 @@ terraform {
     cloudflare = {
       source  = "cloudflare/cloudflare"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+    }
   }
 }
 
 provider "azurerm" {
+  storage_use_azuread = true
+
   features {}
 }
 
-provider "cloudflare" {
-}
+provider "cloudflare" {}
+
+provider "azuread" {}
