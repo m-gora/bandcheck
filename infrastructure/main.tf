@@ -163,6 +163,17 @@ resource "azurerm_linux_function_app" "backend" {
   identity {
     type = "SystemAssigned"
   }
+
+  auth_settings_v2 {
+    auth_enabled = true
+
+    login {}
+
+    microsoft_v2 {
+      client_id = var.social_logins.microsoft
+      client_secret_setting_name = "MicrosoftClientSecret"
+    }
+  }
   
   site_config {
     minimum_tls_version = "1.3"

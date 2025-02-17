@@ -16,7 +16,7 @@ export async function SubmitBand(request: HttpRequest, context: InvocationContex
 
 app.http('SubmitBand', {
     methods: ['POST'],
-    authLevel: 'anonymous',
+    authLevel: 'function',
     handler: SubmitBand,
     route: '/bands'
 });

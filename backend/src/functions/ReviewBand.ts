@@ -10,7 +10,7 @@ export async function ReviewBand(request: HttpRequest, context: InvocationContex
 
 app.http('ReviewBand', {
     methods: ['POST'],
-    authLevel: 'anonymous',
+    authLevel: 'function',
     handler: ReviewBand,
     route: '/bands/{bandId}/review'
 });

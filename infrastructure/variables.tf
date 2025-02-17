@@ -27,3 +27,11 @@ variable "cloudflare_zone_id" {
   description = "The ID of the Cloudflare zone."
   type = string
 }
+
+
+variable "social_logins" {
+  description = "A list of social logins to enable for the frontend."
+  type = object({
+    microsoft = string
+  })
+}
