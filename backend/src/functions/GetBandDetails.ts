@@ -9,7 +9,8 @@ export async function GetBandDetails(request: HttpRequest, context: InvocationCo
 };
 
 app.http('GetBandDetails', {
-    methods: ['GET', 'POST'],
+    methods: ['GET'],
     authLevel: 'anonymous',
-    handler: GetBandDetails
+    handler: GetBandDetails,
+    route: '/bands/{bandId}'
 });
