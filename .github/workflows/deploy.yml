@@ -1,0 +1,29 @@
+---
+name: Deploy
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy infrastructure
+        run: echo "Deploying infrastructure"
+  deploy-backend:
+    needs: infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy backend
+        run: echo "Deploying backend"
+  deploy-frontend:
+    needs: infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy frontend
+        run: echo "Deploying frontend"
