@@ -18,6 +18,10 @@ on:
 env:
   NODE_VERSION: '22.x'
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   # Deploy to Production Environment
   deploy-production:

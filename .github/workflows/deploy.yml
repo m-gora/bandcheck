@@ -16,6 +16,10 @@ env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './backend'
   NODE_VERSION: '22.x'
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   # Build and Deploy Backend (Azure Functions)
   deploy-backend:
