@@ -21,6 +21,7 @@ export interface Review {
   bandId: string;
   userId: string;
   userDisplayName: string;
+  userAvatarUrl?: string;
   safetyAssessment: 'safe' | 'unsafe';
   comment: string;
   evidence: string[];
@@ -52,6 +53,7 @@ export interface ReviewEntity {
   bandId: string;
   userId: string;
   userDisplayName: string;
+  userAvatarUrl?: string;
   safetyAssessment: 'safe' | 'unsafe';
   comment: string;
   evidence: string; // JSON stringified array
@@ -77,6 +79,7 @@ export interface CreateReviewRequest {
   evidence: string[];
   userId: string;
   userDisplayName: string;
+  userAvatarUrl?: string;
 }
 
 export interface GetBandsResponse {

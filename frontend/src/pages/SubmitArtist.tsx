@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import { useAuth } from '../context/AuthContext';
+import { useCreateBand } from '../hooks/useBands';
 
 // Genre options for the form
 const genreOptions = [
@@ -59,6 +60,7 @@ interface ArtistFormData {
 export default function SubmitArtist() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const createBandMutation = useCreateBand();
   
   const [formData, setFormData] = React.useState<ArtistFormData>({
     name: '',
@@ -72,7 +74,6 @@ export default function SubmitArtist() {
   });
   
   const [memberInput, setMemberInput] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
   const [error, setError] = React.useState('');
 
@@ -135,27 +136,33 @@ export default function SubmitArtist() {
       return;
     }
 
-    setLoading(true);
+    // Clear previous errors
     setError('');
 
     try {
-      // In a real app, this would be an API call
-      console.log('Submitting artist:', formData);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Convert form data to API format
+      const bandData = {
+        name: formData.name,
+        description: formData.description,
+        genres: formData.genres,
+        location: formData.location || undefined,
+        formed: formData.formed || undefined,
+        website: formData.website || undefined,
+        imageUrl: formData.imageUrl || undefined,
+        members: formData.members.length > 0 ? formData.members : undefined,
+      };
+
+      await createBandMutation.mutateAsync(bandData);
       
       setSuccess(true);
       
-      // Reset form after success
+      // Navigate to discover page after success
       setTimeout(() => {
         navigate('/discover');
       }, 2000);
       
-    } catch (err) {
-      setError('Failed to submit artist. Please try again.');
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit artist. Please try again.');
     }
   };
 
@@ -230,9 +237,9 @@ export default function SubmitArtist() {
           ) : (
             <form onSubmit={handleSubmit}>
               <Stack spacing={4}>
-                {error && (
+                {(error || createBandMutation.error) && (
                   <Alert severity="error" sx={{ borderRadius: '12px' }}>
-                    {error}
+                    {error || createBandMutation.error?.message}
                   </Alert>
                 )}
 
@@ -605,7 +612,7 @@ export default function SubmitArtist() {
                   type="submit"
                   variant="contained"
                   size="large"
-                  disabled={loading}
+                  disabled={createBandMutation.isPending}
                   sx={{
                     borderRadius: '12px',
                     py: 1.5,
@@ -614,7 +621,7 @@ export default function SubmitArtist() {
                     textTransform: 'none',
                   }}
                 >
-                  {loading ? 'Submitting...' : 'Submit Artist for Review'}
+                  {createBandMutation.isPending ? 'Submitting...' : 'Submit Artist for Review'}
                 </Button>
 
                 <Typography

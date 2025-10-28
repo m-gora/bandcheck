@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import NavBar from "../components/NavBar"
 import SignIn from "../pages/SignIn"
 import Home from "../pages/Home"
+import BandDetails from "../components/BandDetails"
 import Discover from "../pages/Discover"
 import ArtistDetail from "../pages/ArtistDetail"
 import SubmitArtist from "../pages/SubmitArtist"
@@ -18,6 +19,7 @@ const AppRoutes = () => {
 
         <Routes> {/* Define your routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/bands/:id" element={<BandDetails />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/artist/:id" element={<ArtistDetail />} />
           <Route path="/submit-artist" element={<SubmitArtist />} />
