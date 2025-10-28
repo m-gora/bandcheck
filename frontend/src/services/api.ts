@@ -1,6 +1,6 @@
 // API service functions for BandCheck backend
 
-const API_BASE_URL = 'http://localhost:7071/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:7071/api';
 
 // Types (these should eventually be shared between frontend and backend)
 export interface Band {

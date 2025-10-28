@@ -84,7 +84,7 @@ jobs:
       - name: Build frontend
         run: npm run build
         env:
-          # Use dummy values for CI builds
+          # Use dummy values for CI builds to satisfy environment checks
           VITE_API_BASE_URL: "https://api.example.com"
           VITE_AUTH0_DOMAIN: "example.auth0.com"
           VITE_AUTH0_CLIENT_ID: "dummy_client_id"
