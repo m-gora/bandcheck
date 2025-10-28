@@ -1,0 +1,15 @@
+= Constraints
+
+This section outlines the key constraints that have influenced the architecture of the Bandcheck application. These constraints include both technical and non-technical factors that have shaped design decisions.
+
+Licensing::
+    All software components and libraries used in the Bandcheck application must be open source
+    and compatible with the project's overall licensing strategy. This ensures that the platform
+    remains free and accessible to all users.
+
+Data Privacy::
+    The architecture must comply with data protection regulations (e.g., GDPR) and prioritize
+    user privacy. This includes implementing measures to protect personal information and
+    providing users with control over their data.
+
+

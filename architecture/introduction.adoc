@@ -1,0 +1,54 @@
+= Introduction & Goals
+
+Bandcheck's mission statement is to make discovering music safer. Our service delivers
+tools where the community contributes to safer listening experience by contributing to
+a shared knowledge base of content warnings.
+Reviews are evidence based and focus on content warnings rather than subjective ratings.
+This empowers users to make informed decisions about the music they choose to listen to.
+
+The whole platform is non-profit and open source. We believe that access to information about
+potentially triggering content should be freely available to everyone.
+
+== Requirements
+
+The main requirements driving the architecture of Bandcheck are:
+
+Quorum Based Contributions::
+  Reviews and content warnings are contributed by the community. The architecture must
+  support a robust system for user contributions, including mechanisms for moderation
+  and validation to ensure the accuracy and reliability of the information provided.
+
+Discovery and Content Warnings::
+  The platform must provide efficient search and discovery features, allowing users to
+  easily find music along with relevant content warnings. This includes advanced filtering
+  options based on user preferences and warning types.
+
+No Registration Required::
+  Social logins are the main authentication mechanism. Users should be able to access
+  the platform and its features without mandatory registration, ensuring ease of access
+  while still allowing for personalized experiences through optional sign-ins.
+
+== Quality Goals
+
+Cost Efficiency::
+  The architecture should be designed to minimize operational costs, leveraging
+  cloud services and open-source technologies where possible to reduce expenses
+  associated with hosting, data storage, and content delivery.
+
+Maintainability::
+  We aim to use widely adopted technologies and frameworks to ensure that the codebase
+  is maintainable and can be easily understood and contributed to by new developers.
+
+Operability::
+  The platform follows ux best practices to ensure a smooth and intuitive user experience.
+
+== Stakeholders
+
+Core Maintainers::
+  Responsible for the overall development and maintenance of the Bandcheck platform.
+
+Community Contributors::
+    Users who contribute reviews and content warnings, playing a crucial role in enriching the platform's knowledge base and ensuring diverse perspectives are represented.
+
+End Users::
+    Individuals who utilize the Bandcheck platform to discover music and access content warnings, benefiting from the community-driven insights provided.

@@ -1,1 +1,27 @@
+:toc:
+
 = Bandcheck
+
+include::introduction.adoc[leveloffset=+1]
+
+include::constraints.adoc[leveloffset=+1]
+
+include::context.adoc[leveloffset=+1]
+
+include::solution_strategy.adoc[leveloffset=+1]
+
+== Building Block View
+
+== Runtime View
+
+== Deployment View
+
+== Crosscutting Concepts
+
+== Architectural Decisions
+
+== Quality Requirements
+
+== Risks & Technical Debt
+
+== Glossary

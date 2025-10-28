@@ -1,0 +1,63 @@
+= Context & Scope
+
+This section defines the context and scope of the Bandcheck application architecture. It outlines the boundaries of the system, its interactions with external entities, and the key components that make up the architecture.
+
+== Business Context
+
+[mermaid]
+....
+graph LR
+    U[Users] --> A[Bandcheck]
+    A --> IdP[Identity Provider]
+    A --> MA[Metal Archives]
+    B[Band] --> A
+    A --> L[Large Language Model]
+....
+
+Users::
+    People that are either anonymous visitors or registered users of the Bandcheck platform. They interact with the system to discover music, read reviews, and contribute content warnings.
+
+Bandcheck::
+    The core application that provides the platform for music discovery and content warnings. It handles user interactions, data management, and content delivery.
+
+Identity Provider::
+    An external identity provider used for user authentication and authorization. It manages user credentials and provides secure access to the Bandcheck platform.
+
+Band::
+    Musical artists or groups that are the subjects of reviews and content warnings within the Bandcheck platform.
+
+Large Language Model::
+    Provides summaries on a large numbers of reviews for a band, generating an overall content warning summary to assist users in making informed decisions.
+
+Metal Archives::
+    An encyclopedia of metal bands. An import possibility from Metal Archives is being considered to populate the Bandcheck database with initial band data.
+
+== Technical Context
+
+[mermaid]
+....
+graph LR
+    U[Users] -- browsing/submission --> A[Bandcheck]
+    A -- storage/retrieval --> DB[(Database)]
+    A -- openid connect --> IdP[Identity Provider (Auth0)]
+    A -- data import --> MA[Metal Archives]
+    A -- review summarization --> L[Large Language Model]
+....
+
+Users::
+    Interact with the Bandcheck application through web browsers or mobile devices. They can browse content, submit reviews, and manage their profiles.
+
+Bandcheck::
+    The main application that processes user requests, manages business logic, and interfaces with other system components
+
+Database::
+    A persistent storage system that holds user data, reviews, content warnings, and band information.
+
+Identity Provider (Auth0)::
+    Provides authentication services, allowing users to securely log in and access their accounts on the Bandcheck platform.
+
+Metal Archives::
+    An external data source that may be used to import band information into the Bandcheck database.
+
+Large Language Model::
+    A service that processes and summarizes user reviews to generate content warnings, enhancing the user experience by providing concise information.
