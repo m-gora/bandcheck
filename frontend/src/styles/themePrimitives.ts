@@ -31,16 +31,16 @@ const defaultTheme = createTheme();
 const customShadows: Shadows = [...defaultTheme.shadows];
 
 export const brand = {
-  50: 'hsl(210, 100%, 95%)',
-  100: 'hsl(210, 100%, 92%)',
-  200: 'hsl(210, 100%, 80%)',
-  300: 'hsl(210, 100%, 65%)',
-  400: 'hsl(210, 98%, 48%)',
-  500: 'hsl(210, 98%, 42%)',
-  600: 'hsl(210, 98%, 55%)',
-  700: 'hsl(210, 100%, 35%)',
-  800: 'hsl(210, 100%, 16%)',
-  900: 'hsl(210, 100%, 21%)',
+  50: 'hsl(273, 91.6%, 95%)',
+  100: 'hsl(273, 91.6%, 90%)',
+  200: 'hsl(273, 91.6%, 80%)',
+  300: 'hsl(273, 91.6%, 70%)',
+  400: 'hsl(273, 91.6%, 64%)',
+  500: 'hsl(273, 91.6%, 58%)', // Your custom primary color
+  600: 'hsl(273, 91.6%, 50%)',
+  700: 'hsl(273, 91.6%, 42%)',
+  800: 'hsl(273, 91.6%, 32%)',
+  900: 'hsl(273, 91.6%, 22%)',
 };
 
 export const gray = {
@@ -105,27 +105,27 @@ export const getDesignTokens = (mode: PaletteMode) => {
     palette: {
       mode,
       primary: {
-        light: brand[200],
-        main: brand[400],
+        light: brand[300],
+        main: brand[500],
         dark: brand[700],
         contrastText: brand[50],
         ...(mode === 'dark' && {
           contrastText: brand[50],
-          light: brand[300],
-          main: brand[400],
-          dark: brand[700],
+          light: brand[400],
+          main: brand[500],
+          dark: brand[800],
         }),
       },
       info: {
-        light: brand[100],
-        main: brand[300],
-        dark: brand[600],
+        light: brand[200],
+        main: brand[400],
+        dark: brand[700],
         contrastText: gray[50],
         ...(mode === 'dark' && {
-          contrastText: brand[300],
-          light: brand[500],
-          main: brand[700],
-          dark: brand[900],
+          contrastText: brand[200],
+          light: brand[400],
+          main: brand[600],
+          dark: brand[800],
         }),
       },
       warning: {
@@ -391,7 +391,7 @@ export const typography = {
 };
 
 export const shape = {
-  borderRadius: 8,
+  borderRadius: 12,
 };
 
 // @ts-ignore
