@@ -9,12 +9,18 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
 import HomeIcon from '@mui/icons-material/Home';
 import SearchIcon from '@mui/icons-material/Search';
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import InfoIcon from '@mui/icons-material/Info';
 import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PersonIcon from '@mui/icons-material/Person';
 import MenuButton from './MenuButton';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 interface SideMenuMobileProps {
   open: boolean | undefined;
@@ -22,6 +28,24 @@ interface SideMenuMobileProps {
 }
 
 export default function SideMenuMobile({ open, toggleDrawer }: Readonly<SideMenuMobileProps>) {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth();
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    toggleDrawer(false)();
+  };
+
+  const handleLogin = () => {
+    loginWithRedirect();
+    toggleDrawer(false)();
+  };
+
+  const handleLogout = () => {
+    logout();
+    toggleDrawer(false)();
+  };
+
   return (
     <Drawer
       anchor="right"
@@ -56,7 +80,10 @@ export default function SideMenuMobile({ open, toggleDrawer }: Readonly<SideMenu
         {/* Navigation Items */}
         <List sx={{ flexGrow: 1, px: 1, py: 2 }}>
           <ListItem disablePadding>
-            <ListItemButton sx={{ borderRadius: 2 }}>
+            <ListItemButton 
+              sx={{ borderRadius: 2 }}
+              onClick={() => handleNavigation('/')}
+            >
               <ListItemIcon>
                 <HomeIcon />
               </ListItemIcon>
@@ -65,7 +92,10 @@ export default function SideMenuMobile({ open, toggleDrawer }: Readonly<SideMenu
           </ListItem>
           
           <ListItem disablePadding>
-            <ListItemButton sx={{ borderRadius: 2 }}>
+            <ListItemButton 
+              sx={{ borderRadius: 2 }}
+              onClick={() => handleNavigation('/discover')}
+            >
               <ListItemIcon>
                 <SearchIcon />
               </ListItemIcon>
@@ -94,20 +124,72 @@ export default function SideMenuMobile({ open, toggleDrawer }: Readonly<SideMenu
 
         <Divider />
 
-        {/* Sign In Button */}
+        {/* Auth Section */}
         <Stack sx={{ p: 2 }}>
-          <Button 
-            variant="contained" 
-            fullWidth 
-            startIcon={<LoginIcon />}
-            sx={{ 
-              borderRadius: '12px',
-              textTransform: 'none',
-              py: 1.5,
-            }}
-          >
-            Sign In
-          </Button>
+          {!isLoading && (
+            <>
+              {isAuthenticated && user ? (
+                <>
+                  {/* User Profile Section */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar
+                      src={user.picture}
+                      alt={user.name}
+                      sx={{ width: 40, height: 40, mr: 2 }}
+                    >
+                      {user.name?.charAt(0)}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                        {user.name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {user.email}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  
+                  {/* User Menu Items */}
+                  <ListItem disablePadding sx={{ mb: 1 }}>
+                    <ListItemButton sx={{ borderRadius: 2 }}>
+                      <ListItemIcon>
+                        <PersonIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Profile" />
+                    </ListItemButton>
+                  </ListItem>
+                  
+                  <Button 
+                    variant="outlined" 
+                    fullWidth 
+                    startIcon={<LogoutIcon />}
+                    onClick={handleLogout}
+                    sx={{ 
+                      borderRadius: '12px',
+                      textTransform: 'none',
+                      py: 1.5,
+                    }}
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  variant="contained" 
+                  fullWidth 
+                  startIcon={<LoginIcon />}
+                  onClick={handleLogin}
+                  sx={{ 
+                    borderRadius: '12px',
+                    textTransform: 'none',
+                    py: 1.5,
+                  }}
+                >
+                  Sign In
+                </Button>
+              )}
+            </>
+          )}
         </Stack>
       </Stack>
     </Drawer>

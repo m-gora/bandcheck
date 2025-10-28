@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import NavBar from "../components/NavBar"
 import SignIn from "../pages/SignIn"
 import Home from "../pages/Home"
+import Discover from "../pages/Discover"
 
 const AppRoutes = () => {
   return (
@@ -14,6 +15,7 @@ const AppRoutes = () => {
 
         <Routes> {/* Define your routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/discover" element={<Discover />} />
           <Route path="/signin" element={<SignIn />} />
         </Routes>
     </BrowserRouter>

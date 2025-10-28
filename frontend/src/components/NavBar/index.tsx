@@ -6,14 +6,22 @@ import Stack from '@mui/material/Stack';
 import MuiToolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import ShieldIcon from '@mui/icons-material/Shield';
 import HomeIcon from '@mui/icons-material/Home';
 import SearchIcon from '@mui/icons-material/Search';
 import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PersonIcon from '@mui/icons-material/Person';
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
 import ThemeToggle from '../ThemeToggle';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 
 const Toolbar = styled(MuiToolbar)({
@@ -27,9 +35,25 @@ const Toolbar = styled(MuiToolbar)({
 
 const AppNavBar = () => {
   const [open, setOpen] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const navigate = useNavigate();
+  const { user, isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth();
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
+  };
+
+  const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    handleUserMenuClose();
   };
 
   return (
@@ -69,6 +93,7 @@ const AppNavBar = () => {
         >
           <Button
             startIcon={<HomeIcon />}
+            onClick={() => navigate('/')}
             sx={{ 
               color: 'text.primary',
               textTransform: 'none',
@@ -79,6 +104,7 @@ const AppNavBar = () => {
           </Button>
           <Button
             startIcon={<SearchIcon />}
+            onClick={() => navigate('/discover')}
             sx={{ 
               color: 'text.primary',
               textTransform: 'none',
@@ -111,19 +137,75 @@ const AppNavBar = () => {
         <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
           <ThemeToggle />
           
-          {/* Desktop Sign In Button */}
-          <Button
-            variant="outlined"
-            startIcon={<LoginIcon />}
-            sx={{ 
-              display: { xs: 'none', md: 'flex' },
-              textTransform: 'none',
-              borderRadius: '12px',
-              px: 3,
-            }}
-          >
-            Sign In
-          </Button>
+          {/* Desktop Auth Controls */}
+          {!isLoading && (
+            <>
+              {isAuthenticated ? (
+                <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
+                  <Button
+                    onClick={handleUserMenuClick}
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      px: 2,
+                      color: 'text.primary',
+                    }}
+                    startIcon={
+                      <Avatar
+                        src={user?.picture}
+                        alt={user?.name}
+                        sx={{ width: 24, height: 24 }}
+                      >
+                        {user?.name?.charAt(0)}
+                      </Avatar>
+                    }
+                  >
+                    {user?.name}
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleUserMenuClose}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                  >
+                    <MenuItem onClick={handleUserMenuClose}>
+                      <ListItemIcon>
+                        <PersonIcon fontSize="small" />
+                      </ListItemIcon>
+                      Profile
+                    </MenuItem>
+                    <MenuItem onClick={handleLogout}>
+                      <ListItemIcon>
+                        <LogoutIcon fontSize="small" />
+                      </ListItemIcon>
+                      Logout
+                    </MenuItem>
+                  </Menu>
+                </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  startIcon={<LoginIcon />}
+                  onClick={() => loginWithRedirect()}
+                  sx={{ 
+                    display: { xs: 'none', md: 'flex' },
+                    textTransform: 'none',
+                    borderRadius: '12px',
+                    px: 3,
+                  }}
+                >
+                  Sign In
+                </Button>
+              )}
+            </>
+          )}
 
           {/* Mobile Menu Button */}
           <MenuButton 

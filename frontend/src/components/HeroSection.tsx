@@ -10,8 +10,11 @@ import {
 import ShieldIcon from '@mui/icons-material/Shield';
 import SearchIcon from '@mui/icons-material/Search';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import { useNavigate } from 'react-router-dom';
 
 export default function HeroSection() {
+  const navigate = useNavigate();
+
   return (
     <Container maxWidth="lg">
       <Stack
@@ -83,6 +86,7 @@ export default function HeroSection() {
             variant="contained"
             size="large"
             startIcon={<SearchIcon />}
+            onClick={() => navigate('/discover')}
             sx={{
               px: 4,
               py: 1.5,

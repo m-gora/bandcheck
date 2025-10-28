@@ -59,7 +59,7 @@ export default function FeaturesSection() {
     <Box sx={{ bgcolor: 'background.default', py: { xs: 8, sm: 12 } }}>
       <Container maxWidth="lg">
         {/* Section Header */}
-        <Stack spacing={2} sx={{ textAlign: 'center', mb: 8 }}>
+        <Stack spacing={2} sx={{ textAlign: 'center', mb: 8, alignItems: 'center' }}>
           <Typography
             variant="h2"
             component="h2"
@@ -67,6 +67,7 @@ export default function FeaturesSection() {
               fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
               fontWeight: 'bold',
               color: 'text.primary',
+              textAlign: 'center',
             }}
           >
             How It Works
@@ -76,7 +77,8 @@ export default function FeaturesSection() {
             sx={{
               color: 'text.secondary',
               maxWidth: '600px',
-              mx: 'auto',
+              textAlign: 'center',
+              width: '100%',
             }}
           >
             Three simple steps to discover music safely and make informed choices about the content you consume
