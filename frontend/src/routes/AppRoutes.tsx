@@ -6,6 +6,8 @@ import SignIn from "../pages/SignIn"
 import Home from "../pages/Home"
 import Discover from "../pages/Discover"
 import ArtistDetail from "../pages/ArtistDetail"
+import SubmitArtist from "../pages/SubmitArtist"
+import WriteReview from "../pages/WriteReview"
 
 const AppRoutes = () => {
   return (
@@ -18,6 +20,8 @@ const AppRoutes = () => {
           <Route path="/" element={<Home />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/artist/:id" element={<ArtistDetail />} />
+          <Route path="/submit-artist" element={<SubmitArtist />} />
+          <Route path="/artist/:id/review" element={<WriteReview />} />
           <Route path="/signin" element={<SignIn />} />
         </Routes>
     </BrowserRouter>

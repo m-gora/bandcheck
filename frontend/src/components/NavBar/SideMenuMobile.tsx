@@ -18,6 +18,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
+import AddIcon from '@mui/icons-material/Add';
 import MenuButton from './MenuButton';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -102,6 +103,20 @@ export default function SideMenuMobile({ open, toggleDrawer }: Readonly<SideMenu
               <ListItemText primary="Discover Bands" />
             </ListItemButton>
           </ListItem>
+          
+          {isAuthenticated && (
+            <ListItem disablePadding>
+              <ListItemButton 
+                sx={{ borderRadius: 2 }}
+                onClick={() => handleNavigation('/submit-artist')}
+              >
+                <ListItemIcon>
+                  <AddIcon />
+                </ListItemIcon>
+                <ListItemText primary="Submit Artist" />
+              </ListItemButton>
+            </ListItem>
+          )}
           
           <ListItem disablePadding>
             <ListItemButton sx={{ borderRadius: 2 }}>

@@ -549,6 +549,7 @@ export default function ArtistDetail() {
               <Button
                 variant="contained"
                 size="large"
+                onClick={() => navigate(`/artist/${id}/review`)}
                 sx={{
                   borderRadius: '12px',
                   px: 4,

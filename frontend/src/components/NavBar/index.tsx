@@ -113,15 +113,18 @@ const AppNavBar = () => {
           >
             Discover
           </Button>
-          <Button
-            sx={{ 
-              color: 'text.primary',
-              textTransform: 'none',
-              fontSize: '0.95rem',
-            }}
-          >
-            Reviews
-          </Button>
+          {isAuthenticated && (
+            <Button
+              onClick={() => navigate('/submit-artist')}
+              sx={{ 
+                color: 'text.primary',
+                textTransform: 'none',
+                fontSize: '0.95rem',
+              }}
+            >
+              Submit Artist
+            </Button>
+          )}
           <Button
             sx={{ 
               color: 'text.primary',
