@@ -2,6 +2,7 @@
   "name": "bandcheck",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "dist/src/functions/*.js",
   "scripts": {
     "build": "tsc",
@@ -9,12 +10,19 @@
     "clean": "rimraf dist",
     "prestart": "npm run clean && npm run build",
     "start": "func start",
+    "dev": "npm run build && func start --host localhost --port 7071",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "azurite:start": "docker-compose up -d azurite",
+    "azurite:stop": "docker-compose stop azurite",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
     "@azure/data-tables": "^13.3.0",
     "@azure/functions": "^4.0.0",
-    "@azure/identity": "^4.6.0"
+    "@azure/identity": "^4.6.0",
+    "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "@types/node": "18.x",

@@ -1,14 +1,61 @@
 import { TableServiceClient, TableClient } from "@azure/data-tables";
-import { DefaultAzureCredential } from "@azure/identity";
+import { DefaultAzureCredential, AzureCliCredential } from "@azure/identity";
 
-const credential = new DefaultAzureCredential();
-const account_url = process.env.AZURE_TABLES_URL;
+// Configuration for local vs production environments
+const isLocal = process.env.NODE_ENV === 'development';
+const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+const account_url = process.env.AZURE_TABLES_URL || "https://your-storage-account.table.core.windows.net/";
 
-const tableServiceClient = new TableServiceClient(account_url, credential);
+let tableServiceClient: TableServiceClient;
+let bandsClient: TableClient;
+let reviewsClient: TableClient;
 
-
-const bootstrap = async () => {
+if (connectionString) {
+  // Use connection string for local Azurite development or production with connection string
+  console.log('Using connection string for local Azurite development');
+  const clientOptions = isLocal ? { allowInsecureConnection: true } : {};
+  tableServiceClient = TableServiceClient.fromConnectionString(connectionString, clientOptions);
+  bandsClient = TableClient.fromConnectionString(connectionString, 'bands', clientOptions);
+  reviewsClient = TableClient.fromConnectionString(connectionString, 'reviews', clientOptions);
+} else {
+  // Use managed identity for production
+  console.log('Using Azure credential for production');
+  const credential = new DefaultAzureCredential();
+  tableServiceClient = new TableServiceClient(account_url, credential);
+  bandsClient = new TableClient(account_url, 'bands', credential);
+  reviewsClient = new TableClient(account_url, 'reviews', credential);
 }
 
-export const Bands = new TableClient(account_url, 'bands', credential);
-export const Reviews = new TableClient(account_url, 'reviews', credential);
+// Bootstrap function to create tables if they don't exist
+const bootstrap = async () => {
+  try {
+    // Create tables if they don't exist
+    await tableServiceClient.createTable('bands', { 
+      onResponse: (response) => {
+        if (response.status === 409) {
+          console.log('Bands table already exists');
+        } else if (response.status === 201) {
+          console.log('Bands table created successfully');
+        }
+      }
+    });
+    
+    await tableServiceClient.createTable('reviews', {
+      onResponse: (response) => {
+        if (response.status === 409) {
+          console.log('Reviews table already exists');
+        } else if (response.status === 201) {
+          console.log('Reviews table created successfully');
+        }
+      }
+    });
+  } catch (error) {
+    console.log('Error during table initialization:', error);
+  }
+};
+
+// Initialize tables on module load
+bootstrap();
+
+export const Bands = bandsClient;
+export const Reviews = reviewsClient;
