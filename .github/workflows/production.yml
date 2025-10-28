@@ -31,7 +31,9 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       # Build and Deploy Backend
       - name: Setup Node.js for Backend
@@ -87,7 +89,9 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS_STAGING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_STAGING }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID_STAGING }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_STAGING }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
