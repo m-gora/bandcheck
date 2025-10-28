@@ -20,7 +20,8 @@ const sampleBands = [
     name: 'Arctic Monkeys',
     image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=faces',
     genres: ['Indie Rock', 'Alternative Rock', 'Post-Punk Revival'],
-    safetyRating: 4.2,
+    safetyStatus: 'safe' as const,
+    reviewCount: 8,
     location: 'Sheffield, UK',
   },
   {
@@ -28,7 +29,8 @@ const sampleBands = [
     name: 'Billie Eilish',
     image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&h=300&fit=crop&crop=faces',
     genres: ['Pop', 'Electropop', 'Alternative Pop'],
-    safetyRating: 4.8,
+    safetyStatus: 'safe' as const,
+    reviewCount: 12,
     location: 'Los Angeles, CA',
   },
   {
@@ -36,7 +38,8 @@ const sampleBands = [
     name: 'The Strokes',
     image: 'https://images.unsplash.com/photo-1571974599782-87462d4d877b?w=400&h=300&fit=crop&crop=faces',
     genres: ['Garage Rock', 'Indie Rock', 'Post-Punk Revival'],
-    safetyRating: 3.9,
+    safetyStatus: 'unsafe' as const,
+    reviewCount: 6,
     location: 'New York, NY',
   },
   {
@@ -44,7 +47,8 @@ const sampleBands = [
     name: 'Tame Impala',
     image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=300&fit=crop&crop=faces',
     genres: ['Psychedelic Pop', 'Neo-Psychedelia', 'Synth-pop'],
-    safetyRating: 4.5,
+    safetyStatus: 'safe' as const,
+    reviewCount: 7,
     location: 'Perth, Australia',
   },
   {
@@ -52,7 +56,8 @@ const sampleBands = [
     name: 'Royal Blood',
     image: 'https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=400&h=300&fit=crop&crop=faces',
     genres: ['Hard Rock', 'Garage Rock', 'Blues Rock'],
-    safetyRating: 3.7,
+    safetyStatus: 'pending' as const,
+    reviewCount: 3,
     location: 'Brighton, UK',
   },
   {
@@ -60,7 +65,8 @@ const sampleBands = [
     name: 'Glass Animals',
     image: 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=400&h=300&fit=crop&crop=faces',
     genres: ['Indie Pop', 'Psychedelic Pop', 'Electronic'],
-    safetyRating: 4.6,
+    safetyStatus: 'safe' as const,
+    reviewCount: 9,
     location: 'Oxford, UK',
   },
 ];

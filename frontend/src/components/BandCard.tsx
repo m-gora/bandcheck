@@ -7,20 +7,21 @@ import {
   Chip,
   Stack,
   Box,
-  Rating,
   IconButton,
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShieldIcon from '@mui/icons-material/Shield';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface Band {
   id: string;
   name: string;
   image: string;
   genres: string[];
-  safetyRating: number;
+  safetyStatus: 'safe' | 'unsafe' | 'pending';
+  reviewCount: number;
   location?: string;
 }
 
@@ -30,31 +31,43 @@ interface BandCardProps {
   isFavorited?: boolean;
 }
 
-const getSafetyColor = (rating: number) => {
-  if (rating >= 4) return '#4caf50'; // Green
-  if (rating >= 3) return '#ff9800'; // Orange
-  return '#f44336'; // Red
+const getSafetyColor = (status: string) => {
+  switch (status) {
+    case 'safe': return '#4caf50'; // Green
+    case 'unsafe': return '#f44336'; // Red
+    case 'pending': return '#757575'; // Gray
+    default: return '#757575';
+  }
 };
 
-const getSafetyLabel = (rating: number) => {
-  if (rating >= 4) return 'Safe';
-  if (rating >= 3) return 'Caution';
-  return 'Warning';
+const getSafetyLabel = (status: string, reviewCount: number) => {
+  switch (status) {
+    case 'safe': return 'Safe';
+    case 'unsafe': return 'Unsafe';
+    case 'pending': return reviewCount < 5 ? 'Pending' : 'Under Review';
+    default: return 'Unknown';
+  }
 };
 
 export default function BandCard({ band, onFavorite, isFavorited = false }: BandCardProps) {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   
   const handleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
     onFavorite?.(band.id);
   };
 
-  const safetyColor = getSafetyColor(band.safetyRating);
-  const safetyLabel = getSafetyLabel(band.safetyRating);
+  const handleCardClick = () => {
+    navigate(`/artist/${band.id}`);
+  };
+
+  const safetyColor = getSafetyColor(band.safetyStatus);
+  const safetyLabel = getSafetyLabel(band.safetyStatus, band.reviewCount);
 
   return (
     <Card
+      onClick={handleCardClick}
       sx={{
         height: '100%',
         display: 'flex',
@@ -114,24 +127,16 @@ export default function BandCard({ band, onFavorite, isFavorited = false }: Band
           >
             {safetyLabel}
           </Typography>
-          <Rating
-            value={band.safetyRating}
-            readOnly
-            size="small"
-            max={5}
+          <Typography
+            variant="caption"
             sx={{
               ml: 0.5,
-              '& .MuiRating-iconFilled': {
-                color: safetyColor,
-              },
-              '& .MuiRating-iconEmpty': {
-                color: 'rgba(0, 0, 0, 0.2)',
-              },
-              '& .MuiRating-icon': {
-                fontSize: '14px',
-              },
+              color: 'text.secondary',
+              fontSize: '0.7rem',
             }}
-          />
+          >
+            {band.reviewCount} review{band.reviewCount !== 1 ? 's' : ''}
+          </Typography>
         </Box>
 
         {/* Favorite Button - Only show when authenticated */}
