@@ -126,6 +126,7 @@ const AppNavBar = () => {
             </Button>
           )}
           <Button
+            onClick={() => navigate('/about')}
             sx={{ 
               color: 'text.primary',
               textTransform: 'none',

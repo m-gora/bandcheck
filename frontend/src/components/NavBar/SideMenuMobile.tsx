@@ -128,7 +128,10 @@ export default function SideMenuMobile({ open, toggleDrawer }: Readonly<SideMenu
           </ListItem>
           
           <ListItem disablePadding>
-            <ListItemButton sx={{ borderRadius: 2 }}>
+            <ListItemButton 
+              sx={{ borderRadius: 2 }}
+              onClick={() => handleNavigation('/about')}
+            >
               <ListItemIcon>
                 <InfoIcon />
               </ListItemIcon>

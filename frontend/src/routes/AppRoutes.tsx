@@ -2,13 +2,13 @@ import { Box } from "@mui/material"
 import React from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import NavBar from "../components/NavBar"
-import SignIn from "../pages/SignIn"
 import Home from "../pages/Home"
 import BandDetails from "../components/BandDetails"
 import Discover from "../pages/Discover"
 import ArtistDetail from "../pages/ArtistDetail"
 import SubmitArtist from "../pages/SubmitArtist"
 import WriteReview from "../pages/WriteReview"
+import About from "../pages/About"
 
 const AppRoutes = () => {
   return (
@@ -24,7 +24,7 @@ const AppRoutes = () => {
           <Route path="/artist/:id" element={<ArtistDetail />} />
           <Route path="/submit-artist" element={<SubmitArtist />} />
           <Route path="/artist/:id/review" element={<WriteReview />} />
-          <Route path="/signin" element={<SignIn />} />
+          <Route path="/about" element={<About />} />
         </Routes>
     </BrowserRouter>
   )
