@@ -1,5 +1,5 @@
 import { TableServiceClient, TableClient } from "@azure/data-tables";
-import { DefaultAzureCredential, AzureCliCredential } from "@azure/identity";
+import { DefaultAzureCredential } from "@azure/identity";
 
 // Configuration for local vs production environments
 const isLocal = process.env.NODE_ENV === 'development';
@@ -74,7 +74,7 @@ const bootstrap = async () => {
 };
 
 // Initialize tables on module load
-bootstrap();
+await bootstrap();
 
 export const Bands = bandsClient;
 export const Reviews = reviewsClient;
