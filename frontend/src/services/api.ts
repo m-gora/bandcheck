@@ -2,6 +2,25 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:7071/api';
 
+// Auth token management
+let authToken: string | null = null;
+
+export const setAuthToken = (token: string | null) => {
+  authToken = token;
+};
+
+const getAuthHeaders = (): HeadersInit => {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+  
+  return headers;
+};
+
 // Types (these should eventually be shared between frontend and backend)
 export interface Band {
   id: string;
@@ -70,9 +89,12 @@ export const api = {
     if (search) params.append('search', search);
     if (genre) params.append('genre', genre);
     
-    const url = `${API_BASE_URL}/bands${params.toString() ? `?${params.toString()}` : ''}`;
+    const queryString = params.toString();
+    const url = queryString ? `${API_BASE_URL}/bands?${queryString}` : `${API_BASE_URL}/bands`;
     
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error(`Failed to fetch bands: ${response.status} ${response.statusText}`);
     }
@@ -82,7 +104,9 @@ export const api = {
 
   // Get specific band details with reviews
   getBandDetails: async (bandId: string): Promise<GetBandDetailsResponse> => {
-    const response = await fetch(`${API_BASE_URL}/bands/${bandId}`);
+    const response = await fetch(`${API_BASE_URL}/bands/${bandId}`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error('Band not found');
@@ -97,9 +121,7 @@ export const api = {
   createBand: async (band: CreateBandRequest): Promise<{ message: string; bandId: string; band: Band }> => {
     const response = await fetch(`${API_BASE_URL}/bands`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(band),
     });
     
@@ -120,9 +142,7 @@ export const api = {
   }> => {
     const response = await fetch(`${API_BASE_URL}/bands/${bandId}/review`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(review),
     });
     

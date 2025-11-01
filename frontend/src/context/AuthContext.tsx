@@ -1,5 +1,6 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useAuth0, User } from '@auth0/auth0-react';
+import { setAuthToken } from '../services/api';
 
 interface AuthContextType {
   user: User | undefined;
@@ -30,23 +31,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     loginWithRedirect,
     logout: auth0Logout,
+    getAccessTokenSilently,
   } = useAuth0();
+
+  // Update API token when authentication status changes
+  useEffect(() => {
+    const updateToken = async () => {
+      if (isAuthenticated) {
+        try {
+          const token = await getAccessTokenSilently();
+          setAuthToken(token);
+        } catch (error) {
+          console.error('Failed to get access token:', error);
+          setAuthToken(null);
+        }
+      } else {
+        setAuthToken(null);
+      }
+    };
+
+    updateToken();
+  }, [isAuthenticated, getAccessTokenSilently]);
 
   const logout = () => {
     auth0Logout({
       logoutParams: {
-        returnTo: window.location.origin,
+        returnTo: globalThis.location.origin,
       },
     });
   };
 
-  const value: AuthContextType = {
+  const handleLogin = () => {
+    void loginWithRedirect();
+  };
+
+  const value: AuthContextType = React.useMemo(() => ({
     user,
     isAuthenticated,
     isLoading,
-    loginWithRedirect,
+    loginWithRedirect: handleLogin,
     logout,
-  };
+  }), [user, isAuthenticated, isLoading, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
