@@ -24,7 +24,7 @@
     }
   },
   "globalHeaders": {
-    "content-security-policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'self'; connect-src 'self' https://auth.marcodoes.tech https://*.azurewebsites.net https://api.bandcheck.marcodoes.tech; img-src 'self' data: https:; font-src 'self' data:;"
+    "content-security-policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'self'; connect-src 'self' https://auth.marcodoes.tech https://*.azurewebsites.net https://api.bandcheck.marcodoes.tech; frame-src 'self' https://auth.marcodoes.tech; img-src 'self' data: https:; font-src 'self' data:;"
   },
   "mimeTypes": {
     ".json": "text/json"
