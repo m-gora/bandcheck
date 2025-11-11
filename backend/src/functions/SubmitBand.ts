@@ -1,10 +1,11 @@
-import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
+import { app, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { Bands } from '../shared/Tables.js';
 import { CreateBandRequest, Band } from '../shared/types.js';
 import { bandToEntity, generateId } from '../shared/utils.js';
+import { withAuth, AuthenticatedRequest, AuthenticatedUser } from '../shared/Middleware.js';
 
-export async function SubmitBand(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
-    context.log(`Http function processed request for url "${request.url}"`);
+export async function SubmitBand(request: AuthenticatedRequest, context: InvocationContext, user: AuthenticatedUser): Promise<HttpResponseInit> {
+    context.log(`Http function processed request for url "${request.url}" by user ${user.sub}`);
 
     try {
         const body = await request.json() as CreateBandRequest;
@@ -31,7 +32,12 @@ export async function SubmitBand(request: HttpRequest, context: InvocationContex
                 }
             });
 
+            const existingBandsList = [];
             for await (const entity of existingBands) {
+                existingBandsList.push(entity);
+            }
+            
+            if (existingBandsList.length > 0) {
                 return {
                     status: 409,
                     headers: {
@@ -118,7 +124,7 @@ export async function SubmitBand(request: HttpRequest, context: InvocationContex
 
 app.http('SubmitBand', {
     methods: ['POST'],
-    authLevel: 'function',
-    handler: SubmitBand,
+    authLevel: 'anonymous',
+    handler: withAuth(SubmitBand),
     route: 'bands'
 });

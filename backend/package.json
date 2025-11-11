@@ -22,9 +22,12 @@
     "@azure/data-tables": "^13.3.0",
     "@azure/functions": "^4.0.0",
     "@azure/identity": "^4.6.0",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-client": "^2.1.0"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "18.x",
     "azure-functions-core-tools": "^4.x",
     "rimraf": "^5.0.0",

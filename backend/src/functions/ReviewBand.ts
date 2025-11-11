@@ -1,10 +1,11 @@
-import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
+import { app, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { Bands, Reviews } from '../shared/Tables.js';
 import { CreateReviewRequest, Review } from '../shared/types.js';
 import { reviewToEntity, generateId, entityToReview, calculateSafetyStatus, bandToEntity, entityToBand } from '../shared/utils.js';
+import { withAuth, AuthenticatedRequest, AuthenticatedUser } from '../shared/Middleware.js';
 
-export async function ReviewBand(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
-    context.log(`Http function processed request for url "${request.url}"`);
+export async function ReviewBand(request: AuthenticatedRequest, context: InvocationContext, user: AuthenticatedUser): Promise<HttpResponseInit> {
+    context.log(`Http function processed request for url "${request.url}" by user ${user.sub}`);
 
     try {
         const bandId = request.params.bandId;
@@ -24,7 +25,7 @@ export async function ReviewBand(request: HttpRequest, context: InvocationContex
         }
 
         // Validate required fields
-        if (!body.safetyAssessment || !body.comment || !body.userId || !body.userDisplayName || !body.evidence || body.evidence.length === 0) {
+        if (!body.safetyAssessment || !body.comment || !body.evidence || body.evidence.length === 0) {
             return {
                 status: 400,
                 headers: {
@@ -32,7 +33,7 @@ export async function ReviewBand(request: HttpRequest, context: InvocationContex
                 },
                 body: JSON.stringify({ 
                     error: 'Bad Request',
-                    message: 'Safety assessment, comment, user information, and at least one evidence item are required'
+                    message: 'Safety assessment, comment, and at least one evidence item are required'
                 })
             };
         }
@@ -57,13 +58,11 @@ export async function ReviewBand(request: HttpRequest, context: InvocationContex
         }
 
         // Check if user has already reviewed this band
-        const existingReviews = Reviews.listEntities({
-            queryOptions: {
-                filter: `PartitionKey eq '${bandId}' and userId eq '${body.userId}'`
-            }
-        });
-
-        for await (const entity of existingReviews) {
+            const existingReviews = Reviews.listEntities({
+                queryOptions: {
+                    filter: `PartitionKey eq '${bandId}' and userId eq '${user.sub}'`
+                }
+            });        for await (const entity of existingReviews) {
             return {
                 status: 409,
                 headers: {
@@ -80,20 +79,21 @@ export async function ReviewBand(request: HttpRequest, context: InvocationContex
         const now = new Date().toISOString();
         const reviewId = generateId();
         
-        const newReview: Review = {
+        const review: Review = {
             id: reviewId,
             bandId: bandId,
-            userId: body.userId.trim(),
-            userDisplayName: body.userDisplayName.trim(),
+            userId: user.sub,
+            userDisplayName: user.name || user.email || 'Anonymous User',
+            userAvatarUrl: user.picture,
             safetyAssessment: body.safetyAssessment,
             comment: body.comment.trim(),
-            evidence: body.evidence.filter(e => e.trim()),
+            evidence: body.evidence.map(e => e.trim()).filter(e => e.length > 0),
             createdAt: now,
             updatedAt: now
         };
 
         // Convert to entity and save to table
-        const reviewEntity = reviewToEntity(newReview);
+        const reviewEntity = reviewToEntity(review);
         await Reviews.createEntity(reviewEntity);
         
         // Update band's review count and recalculate safety status
@@ -122,7 +122,7 @@ export async function ReviewBand(request: HttpRequest, context: InvocationContex
         const updatedBandEntity = bandToEntity(band);
         await Bands.updateEntity(updatedBandEntity, 'Replace');
         
-        context.log(`Successfully created review for band ${bandId} by user ${body.userId}`);
+        context.log(`Successfully created review for band ${bandId} by user ${user.sub}`);
 
         return {
             status: 201,
@@ -132,7 +132,7 @@ export async function ReviewBand(request: HttpRequest, context: InvocationContex
             body: JSON.stringify({ 
                 message: 'Review submitted successfully',
                 reviewId: reviewId,
-                review: newReview,
+                review: review,
                 updatedBand: {
                     safetyStatus: band.safetyStatus,
                     reviewCount: band.reviewCount
@@ -172,7 +172,7 @@ export async function ReviewBand(request: HttpRequest, context: InvocationContex
 
 app.http('ReviewBand', {
     methods: ['POST'],
-    authLevel: 'function',
-    handler: ReviewBand,
+    authLevel: 'anonymous',
+    handler: withAuth(ReviewBand),
     route: 'bands/{bandId}/review'
 });
