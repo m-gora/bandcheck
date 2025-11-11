@@ -20,6 +20,8 @@ include::solution_strategy.adoc[leveloffset=+1]
 
 == Architectural Decisions
 
+include::architectural_decisions.adoc[leveloffset=+1]
+
 == Quality Requirements
 
 == Risks & Technical Debt

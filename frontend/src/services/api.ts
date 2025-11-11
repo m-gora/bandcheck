@@ -76,9 +76,6 @@ export interface CreateReviewRequest {
   safetyAssessment: 'safe' | 'unsafe';
   comment: string;
   evidence: string[];
-  userId: string;
-  userDisplayName: string;
-  userAvatarUrl?: string;
 }
 
 // API functions

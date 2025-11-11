@@ -188,17 +188,10 @@ resource "azurerm_linux_function_app" "backend" {
     type = "SystemAssigned"
   }
 
-  auth_settings_v2 {
-    auth_enabled = true
-
-    login {}
-
-    active_directory_v2 {
-      client_id = azuread_application.this.client_id
-      client_secret_setting_name = "AZURE_AD_CLIENT_SECRET"
-      tenant_auth_endpoint = "https://login.microsoftonline.com/v2.0/${data.azurerm_client_config.current.tenant_id}"
-    }
-  }
+  # Disable app-level auth since we handle JWT validation manually
+  # auth_settings_v2 {
+  #   auth_enabled = false
+  # }
   
   site_config {
     minimum_tls_version = "1.3"

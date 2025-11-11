@@ -12,4 +12,6 @@ Data Privacy::
     user privacy. This includes implementing measures to protect personal information and
     providing users with control over their data.
 
-
+Pricing::
+    Since Bandcheck is not monetized, the architecture must minimize operational costs. This includes selecting cost-effective cloud services and optimizing resource usage to ensure sustainability without compromising performance.
+    Where possible, leverage free tiers of cloud providers and open-source solutions to reduce expenses.

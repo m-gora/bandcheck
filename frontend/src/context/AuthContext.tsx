@@ -39,7 +39,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const updateToken = async () => {
       if (isAuthenticated) {
         try {
-          const token = await getAccessTokenSilently();
+          const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: 'https://api.bandcheck.marcodoes.tech',
+              scope: 'openid profile email'
+            }
+          });
           setAuthToken(token);
         } catch (error) {
           console.error('Failed to get access token:', error);

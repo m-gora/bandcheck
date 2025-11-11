@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -51,9 +51,6 @@ const BandDetails: React.FC = () => {
     safetyAssessment: 'safe' as 'safe' | 'unsafe',
     comment: '',
     evidence: [''],
-    userId: user?.sub || '', // Auth0 user ID
-    userDisplayName: user?.name || user?.email || 'Anonymous', // Auth0 user display name
-    userAvatarUrl: user?.picture, // Auth0 user profile picture
   });
 
   // Fetch band details
@@ -61,18 +58,6 @@ const BandDetails: React.FC = () => {
   
   // Create review mutation
   const createReviewMutation = useCreateReview(id!);
-
-  // Sync user data to form when user changes
-  useEffect(() => {
-    if (user) {
-      setReviewForm(prev => ({
-        ...prev,
-        userId: user.sub || '',
-        userDisplayName: user.name || user.email || 'Anonymous',
-        userAvatarUrl: user.picture,
-      }));
-    }
-  }, [user]);
 
   const handleBack = () => {
     navigate(-1);
@@ -115,9 +100,8 @@ const BandDetails: React.FC = () => {
     
     try {
       await createReviewMutation.mutateAsync({
-        ...reviewForm,
-        userId: user.sub || '',
-        userDisplayName: user.name || user.email || 'Anonymous',
+        safetyAssessment: reviewForm.safetyAssessment,
+        comment: reviewForm.comment,
         evidence: filteredEvidence,
       });
       
@@ -127,9 +111,6 @@ const BandDetails: React.FC = () => {
         safetyAssessment: 'safe',
         comment: '',
         evidence: [''],
-        userId: user.sub || '',
-        userDisplayName: user.name || user.email || 'Anonymous',
-        userAvatarUrl: user.picture,
       });
     } catch (error: any) {
       console.error('Failed to submit review:', error);
