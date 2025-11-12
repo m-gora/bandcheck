@@ -1,13 +1,13 @@
 import { HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import jwt from 'jsonwebtoken';
-import jwksClient from 'jwks-client';
+import JwksClient from 'jwks-client';
 
 // Auth0 configuration
 const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN || '';
 const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || '';
 
 // JWKS client for getting Auth0 public keys
-const client = jwksClient({
+const client = new JwksClient({
     jwksUri: `https://${AUTH0_DOMAIN}/.well-known/jwks.json`
 });
 
