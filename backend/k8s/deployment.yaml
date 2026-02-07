@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: your-registry/bandcheck-backend:latest
+        image: ghcr.io/m-gora/bandcheck/backend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
           name: http
@@ -36,23 +37,13 @@ spec:
             secretKeyRef:
               name: bandcheck-secrets
               key: auth0-audience
-        - name: AZURE_TABLES_URL
-          valueFrom:
-            secretKeyRef:
-              name: bandcheck-secrets
-              key: azure-tables-url
-        - name: AZURE_STORAGE_ACCOUNT_NAME
-          valueFrom:
-            secretKeyRef:
-              name: bandcheck-secrets
-              key: azure-storage-account-name
-        - name: AZURE_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: bandcheck-secrets
-              key: azure-client-id
+        - name: DATABASE_URL
+          value: "/app/data/bandcheck.db"
         - name: ALLOWED_ORIGINS
           value: "https://bandcheck.marcodoes.tech,http://localhost:5173"
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
         resources:
           requests:
             memory: "256Mi"
@@ -72,3 +63,7 @@ spec:
             port: 3000
           initialDelaySeconds: 5
           periodSeconds: 10
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: bandcheck-backend-data

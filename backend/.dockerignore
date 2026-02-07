@@ -36,6 +36,22 @@ pids
 # Coverage directory used by tools like istanbul
 coverage
 
-# Azure Functions artifacts
-bin
-obj
+# Test files
+test/
+tests/
+__tests__
+*.test.ts
+*.spec.ts
+
+# Documentation and configs
+README.md
+ARCHITECTURE.md
+docs/
+k8s/
+K8S_DEPLOYMENT.md
+
+# Drizzle migrations (applied separately)
+drizzle/
+
+# Database files (don't include local DB in image)
+data/
