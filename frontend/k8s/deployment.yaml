@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bandcheck-frontend
+  namespace: bandcheck
+  labels:
+    app: bandcheck-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bandcheck-frontend
+  template:
+    metadata:
+      labels:
+        app: bandcheck-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/m-gora/bandcheck/frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
