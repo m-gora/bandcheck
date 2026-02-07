@@ -55,12 +55,10 @@ jobs:
         run: |
           # Copy compiled files to root for deployment
           cp -r dist/src/* .
-          # Copy necessary config files
-          cp host.json .
           # Install production dependencies only
           npm ci --production
           # Remove dev files
-          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml
+          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml dist
 
       - name: Azure Login
         uses: azure/login@v1
