@@ -26,21 +26,27 @@ spec:
         - name: PORT
           value: "3000"
         - name: NODE_ENV
-          value: "production"
+          valueFrom:
+            configMapKeyRef:
+              name: bandcheck-backend-config
+              key: NODE_ENV
         - name: AUTH0_DOMAIN
           valueFrom:
-            secretKeyRef:
-              name: bandcheck-secrets
-              key: auth0-domain
+            configMapKeyRef:
+              name: bandcheck-backend-config
+              key: AUTH0_DOMAIN
         - name: AUTH0_AUDIENCE
           valueFrom:
-            secretKeyRef:
-              name: bandcheck-secrets
-              key: auth0-audience
+            configMapKeyRef:
+              name: bandcheck-backend-config
+              key: AUTH0_AUDIENCE
         - name: DATABASE_URL
           value: "/app/data/bandcheck.db"
         - name: ALLOWED_ORIGINS
-          value: "https://bandcheck.marcodoes.tech,http://localhost:5173"
+          valueFrom:
+            configMapKeyRef:
+              name: bandcheck-backend-config
+              key: ALLOWED_ORIGINS
         volumeMounts:
         - name: data
           mountPath: /app/data
