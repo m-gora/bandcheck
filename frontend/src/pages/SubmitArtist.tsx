@@ -218,7 +218,6 @@ export default function SubmitArtist() {
         <Paper
           elevation={0}
           sx={{
-            borderRadius: '20px',
             p: { xs: 3, md: 4 },
             border: '1px solid',
             borderColor: 'divider',
@@ -250,31 +249,6 @@ export default function SubmitArtist() {
                   onChange={handleInputChange('name')}
                   fullWidth
                   variant="outlined"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '12px',
-                      alignItems: 'center',
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'primary.main',
-                        borderWidth: '2px',
-                      },
-                    },
-                    '& .MuiInputLabel-root': {
-                      transform: 'translate(14px, 16px) scale(1)',
-                      '&.MuiInputLabel-shrink': {
-                        transform: 'translate(14px, -9px) scale(0.75)',
-                      },
-                      '&.Mui-focused': {
-                        color: 'text.primary',
-                        backgroundColor: 'background.paper',
-                        px: 1,
-                      },
-                    },
-                    '& .MuiInputBase-input': {
-                      paddingTop: '16px',
-                      paddingBottom: '16px',
-                    },
-                  }}
                 />
 
                 {/* Location and Year Formed */}
@@ -286,34 +260,6 @@ export default function SubmitArtist() {
                     fullWidth
                     variant="outlined"
                     placeholder="Sheffield, UK"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '12px',
-                        alignItems: 'center',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: 'primary.main',
-                          borderWidth: '2px',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        transform: 'translate(14px, 16px) scale(1)',
-                        '&.MuiInputLabel-shrink': {
-                          transform: 'translate(14px, -9px) scale(0.75)',
-                        },
-                        '&.Mui-focused': {
-                          color: 'text.primary',
-                          backgroundColor: 'background.paper',
-                          px: 1,
-                        },
-                      },
-                      '& .MuiInputBase-input': {
-                        paddingTop: '16px',
-                        paddingBottom: '16px',
-                        '&::placeholder': {
-                          opacity: 0.6,
-                        },
-                      },
-                    }}
                   />
                   
                   <TextField
@@ -323,34 +269,6 @@ export default function SubmitArtist() {
                     fullWidth
                     variant="outlined"
                     placeholder="2002"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '12px',
-                        alignItems: 'center',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: 'primary.main',
-                          borderWidth: '2px',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        transform: 'translate(14px, 16px) scale(1)',
-                        '&.MuiInputLabel-shrink': {
-                          transform: 'translate(14px, -9px) scale(0.75)',
-                        },
-                        '&.Mui-focused': {
-                          color: 'text.primary',
-                          backgroundColor: 'background.paper',
-                          px: 1,
-                        },
-                      },
-                      '& .MuiInputBase-input': {
-                        paddingTop: '16px',
-                        paddingBottom: '16px',
-                        '&::placeholder': {
-                          opacity: 0.6,
-                        },
-                      },
-                    }}
                   />
                 </Stack>
 
@@ -366,29 +284,6 @@ export default function SubmitArtist() {
                       label="Genres *"
                       placeholder="Select genres..."
                       variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '12px',
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: 'primary.main',
-                            borderWidth: '2px',
-                          },
-                        },
-                        '& .MuiInputLabel-root': {
-                          '&.Mui-focused': {
-                            color: 'text.primary',
-                            backgroundColor: 'background.paper',
-                            px: 1,
-                          },
-                        },
-                        '& .MuiInputBase-input': {
-                          '&::placeholder': {
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          },
-                        },
-                      }}
                     />
                   )}
                   renderTags={(value, getTagProps) =>
@@ -428,34 +323,6 @@ export default function SubmitArtist() {
                       fullWidth
                       variant="outlined"
                       placeholder="Enter band member name"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '12px',
-                          alignItems: 'center',
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: 'primary.main',
-                            borderWidth: '2px',
-                          },
-                        },
-                        '& .MuiInputLabel-root': {
-                          transform: 'translate(14px, 16px) scale(1)',
-                          '&.MuiInputLabel-shrink': {
-                            transform: 'translate(14px, -9px) scale(0.75)',
-                          },
-                          '&.Mui-focused': {
-                            color: 'text.primary',
-                            backgroundColor: 'background.paper',
-                            px: 1,
-                          },
-                        },
-                        '& .MuiInputBase-input': {
-                          paddingTop: '16px',
-                          paddingBottom: '16px',
-                          '&::placeholder': {
-                            opacity: 0.6,
-                          },
-                        },
-                      }}
                     />
                     
                     <Button
@@ -502,35 +369,6 @@ export default function SubmitArtist() {
                   maxRows={8}
                   variant="outlined"
                   placeholder="Tell us about the artist's background, style, and achievements"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '12px',
-                      alignItems: 'flex-start',
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'primary.main',
-                        borderWidth: '2px',
-                      },
-                    },
-                    '& .MuiInputLabel-root': {
-                      transform: 'translate(14px, 16px) scale(1)',
-                      '&.MuiInputLabel-shrink': {
-                        transform: 'translate(14px, -9px) scale(0.75)',
-                      },
-                      '&.Mui-focused': {
-                        color: 'text.primary',
-                        backgroundColor: 'background.paper',
-                        px: 1,
-                      },
-                    },
-                    '& .MuiInputBase-input': {
-                      paddingTop: '16px',
-                      paddingBottom: '16px',
-                      lineHeight: 1.5,
-                      '&::placeholder': {
-                        opacity: 0.6,
-                      },
-                    },
-                  }}
                 />
 
                 {/* Website and Image URL */}
@@ -542,36 +380,6 @@ export default function SubmitArtist() {
                     fullWidth
                     variant="outlined"
                     placeholder="https://artist-website.com"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '12px',
-                        alignItems: 'center',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: 'primary.main',
-                          borderWidth: '2px',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        transform: 'translate(14px, 16px) scale(1)',
-                        '&.MuiInputLabel-shrink': {
-                          transform: 'translate(14px, -9px) scale(0.75)',
-                        },
-                        '&.Mui-focused': {
-                          color: 'text.primary',
-                          backgroundColor: 'background.paper',
-                          px: 1,
-                        },
-                      },
-                      '& .MuiInputBase-input': {
-                        paddingTop: '16px',
-                        paddingBottom: '16px',
-                        '&::placeholder': {
-                          opacity: 0.6,
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        },
-                      },
-                    }}
                   />
                   
                   <TextField
@@ -581,29 +389,6 @@ export default function SubmitArtist() {
                     fullWidth
                     variant="outlined"
                     placeholder="https://image-url.com/photo.jpg"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '12px',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: 'primary.main',
-                          borderWidth: '2px',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        '&.Mui-focused': {
-                          color: 'text.primary',
-                          backgroundColor: 'background.paper',
-                          px: 1,
-                        },
-                      },
-                      '& .MuiInputBase-input': {
-                        '&::placeholder': {
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        },
-                      },
-                    }}
                   />
                 </Stack>
 

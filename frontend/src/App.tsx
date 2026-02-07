@@ -27,7 +27,11 @@ export default function App() {
       clientId={clientId}
       authorizationParams={{
         redirect_uri: redirectUri,
+        audience: 'https://api.bandcheck.marcodoes.tech',
+        scope: 'openid profile email',
       }}
+      cacheLocation="localstorage"
+      useRefreshTokens={true}
     >
       <AuthProvider>
         <AppRoutes />
