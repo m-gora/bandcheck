@@ -13,7 +13,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_NAME: 'bandcheck-backend'  # Replace with your Function App name
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: './backend/dist/src'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './dist/src'
   NODE_VERSION: '22.x'
 
 permissions:
@@ -50,20 +50,6 @@ jobs:
 
       - name: Build backend
         run: npm run build
-
-      - name: Prepare deployment package
-        run: |
-          # Create functions directory structure at root
-          mkdir -p functions shared
-          # Copy compiled function files
-          cp dist/src/functions/*.js functions/
-          cp dist/src/shared/*.js shared/
-          # Update package.json main entry for deployment
-          node -e "const pkg=require('./package.json'); pkg.main='functions/*.js'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
-          # Install production dependencies only
-          npm ci --production
-          # Remove dev files
-          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml dist .env .env.example
 
       - name: Azure Login
         uses: azure/login@v1
