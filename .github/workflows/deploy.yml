@@ -53,12 +53,17 @@ jobs:
 
       - name: Prepare deployment package
         run: |
-          # Copy compiled files to root for deployment
-          cp -r dist/src/* .
+          # Create functions directory structure at root
+          mkdir -p functions shared
+          # Copy compiled function files
+          cp dist/src/functions/*.js functions/
+          cp dist/src/shared/*.js shared/
+          # Update package.json main entry for deployment
+          node -e "const pkg=require('./package.json'); pkg.main='functions/*.js'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
           # Install production dependencies only
           npm ci --production
           # Remove dev files
-          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml dist
+          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml dist .env .env.example
 
       - name: Azure Login
         uses: azure/login@v1
