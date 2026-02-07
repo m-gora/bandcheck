@@ -21,29 +21,27 @@ import AddIcon from '@mui/icons-material/Add';
 import { useAuth } from '../context/AuthContext';
 import { useCreateBand } from '../hooks/useBands';
 
-// Genre options for the form
+// Metal subgenre options for the form
 const genreOptions = [
-  'Alternative Rock',
-  'Blues Rock',
-  'Country',
-  'Electronic',
-  'Electropop',
-  'Folk',
-  'Garage Rock',
-  'Hard Rock',
-  'Hip Hop',
-  'Indie Pop',
-  'Indie Rock',
-  'Jazz',
-  'Metal',
-  'Neo-Psychedelia',
-  'Pop',
-  'Post-Punk Revival',
-  'Psychedelic Pop',
-  'Punk',
-  'R&B',
-  'Rock',
-  'Synth-pop',
+  'Black Metal',
+  'Death Metal',
+  'Doom Metal',
+  'Folk Metal',
+  'Glam Metal',
+  'Gothic Metal',
+  'Groove Metal',
+  'Heavy Metal',
+  'Industrial Metal',
+  'Melodic Death Metal',
+  'Metalcore',
+  'Nu Metal',
+  'Power Metal',
+  'Progressive Metal',
+  'Sludge Metal',
+  'Speed Metal',
+  'Symphonic Metal',
+  'Thrash Metal',
+  'Traditional Metal',
 ];
 
 interface ArtistFormData {
