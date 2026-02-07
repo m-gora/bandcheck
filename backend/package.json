@@ -21,6 +21,7 @@
     "jwks-rsa": "^3.2.2"
   },
   "devDependencies": {
+    "@libsql/client": "^0.17.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jsonwebtoken": "^9.0.10",
     "drizzle-kit": "^0.31.8"

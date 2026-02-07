@@ -4,13 +4,16 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS install
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production
+COPY package.json ./
+RUN bun install
 
 # Copy source code
 FROM base AS release
 COPY --from=install /app/node_modules ./node_modules
 COPY . .
+
+# Create data directory with proper permissions before switching user
+RUN mkdir -p /app/data && chown -R bun:bun /app
 
 # Expose port
 EXPOSE 3000
@@ -18,5 +21,5 @@ EXPOSE 3000
 # Set user to non-root
 USER bun
 
-# Start the server
-CMD ["bun", "run", "src/server.ts"]
+# Use entrypoint script for database initialization
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
