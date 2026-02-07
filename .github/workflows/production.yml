@@ -59,12 +59,24 @@ jobs:
           npm ci
           npm run build
 
+      - name: Prepare deployment package
+        working-directory: ./backend
+        run: |
+          # Copy compiled files to root for deployment
+          cp -r dist/src/* .
+          # Copy necessary config files
+          cp host.json .
+          # Install production dependencies only
+          npm ci --production
+          # Remove dev files
+          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml
+
       - name: Deploy Backend to Azure Functions
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME_PROD }}
           package: './backend'
-          respect-funcignore: true
+          respect-funcignore: false
 
       # Build and Deploy Frontend
       - name: Setup Node.js for Frontend
@@ -129,12 +141,24 @@ jobs:
           npm ci
           npm run build
 
+      - name: Prepare deployment package (Staging)
+        working-directory: ./backend
+        run: |
+          # Copy compiled files to root for deployment
+          cp -r dist/src/* .
+          # Copy necessary config files
+          cp host.json .
+          # Install production dependencies only
+          npm ci --production
+          # Remove dev files
+          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml
+
       - name: Deploy Backend to Azure Functions (Staging)
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME_STAGING }}
           package: './backend'
-          respect-funcignore: true
+          respect-funcignore: false
 
       # Deploy frontend to staging
       - name: Build Frontend (Staging)

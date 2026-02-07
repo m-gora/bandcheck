@@ -51,6 +51,17 @@ jobs:
       - name: Build backend
         run: npm run build
 
+      - name: Prepare deployment package
+        run: |
+          # Copy compiled files to root for deployment
+          cp -r dist/src/* .
+          # Copy necessary config files
+          cp host.json .
+          # Install production dependencies only
+          npm ci --production
+          # Remove dev files
+          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml
+
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -63,7 +74,7 @@ jobs:
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          respect-funcignore: true
+          respect-funcignore: false
 
   # Build and Deploy Frontend (Azure Static Web Apps)
   deploy-frontend:

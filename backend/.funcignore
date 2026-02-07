@@ -3,9 +3,16 @@
 .git*
 .vscode
 .env
+.env.example
 local.settings.json
 test
 getting_started.md
+tsconfig.json
+docker-compose.yml
+Dockerfile.dev
+scripts/
+src/
+dist/
 node_modules/@types/
 node_modules/azure-functions-core-tools/
 node_modules/typescript/

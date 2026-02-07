@@ -166,6 +166,27 @@ az storage container create \
 
 ## Monitoring and Troubleshooting
 
+### Common Issue: Functions Disappearing After Deployment ⚠️
+
+**Problem**: After GitHub Actions deployment, functions are no longer visible in Azure Portal.
+
+**Root Cause**: The deployment package structure was incorrect. Azure Functions expects:
+- Function JavaScript files at the root or in a `functions/` folder  
+- `host.json` at the root
+- `node_modules/` with production dependencies
+
+**Solution Applied**: The deployment workflow now:
+1. Compiles TypeScript (`npm run build` → creates `dist/src/functions/*.js`)
+2. Copies compiled files to deployment root (`cp -r dist/src/* .`)
+3. Installs only production dependencies (`npm ci --production`)
+4. Removes source files to reduce package size
+5. Deploys the prepared package
+
+**Files Changed**:
+- `.github/workflows/deploy.yml`: Added "Prepare deployment package" step
+- `.github/workflows/production.yml`: Added preparation for both prod and staging
+- `backend/.funcignore`: Updated to exclude source files and dev dependencies
+
 ### View Deployment Logs
 1. Go to GitHub Actions tab in your repository
 2. Select the workflow run
