@@ -24,9 +24,7 @@ include::architectural_decisions.adoc[leveloffset=+1]
 
 include::quality_requirements.adoc[leveloffset=+1]
 
-== Risks & Technical Debt
-
-_(To be documented: known risks and technical debt items)_
+include::risks_and_technical_debt.adoc[leveloffset=+1]
 
 == Glossary
 

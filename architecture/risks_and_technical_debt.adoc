@@ -1,0 +1,707 @@
+= Risks & Technical Debt
+
+This section documents known risks and technical debt items, their potential impact, and mitigation strategies.
+
+== Technical Risks
+
+=== Risk 1: Single Database Instance (SQLite)
+
+**Description:** SQLite is a single-file database without replication or high availability.
+
+**Impact:** HIGH
+
+* Database corruption → complete data loss
+* No automatic failover
+* Single point of failure
+
+**Probability:** LOW (SQLite is very reliable, but hardware failures happen)
+
+**Mitigation Strategies:**
+
+* ✅ Regular automated backups (currently: manual kubectl cp)
+* ⚠️ Implement automated daily backups to external storage
+* ⚠️ Test restore procedure quarterly
+* ⚠️ Consider PostgreSQL migration if data becomes critical
+* ✅ PersistentVolume provides some durability
+
+**Risk Acceptance:**
+
+Accepted for now due to:
+
+* Non-commercial platform (data loss not catastrophic)
+* Community can re-contribute content
+* Cost savings significant
+* Can migrate to PostgreSQL if needed (architecture supports this)
+
+=== Risk 2: No Real-Time Monitoring/Alerting
+
+**Description:** No automated monitoring or alerting system in place.
+
+**Impact:** MEDIUM
+
+* Issues discovered by users, not operators
+* Slow response to outages or degraded performance
+* No visibility into system health trends
+
+**Probability:** MEDIUM (issues will occur, question is detection time)
+
+**Mitigation Strategies:**
+
+* ✅ Basic health checks via Kubernetes probes
+* ✅ ArgoCD shows deployment status
+* ⚠️ Add uptime monitoring (e.g., UptimeRobot free tier)
+* ⚠️ Implement Prometheus + Grafana for metrics
+* ⚠️ Add error tracking (e.g., Sentry free tier)
+
+**Risk Acceptance:**
+
+Partially accepted due to:
+
+* Manual checks currently sufficient for traffic volume
+* Can add monitoring when traffic increases
+* Community tolerance for occasional downtime
+
+=== Risk 3: Auth0 Dependency
+
+**Description:** Complete dependency on Auth0 for authentication. If Auth0 has issues or changes pricing, platform is affected.
+
+**Impact:** HIGH
+
+* Auth0 outage → users cannot log in
+* Pricing change → forced migration or increased costs
+* Account suspension → complete service disruption
+
+**Probability:** LOW (Auth0 is reliable, pricing is predictable)
+
+**Mitigation Strategies:**
+
+* ✅ Using free tier (under 7,000 users)
+* ✅ Standard OAuth/OIDC (portable to other providers)
+* ⚠️ Document migration procedure to alternative provider
+* ⚠️ Monitor user count to avoid surprise billing
+* ⚠️ Have backup authentication provider identified
+
+**Risk Acceptance:**
+
+Accepted because:
+
+* Auth0 is industry standard and reliable
+* Migration path exists (standard OAuth)
+* Managing own authentication is higher risk
+* Free tier sufficient for foreseeable future
+
+=== Risk 4: Kubernetes Cluster Dependency
+
+**Description:** Application requires Kubernetes cluster. Cluster issues affect entire platform.
+
+**Impact:** MEDIUM
+
+* Cluster failure → complete outage
+* Misconfiguration → deployment issues
+* Kubernetes learning curve for operators
+
+**Probability:** MEDIUM (K8s adds operational complexity)
+
+**Mitigation Strategies:**
+
+* ✅ Kubernetes is industry standard (plenty of support)
+* ✅ Can redeploy to new cluster quickly (IaC)
+* ✅ Multiple K8s distributions available (K3s, K8s, etc.)
+* ⚠️ Document disaster recovery procedure
+* ⚠️ Regular backup of cluster configuration
+
+**Risk Acceptance:**
+
+Accepted because:
+
+* Platform independence requires orchestration
+* Kubernetes is standard, mature technology
+* Benefits (portability, scaling) outweigh complexity
+* Community can self-host if needed
+
+=== Risk 5: No Load Testing
+
+**Description:** Unknown performance limits and behavior under high load.
+
+**Impact:** MEDIUM
+
+* Sudden traffic spike could cause outage
+* Unknown database performance limits
+* No capacity planning data
+
+**Probability:** LOW (currently low traffic)
+
+**Mitigation Strategies:**
+
+* ⚠️ Implement basic load testing (k6, Artillery)
+* ⚠️ Test SQLite concurrent write limits
+* ✅ Horizontal pod autoscaling configured
+* ✅ Cloudflare provides DDoS protection
+* ⚠️ Document expected user limits
+
+**Risk Acceptance:**
+
+Accepted for now:
+
+* Low current traffic
+* Gradual growth expected
+* Can scale when needed
+* Database can be migrated if needed
+
+=== Risk 6: Cloudflare Dependency
+
+**Description:** DNS, CDN, and bot protection depend on Cloudflare.
+
+**Impact:** LOW
+
+* Cloudflare outage → site unreachable
+* Account suspension → service disruption
+* Free tier limitations
+
+**Probability:** VERY LOW (Cloudflare is extremely reliable)
+
+**Mitigation Strategies:**
+
+* ✅ Using Cloudflare free tier (no cost risk)
+* ✅ DNS can be migrated to other provider
+* ⚠️ Document DNS migration procedure
+* ⚠️ Keep backup DNS provider credentials
+
+**Risk Acceptance:**
+
+Low risk accepted:
+
+* Cloudflare's uptime is excellent
+* Free tier is generous and stable
+* Migration is straightforward
+* Benefits (DDoS protection, CDN) are significant
+
+== Security Risks
+
+=== Risk 7: JWT Secret Compromise
+
+**Description:** If Auth0 secrets or JWT signing keys are compromised, authentication is broken.
+
+**Impact:** CRITICAL
+
+* Attackers can forge valid tokens
+* Unauthorized access to all protected endpoints
+* Complete security breach
+
+**Probability:** VERY LOW (Auth0 manages keys securely)
+
+**Mitigation Strategies:**
+
+* ✅ Auth0 manages JWT signing keys
+* ✅ Keys stored in Kubernetes Secrets
+* ✅ Never commit secrets to Git
+* ✅ Separate secrets per environment
+* ⚠️ Regular secret rotation
+* ⚠️ Audit access to secrets
+
+**Risk Acceptance:**
+
+Not accepted - continue monitoring:
+
+* Using industry best practices
+* Auth0 handles key management
+* Regular security reviews needed
+
+=== Risk 8: SQL Injection via ORM
+
+**Description:** While using Drizzle ORM, incorrect usage could introduce SQL injection vulnerabilities.
+
+**Impact:** HIGH
+
+* Data breach
+* Data manipulation
+* Data loss
+
+**Probability:** VERY LOW (ORM provides protection)
+
+**Mitigation Strategies:**
+
+* ✅ Using parameterized queries via Drizzle ORM
+* ✅ TypeScript type checking prevents many errors
+* ✅ Input validation in controllers
+* ✅ Code review process
+* ⚠️ Regular security audits
+* ⚠️ Automated security testing (SAST)
+
+**Risk Acceptance:**
+
+Low risk with continued vigilance:
+
+* ORM provides strong protection
+* TypeScript adds safety layer
+* Code review catches issues
+
+=== Risk 9: Bot Protection Bypass
+
+**Description:** Sophisticated bots might bypass Cloudflare Turnstile.
+
+**Impact:** MEDIUM
+
+* Spam submissions
+* Database pollution
+* Degraded user experience
+
+**Probability:** LOW (Turnstile is effective)
+
+**Mitigation Strategies:**
+
+* ✅ Cloudflare Turnstile implemented
+* ✅ Server-side verification
+* ⚠️ Add rate limiting per user/IP
+* ⚠️ Implement content moderation tools
+* ⚠️ Monitor for spam patterns
+
+**Risk Acceptance:**
+
+Accepted with monitoring:
+
+* Some spam is inevitable
+* Community can flag inappropriate content
+* Moderation tools can be added if needed
+
+=== Risk 10: Dependency Vulnerabilities
+
+**Description:** Third-party dependencies may have security vulnerabilities.
+
+**Impact:** VARIES (LOW to CRITICAL depending on vulnerability)
+
+**Probability:** MEDIUM (new vulnerabilities discovered regularly)
+
+**Mitigation Strategies:**
+
+* ✅ Lock files prevent unexpected updates
+* ⚠️ Dependabot for automated security updates
+* ⚠️ Regular npm audit / bun audit
+* ⚠️ Monitor security advisories
+* ✅ CI fails on high-severity vulnerabilities
+
+**Risk Acceptance:**
+
+Active management required:
+
+* Regular dependency review
+* Prompt security updates
+* Balance security vs. stability
+
+== Compliance & Legal Risks
+
+=== Risk 11: GDPR Non-Compliance
+
+**Description:** Failure to comply with GDPR could result in fines or legal issues.
+
+**Impact:** MEDIUM (fines unlikely for non-profit, but legal risk exists)
+
+**Probability:** LOW (privacy-first design reduces risk)
+
+**Mitigation Strategies:**
+
+* ✅ Privacy Policy in place
+* ✅ No tracking cookies (no consent needed)
+* ✅ Minimal data collection
+* ⚠️ Automated data deletion (currently manual)
+* ⚠️ Document data processing activities
+* ⚠️ Regular privacy policy review
+
+**Risk Acceptance:**
+
+Low risk due to privacy-first design:
+
+* Strictly necessary cookies only
+* No behavioral tracking
+* Auth0 handles personal data
+* Manual data deletion available
+
+=== Risk 12: Copyright Infringement
+
+**Description:** User-submitted content might include copyrighted material without permission.
+
+**Impact:** MEDIUM
+
+* DMCA takedown notices
+* Legal liability
+* Content removal required
+
+**Probability:** MEDIUM (users submit band information)
+
+**Mitigation Strategies:**
+
+* ✅ Terms of Service clearly define acceptable use
+* ⚠️ Implement content reporting mechanism
+* ⚠️ DMCA agent registration
+* ⚠️ Content moderation guidelines
+* ⚠️ Takedown procedure documentation
+
+**Risk Acceptance:**
+
+Manageable risk:
+
+* Platform is informational, not hosting copyrighted works
+* User-generated content has safe harbor provisions
+* Can respond to legitimate takedown requests
+
+== Operational Risks
+
+=== Risk 13: Key Person Dependency
+
+**Description:** Platform depends on limited number of maintainers.
+
+**Impact:** HIGH
+
+* Maintainer unavailability → no updates
+* Knowledge loss if maintainer leaves
+* Slow bug fixes and security patches
+
+**Probability:** MEDIUM (small team/single person)
+
+**Mitigation Strategies:**
+
+* ✅ Comprehensive architecture documentation
+* ✅ Open source (community can fork)
+* ⚠️ Onboarding documentation
+* ⚠️ Regular knowledge sharing
+* ⚠️ Backup administrator access
+
+**Risk Acceptance:**
+
+Common for open source projects:
+
+* Documentation helps mitigate
+* Community can take over if needed
+* Code is accessible
+
+=== Risk 14: Configuration Drift
+
+**Description:** Manual configuration changes could cause inconsistencies between environments.
+
+**Impact:** MEDIUM
+
+* Dev/prod parity issues
+* Difficult to reproduce bugs
+* Failed deployments
+
+**Probability:** MEDIUM (manual configuration exists)
+
+**Mitigation Strategies:**
+
+* ✅ Infrastructure as Code (Kubernetes manifests)
+* ✅ ArgoCD for GitOps deployment
+* ✅ Environment variables documented
+* ⚠️ Configuration management review
+* ⚠️ Automated drift detection
+
+**Risk Acceptance:**
+
+Manageable with GitOps:
+
+* ArgoCD ensures Git is source of truth
+* Manual changes detected and reverted
+* Documentation helps maintain consistency
+
+=== Risk 15: Backup Failure
+
+**Description:** Backups might fail or be incomplete without detection.
+
+**Impact:** HIGH
+
+* Cannot recover from data loss
+* False sense of security
+* Permanent data loss in disaster
+
+**Probability:** MEDIUM (manual backup process)
+
+**Mitigation Strategies:**
+
+* ⚠️ Automated backup schedule
+* ⚠️ Backup verification (test restore)
+* ⚠️ Off-site backup storage
+* ⚠️ Backup monitoring and alerts
+* ⚠️ Document restore procedure
+
+**Risk Acceptance:**
+
+Not accepted - action needed:
+
+* Critical gap in disaster recovery
+* High priority to automate
+* Test restore procedure needed
+
+== Technical Debt
+
+=== Debt Item 1: Manual Data Deletion Process
+
+**Impact:** HIGH (GDPR compliance risk)
+
+**Effort to Fix:** MEDIUM (3-5 days)
+
+**Description:**
+
+* User data deletion requests handled manually
+* Time-consuming process
+* Risk of incomplete deletion
+* Doesn't scale
+
+**Action Plan:**
+
+1. Create API endpoint for data deletion
+2. Implement cascade deletion logic
+3. Add Auth0 account deletion
+4. Create admin interface
+5. Test thoroughly with test data
+6. Document for users
+
+**Target:** Q2 2026
+
+=== Debt Item 2: No End-to-End Tests
+
+**Impact:** MEDIUM (regression risk)
+
+**Effort to Fix:** HIGH (5-10 days initial setup)
+
+**Description:**
+
+* Only unit and manual testing
+* No automated user flow testing
+* Regression bugs not caught early
+* Manual testing time-consuming
+
+**Action Plan:**
+
+1. Choose E2E framework (Playwright recommended)
+2. Set up test infrastructure
+3. Write tests for critical flows:
+   - User registration/login
+   - Band submission
+   - Review submission
+   - Search and discovery
+4. Integrate into CI pipeline
+5. Maintain test suite
+
+**Target:** Q3 2026
+
+=== Debt Item 3: No Production Monitoring
+
+**Impact:** MEDIUM (slow incident detection)
+
+**Effort to Fix:** MEDIUM (2-3 days)
+
+**Description:**
+
+* No metrics collection
+* No alerting system
+* Issues discovered by users
+* No performance trending
+
+**Action Plan:**
+
+1. Add uptime monitoring (UptimeRobot free tier)
+2. Set up basic alerting (email/Discord)
+3. Add Prometheus + Grafana (optional)
+4. Define key metrics and SLOs
+5. Create runbook for common issues
+
+**Target:** Q2 2026
+
+=== Debt Item 4: Automated Backup System
+
+**Impact:** HIGH (disaster recovery)
+
+**Effort to Fix:** LOW (1-2 days)
+
+**Description:**
+
+* Manual backup process
+* No verification
+* No schedule
+* No off-site storage
+
+**Action Plan:**
+
+1. Write backup script (kubectl cp + compress)
+2. Set up CronJob in Kubernetes
+3. Store backups in cloud storage (S3, B2)
+4. Test restore procedure
+5. Document backup/restore process
+6. Add backup monitoring
+
+**Target:** Q1 2026 (high priority)
+
+=== Debt Item 5: Limited Error Handling
+
+**Impact:** LOW (user experience)
+
+**Effort to Fix:** LOW (ongoing)
+
+**Description:**
+
+* Some error scenarios not handled gracefully
+* Generic error messages
+* Limited user guidance on errors
+
+**Action Plan:**
+
+1. Audit error scenarios
+2. Improve error messages
+3. Add error recovery suggestions
+4. Implement retry logic
+5. Better loading/error states in UI
+
+**Target:** Ongoing improvements
+
+=== Debt Item 6: No Load/Performance Testing
+
+**Impact:** MEDIUM (scalability unknown)
+
+**Effort to Fix:** MEDIUM (2-3 days)
+
+**Description:**
+
+* Unknown performance limits
+* No capacity planning data
+* Scalability untested
+
+**Action Plan:**
+
+1. Set up load testing tool (k6, Artillery)
+2. Define test scenarios
+3. Run baseline tests
+4. Document performance limits
+5. Test scaling behavior
+6. Create performance budget
+
+**Target:** Q3 2026
+
+=== Debt Item 7: Inconsistent Logging
+
+**Impact:** LOW (troubleshooting efficiency)
+
+**Effort to Fix:** LOW (1 day)
+
+**Description:**
+
+* Logging format not fully consistent
+* Some important events not logged
+* No correlation IDs
+
+**Action Plan:**
+
+1. Standardize log format
+2. Add correlation IDs
+3. Add structured logging library
+4. Document logging conventions
+5. Add missing log statements
+
+**Target:** Q2 2026
+
+=== Debt Item 8: No Disaster Recovery Plan
+
+**Impact:** HIGH (recovery time)
+
+**Effort to Fix:** LOW (documentation)
+
+**Description:**
+
+* No documented recovery procedures
+* Unknown RTO/RPO
+* No practice drills
+
+**Action Plan:**
+
+1. Document recovery procedures
+2. Define RTO/RPO targets
+3. Create runbook for disasters
+4. Schedule quarterly DR drills
+5. Test backup restoration
+6. Document contact procedures
+
+**Target:** Q1 2026
+
+== Risk Management Strategy
+
+=== Risk Assessment Schedule
+
+**Monthly:**
+
+* Review security advisories
+* Check dependency vulnerabilities
+* Monitor backup success
+* Review error logs
+
+**Quarterly:**
+
+* Full risk assessment review
+* Technical debt prioritization
+* Disaster recovery drill
+* Security audit
+
+**Annually:**
+
+* Architecture review
+* Threat model update
+* Compliance review
+* Insurance/legal review
+
+=== Risk Monitoring
+
+**Key Risk Indicators:**
+
+* Failed deployment rate
+* Error rate trends
+* Response time degradation
+* Security vulnerability count
+* Backup failure rate
+* Manual intervention frequency
+
+**Thresholds for Action:**
+
+* Error rate >5% → immediate investigation
+* Response time >1s (p95) → performance review
+* High/critical vulnerability → patch within 7 days
+* Backup failure → immediate fix
+
+=== Technical Debt Prioritization
+
+**Priority Matrix:**
+
+* **High Impact + Low Effort** = Do First (Automated backups)
+* **High Impact + High Effort** = Schedule (E2E tests, monitoring)
+* **Low Impact + Low Effort** = Quick Wins (Logging improvements)
+* **Low Impact + High Effort** = Defer (Advanced observability)
+
+**Debt Budget:**
+
+* Allocate 20% of development time to technical debt
+* Address at least one debt item per sprint
+* High-risk items take priority
+
+== Conclusion
+
+**Overall Risk Profile:** MEDIUM
+
+The platform has acceptable risk levels for a non-profit, community-driven project. Key strengths:
+
+* ✅ Privacy-first design reduces compliance risk
+* ✅ Platform-independent architecture reduces vendor lock-in
+* ✅ Simple technology choices reduce operational complexity
+* ✅ Cost-effective infrastructure reduces financial risk
+
+**Key Areas for Improvement:**
+
+1. **Automated backups and DR plan** (Q1 2026 priority)
+2. **Production monitoring and alerting** (Q2 2026)
+3. **GDPR data deletion automation** (Q2 2026)
+4. **E2E testing** (Q3 2026)
+
+**Risk Acceptance Philosophy:**
+
+We accept higher operational risks (manual processes, limited monitoring) in exchange for:
+
+* Lower costs (sustainable for non-profit)
+* Operational simplicity (maintainable by small team)
+* Platform independence (community ownership)
+
+This is appropriate for the current scale and stage. As the platform grows, we'll progressively reduce risks by automating operations and improving monitoring.
