@@ -69,8 +69,7 @@ export default function HeroSection() {
             }}
           >
             Find new music while staying informed about content that matters to you. 
-            Our AI-powered platform analyzes band content to provide safety scores 
-            and community-driven reviews.
+            Share and discover community-driven reviews and safety information.
           </Typography>
         </Box>
 
@@ -123,26 +122,6 @@ export default function HeroSection() {
             flexWrap: 'wrap',
           }}
         >
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
-            <Box
-              component="span"
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                bgcolor: 'success.main',
-              }}
-            />
-            AI-Powered Analysis
-          </Typography>
           <Typography
             variant="body2"
             sx={{

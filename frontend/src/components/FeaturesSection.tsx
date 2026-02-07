@@ -9,7 +9,6 @@ import {
   Paper,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import PsychologyIcon from '@mui/icons-material/Psychology';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import GroupIcon from '@mui/icons-material/Group';
@@ -23,15 +22,9 @@ const features = [
     highlights: ['Comprehensive database', 'Advanced filters', 'Personalized recommendations']
   },
   {
-    icon: <PsychologyIcon sx={{ fontSize: 40, color: 'secondary.main' }} />,
-    title: 'AI Content Analysis',
-    description: 'Our advanced AI analyzes lyrics, social media posts, and band content to identify potentially harmful or triggering material automatically.',
-    highlights: ['Real-time analysis', 'Multiple content sources', 'Accuracy-focused algorithms']
-  },
-  {
     icon: <AssessmentIcon sx={{ fontSize: 40, color: 'success.main' }} />,
     title: 'Safety Scoring',
-    description: 'Get clear safety scores based on community reviews and AI analysis. Make informed decisions about the content you consume.',
+    description: 'Get clear safety scores based on community reviews and ratings. Make informed decisions about the content you consume.',
     highlights: ['Transparent scoring', 'Community-driven', 'Regular updates']
   }
 ];
@@ -81,7 +74,7 @@ export default function FeaturesSection() {
               width: '100%',
             }}
           >
-            Three simple steps to discover music safely and make informed choices about the content you consume
+            Simple steps to discover music safely and make informed choices about the content you consume
           </Typography>
         </Stack>
 
@@ -92,11 +85,12 @@ export default function FeaturesSection() {
             gridTemplateColumns: {
               xs: '1fr',
               sm: 'repeat(2, 1fr)',
-              lg: 'repeat(3, 1fr)',
             },
             gap: 4,
             mb: 10,
             alignItems: 'stretch',
+            maxWidth: '900px',
+            mx: 'auto',
           }}
         >
           {features.map((feature, index) => (
