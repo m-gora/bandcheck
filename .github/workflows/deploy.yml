@@ -13,7 +13,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_NAME: 'bandcheck-backend'  # Replace with your Function App name
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: './src'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './backend/src'
   NODE_VERSION: '22.x'
 
 permissions:
