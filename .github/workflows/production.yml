@@ -62,23 +62,21 @@ jobs:
       - name: Prepare deployment package
         working-directory: ./backend
         run: |
-          # Create functions directory structure at root
-          mkdir -p functions shared
-          # Copy compiled function files
-          cp dist/src/functions/*.js functions/
-          cp dist/src/shared/*.js shared/
-          # Update package.json main entry for deployment
-          node -e "const pkg=require('./package.json'); pkg.main='functions/*.js'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
-          # Install production dependencies only
-          npm ci --production
-          # Remove dev files
-          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml dist .env .env.example
+          # Copy required config files to dist
+          cp host.json dist/
+          cp package.json dist/
+          # Update package.json main entry to point to compiled functions
+          cd dist
+          node -e "const pkg=require('./package.json'); pkg.main='src/functions/*.js'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
+          # Install production dependencies in dist
+          npm ci --production --ignore-scripts
+          cd ..
 
       - name: Deploy Backend to Azure Functions
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME_PROD }}
-          package: './backend'
+          package: './backend/dist'
           respect-funcignore: false
 
       # Build and Deploy Frontend
@@ -147,23 +145,21 @@ jobs:
       - name: Prepare deployment package (Staging)
         working-directory: ./backend
         run: |
-          # Create functions directory structure at root
-          mkdir -p functions shared
-          # Copy compiled function files
-          cp dist/src/functions/*.js functions/
-          cp dist/src/shared/*.js shared/
-          # Update package.json main entry for deployment
-          node -e "const pkg=require('./package.json'); pkg.main='functions/*.js'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
-          # Install production dependencies only
-          npm ci --production
-          # Remove dev files
-          rm -rf src scripts tsconfig.json Dockerfile.dev docker-compose.yml dist .env .env.example
+          # Copy required config files to dist
+          cp host.json dist/
+          cp package.json dist/
+          # Update package.json main entry to point to compiled functions
+          cd dist
+          node -e "const pkg=require('./package.json'); pkg.main='src/functions/*.js'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
+          # Install production dependencies in dist
+          npm ci --production --ignore-scripts
+          cd ..
 
       - name: Deploy Backend to Azure Functions (Staging)
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME_STAGING }}
-          package: './backend'
+          package: './backend/dist'
           respect-funcignore: false
 
       # Deploy frontend to staging
