@@ -1,36 +1,28 @@
 {
-  "name": "bandcheck",
+  "name": "bandcheck-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "BandCheck API server",
   "type": "module",
-  "main": "src/functions/*.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "clean": "rimraf dist",
-    "prestart": "npm run clean && npm run build",
-    "start": "func start",
-    "dev": "npm run build && func start --host localhost --port 7071",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
-    "azurite:start": "docker-compose up -d azurite",
-    "azurite:stop": "docker-compose stop azurite",
+    "dev": "bun --watch src/server.ts",
+    "start": "bun src/server.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "build": "echo 'No build step needed for Bun'",
+    "docker:build": "docker build -t bandcheck-backend .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env bandcheck-backend",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
-    "@azure/data-tables": "^13.3.0",
-    "@azure/functions": "^4.0.0",
-    "@azure/identity": "^4.6.0",
-    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
     "jsonwebtoken": "^9.0.2",
-    "jwks-client": "^2.1.0"
+    "jwks-rsa": "^3.2.2"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "18.x",
-    "azure-functions-core-tools": "^4.x",
-    "rimraf": "^5.0.0",
-    "typescript": "^4.0.0"
+    "drizzle-kit": "^0.31.8"
   }
 }

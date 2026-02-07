@@ -1,0 +1,93 @@
+= Architectural Decisions
+
+== Authentication and Authorization
+
+=== Context
+The system requires secure access control to ensure that only authorized users can submit reviews and access certain features. The solution should follow state of the art security practices. And should follow the constraint of offering a free tier or cheap pricing.
+
+=== Options Considered
+
+Option 1: Azure Entra ID B2C::
+    This is Microsoft's cloud-based identity and access management solution for consumer-facing applications. It supports various authentication protocols and provides features like multi-factor authentication, social logins, and user management.
+    However, the social logins are not integrated by default and require additional cloud accounts and has higher configuration complexity.
+
+Options 2: Auth0::
+    Auth0 is a popular third-party authentication and authorization service that offers a wide range of features, including social logins, multi-factor authentication, and user management. It provides an easy-to-use interface and supports various authentication protocols.
+    Auth0 offers a free tier that includes essential features for small applications, making it a cost-effective choice for Bandcheck.
+    Social logins are integrated by default, making it easier to set up and manage.
+
+=== Decision
+
+After evaluating the options, we have decided to use Auth0 for authentication and authorization in the Bandcheck application. Auth0's ease of use, comprehensive feature set, and cost-effectiveness align well with the project's requirements and constraints.
+
+== Frontend Delivery
+
+=== Context
+The Frontend needs a way to be delivered to users that browsers can actually access it.
+
+=== Options Considered
+
+Option 1: Serve from Backend::
+    The frontend assets (HTML, CSS, JavaScript) can be served directly from the backend server. This approach simplifies deployment and reduces the number of services to manage.
+    However, it can lead to increased load on the backend server and may not be as efficient for delivering static assets. While it's simple to deploy and run, it adds additional load to the backend server.
+
+Option 2: Azure Static Web Apps::
+    Azure Static Web Apps is a service that allows for the hosting of static web applications directly from a GitHub repository. It provides features like global distribution, custom domains, and SSL certificates.
+    This option offloads the delivery of static assets from the backend server, improving performance and scalability.
+    It offers a free tier that is sufficient for the needs of Bandcheck and potentially allows for the addition of Azure FrontDoor in front of it in the future for better CDN capabilities.
+
+=== Decision
+
+We have decided to use Azure Static Web Apps for delivering the frontend of the Bandcheck application. Serving static assets from a dedicated service that is free and optimized for this purpose will enhance performance and scalability while keeping operational costs low.
+
+
+== Backend Hosting
+
+=== Context
+The backend of the Bandcheck application needs to be hosted in a way that is cost-effective,
+scalable, and easy to manage.
+
+=== Options Considered
+
+Option 1: Azure App Service::
+    Azure App Service is a fully managed platform for building, deploying, and scaling web applications. It supports various programming languages and frameworks, including Node.js.
+    This option provides built-in features like auto-scaling, load balancing, and integration with other Azure services.
+    However, the pricing model may not be the most cost-effective for small applications like Bandcheck.
+
+Option 2: Azure Functions (Serverless)::
+    Azure Functions is a serverless compute service that allows you to run code on-demand without managing infrastructure. It supports various programming languages, including Node.js.
+    This option offers a pay-as-you-go pricing model, which can be more cost-effective for applications with variable workloads.
+    It also provides built-in scaling capabilities and seamless integration with other Azure services.
+
+=== Decision
+
+We have decided to use Azure Functions for hosting the backend of the Bandcheck application. The serverless architecture aligns well with the project's requirements for cost-effectiveness, scalability, and ease of management.
+
+== Database Solution
+
+=== Context
+Bandcheck will have to store master data. Since database solutions can vary widely in cost, complexity, and scalability, it's important to choose a solution that fits the project's needs.
+As we see this part of the solution with the highest potential cost, we need to be careful with our choice here.
+
+=== Options Considered
+
+Option 1: Azure Cosmos DB::
+    Azure Cosmos DB is a globally distributed, multi-model database service that supports various data models, including document, key-value, graph, and column-family.
+    It offers high availability, low latency, and automatic scaling. However, the pricing model can be complex and may not be the most cost-effective for small applications like Bandcheck.
+
+Option 2: Azure MySql Database::
+    Azure Database for MySQL is a fully managed relational database service based on the MySQL community edition. It provides built-in high availability, automated backups, and scaling capabilities.
+    This option offers a more straightforward pricing model and may be more cost-effective for applications with moderate data storage needs.
+
+Option 3: Azure Database for PostgreSQL::
+    Azure Database for PostgreSQL is a fully managed relational database service based on the PostgreSQL community edition. It provides built-in high availability, automated backups, and scaling capabilities.
+    This option offers a more straightforward pricing model and may be more cost-effective for applications with moderate data storage needs.
+
+Option 4: Azure Table Storage::
+    Azure Table Storage is part of the Storage Accounts service and provides a NoSQL key-value store for semi-structured data.
+    It offers a simple and cost-effective solution for storing large amounts of structured data. However, it may lack some advanced features found in more robust database solutions.
+    Paging and querying capabilities are limited compared to more advanced databases, but it is sufficient for the initial needs of Bandcheck.
+
+=== Decision
+
+The use cases of Bandcheck are pretty simple and the data model is not very complex. Azure Table Storage provides simple filter capabilities that are sufficient for the needs of Bandcheck initially. If the needs grow more complex in the future, we can consider migrating to a more robust database solution. For now, Azure Table Storage offers a cost-effective and straightforward solution for storing the application's data.

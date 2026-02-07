@@ -1,13 +1,12 @@
-import { HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import jwt from 'jsonwebtoken';
-import JwksClient from 'jwks-client';
+import JwksClient from 'jwks-rsa';
 
 // Auth0 configuration
 const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN || '';
 const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || '';
 
 // JWKS client for getting Auth0 public keys
-const client = new JwksClient({
+const client = JwksClient({
     jwksUri: `https://${AUTH0_DOMAIN}/.well-known/jwks.json`
 });
 
@@ -18,11 +17,6 @@ export interface AuthenticatedUser {
     name?: string;
     picture?: string;
     [key: string]: any;
-}
-
-// Interface for authenticated request
-export interface AuthenticatedRequest extends HttpRequest {
-    authenticatedUser?: AuthenticatedUser;
 }
 
 // Get signing key for JWT verification
@@ -54,11 +48,10 @@ const verifyToken = (token: string): Promise<AuthenticatedUser> => {
     });
 };
 
-// Authorization middleware
+// Authorization middleware for standard Request
 export const authorize = async (
-    request: HttpRequest, 
-    context: InvocationContext
-): Promise<{ authorized: boolean; user?: AuthenticatedUser; response?: HttpResponseInit }> => {
+    request: Request
+): Promise<{ authorized: boolean; user?: AuthenticatedUser; response?: { status: number; body: any } }> => {
     try {
         const authHeader = request.headers.get('authorization');
         
@@ -67,11 +60,10 @@ export const authorize = async (
                 authorized: false,
                 response: {
                     status: 401,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
+                    body: { 
                         error: 'Authorization header missing',
                         message: 'Please provide a valid access token' 
-                    })
+                    }
                 }
             };
         }
@@ -83,11 +75,10 @@ export const authorize = async (
                 authorized: false,
                 response: {
                     status: 401,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
+                    body: { 
                         error: 'Invalid authorization header format',
                         message: 'Expected format: Bearer <token>' 
-                    })
+                    }
                 }
             };
         }
@@ -95,7 +86,7 @@ export const authorize = async (
         // Verify the JWT token
         const user = await verifyToken(token);
         
-        context.log(`User authenticated: ${user.sub}`);
+        console.log(`User authenticated: ${user.sub}`);
         
         return {
             authorized: true,
@@ -103,50 +94,17 @@ export const authorize = async (
         };
 
     } catch (error) {
-        context.log(`Authorization failed: ${error}`);
+        console.log(`Authorization failed: ${error}`);
         
         return {
             authorized: false,
             response: {
                 status: 401,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: { 
                     error: 'Invalid or expired token',
                     message: 'Please log in again' 
-                })
+                }
             }
         };
     }
-};
-
-// Convenience wrapper for protected functions
-export const withAuth = (
-    handler: (request: AuthenticatedRequest, context: InvocationContext, user: AuthenticatedUser) => Promise<HttpResponseInit>
-) => {
-    return async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
-        const authResult = await authorize(request, context);
-        
-        if (!authResult.authorized) {
-            return authResult.response || {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ error: 'Authentication error' })
-            };
-        }
-
-        if (!authResult.user) {
-            return {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ error: 'User information not available' })
-            };
-        }
-
-        // Add user to request object
-        const authenticatedRequest = request as AuthenticatedRequest;
-        authenticatedRequest.authenticatedUser = authResult.user;
-
-        // Call the protected handler
-        return handler(authenticatedRequest, context, authResult.user);
-    };
 };
