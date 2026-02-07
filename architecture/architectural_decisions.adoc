@@ -3,22 +3,30 @@
 == Authentication and Authorization
 
 === Context
-The system requires secure access control to ensure that only authorized users can submit reviews and access certain features. The solution should follow state of the art security practices. And should follow the constraint of offering a free tier or cheap pricing.
+The system requires secure access control to ensure that only authorized users can submit reviews and access certain features. The solution should follow state of the art security practices and should follow the constraint of offering a free tier or cheap pricing.
 
 === Options Considered
 
 Option 1: Azure Entra ID B2C::
     This is Microsoft's cloud-based identity and access management solution for consumer-facing applications. It supports various authentication protocols and provides features like multi-factor authentication, social logins, and user management.
-    However, the social logins are not integrated by default and require additional cloud accounts and has higher configuration complexity.
+    However, the social logins are not integrated by default and require additional cloud accounts and have higher configuration complexity.
 
-Options 2: Auth0::
+Option 2: Auth0::
     Auth0 is a popular third-party authentication and authorization service that offers a wide range of features, including social logins, multi-factor authentication, and user management. It provides an easy-to-use interface and supports various authentication protocols.
     Auth0 offers a free tier that includes essential features for small applications, making it a cost-effective choice for Bandcheck.
     Social logins are integrated by default, making it easier to set up and manage.
 
 === Decision
 
-After evaluating the options, we have decided to use Auth0 for authentication and authorization in the Bandcheck application. Auth0's ease of use, comprehensive feature set, and cost-effectiveness align well with the project's requirements and constraints.
+After evaluating the options, we have decided to use **Auth0** for authentication and authorization in the Bandcheck application. Auth0's ease of use, comprehensive feature set, and cost-effectiveness align well with the project's requirements and constraints.
+
+**Implementation Details:**
+
+* OAuth 2.0 / OpenID Connect protocol
+* JWT tokens for API authorization
+* Social login providers: GitHub, Google, etc.
+* No password storage or management
+* Free tier supports up to 7,000 active users
 
 == Frontend Delivery
 
@@ -29,17 +37,36 @@ The Frontend needs a way to be delivered to users that browsers can actually acc
 
 Option 1: Serve from Backend::
     The frontend assets (HTML, CSS, JavaScript) can be served directly from the backend server. This approach simplifies deployment and reduces the number of services to manage.
-    However, it can lead to increased load on the backend server and may not be as efficient for delivering static assets. While it's simple to deploy and run, it adds additional load to the backend server.
+    However, it can lead to increased load on the backend server and may not be as efficient for delivering static assets.
 
 Option 2: Azure Static Web Apps::
     Azure Static Web Apps is a service that allows for the hosting of static web applications directly from a GitHub repository. It provides features like global distribution, custom domains, and SSL certificates.
-    This option offloads the delivery of static assets from the backend server, improving performance and scalability.
-    It offers a free tier that is sufficient for the needs of Bandcheck and potentially allows for the addition of Azure FrontDoor in front of it in the future for better CDN capabilities.
+    However, this creates vendor lock-in and adds complexity when the backend is running outside of Azure.
+
+Option 3: Kubernetes with nginx::
+    Deploy frontend as a containerized nginx server serving static files in the Kubernetes cluster alongside the backend.
+    This provides complete control, keeps the entire stack in one infrastructure, platform independence, and uses Cloudflare for DNS and CDN.
 
 === Decision
 
-We have decided to use Azure Static Web Apps for delivering the frontend of the Bandcheck application. Serving static assets from a dedicated service that is free and optimized for this purpose will enhance performance and scalability while keeping operational costs low.
+We have decided to use **Kubernetes with nginx** for delivering the frontend of the Bandcheck application.
 
+**Rationale:**
+
+* **Platform Independence:** No vendor lock-in, can run on any Kubernetes cluster
+* **Unified Infrastructure:** Frontend and backend in the same cluster, simplified networking
+* **Cost Control:** Predictable costs, no per-request charges
+* **Flexibility:** Full control over nginx configuration, caching, and routing
+* **Cloudflare Integration:** Uses Cloudflare for DNS, SSL/TLS, and CDN caching
+* **Simplicity:** Single deployment pipeline for the entire stack
+
+**Implementation:**
+
+* Frontend built as static assets (React SPA)
+* Packaged in nginx Docker container
+* Deployed to Kubernetes alongside backend
+* Cloudflare handles DNS and acts as CDN
+* ArgoCD manages continuous deployment
 
 == Backend Hosting
 
@@ -52,16 +79,61 @@ scalable, and easy to manage.
 Option 1: Azure App Service::
     Azure App Service is a fully managed platform for building, deploying, and scaling web applications. It supports various programming languages and frameworks, including Node.js.
     This option provides built-in features like auto-scaling, load balancing, and integration with other Azure services.
-    However, the pricing model may not be the most cost-effective for small applications like Bandcheck.
+    However, the pricing model is not cost-effective and creates vendor lock-in.
 
 Option 2: Azure Functions (Serverless)::
     Azure Functions is a serverless compute service that allows you to run code on-demand without managing infrastructure. It supports various programming languages, including Node.js.
-    This option offers a pay-as-you-go pricing model, which can be more cost-effective for applications with variable workloads.
-    It also provides built-in scaling capabilities and seamless integration with other Azure services.
+    Initially considered, but proved to be too complex with significant adapter overhead, cold start issues, and vendor lock-in. The developer experience was poor with function-specific constraints.
+
+Option 3: Kubernetes::
+    Kubernetes provides container orchestration for running the backend application. Can run on any infrastructure (cloud, VPS, on-premises).
+    This option offers maximum flexibility and control, platform independence, and allows for cost optimization through infrastructure choice.
+    Standard application deployment without serverless constraints.
 
 === Decision
 
-We have decided to use Azure Functions for hosting the backend of the Bandcheck application. The serverless architecture aligns well with the project's requirements for cost-effectiveness, scalability, and ease of management.
+After initial experimentation with Azure Functions, we **completely moved away from Azure** and adopted **Kubernetes** for hosting the backend. This decision was driven by:
+
+**Cost Efficiency:**
+
+* Kubernetes can run on any infrastructure (cloud VPS, on-premises, edge)
+* No per-execution costs like serverless
+* Predictable monthly costs
+* No vendor lock-in, can choose cheapest provider
+
+**Operational Simplicity:**
+
+* Standard Node.js/Bun application without serverless constraints
+* Direct HTTP server instead of function adapters
+* Simpler debugging and logging
+* No cold start delays
+* Better developer experience
+
+**Platform Independence:**
+
+* Not tied to Azure or any specific cloud provider
+* Can migrate between providers easily
+* Can run on-premises or hybrid
+* Full control over runtime environment
+* Support for long-running connections
+
+**Implementation:**
+
+* Backend runs as Docker containers managed by Kubernetes
+* Images hosted on GitHub Container Registry (free)
+* Multi-platform support (amd64, arm64)
+* CI: GitHub Actions builds and pushes images to GHCR
+* CD: ArgoCD manages deployment to Kubernetes
+* SQLite database on PersistentVolume
+
+**Why We Left Azure Functions:**
+
+* Too much overhead adapting standard HTTP apps to function format
+* Poor developer experience with function-specific constraints
+* Cold start latency impacted user experience
+* Vendor lock-in to Azure ecosystem
+* Complexity didn't justify the "serverless" benefits
+* With the backend on Kubernetes, keeping frontend on Azure made no sense
 
 == Database Solution
 
@@ -75,7 +147,7 @@ Option 1: Azure Cosmos DB::
     Azure Cosmos DB is a globally distributed, multi-model database service that supports various data models, including document, key-value, graph, and column-family.
     It offers high availability, low latency, and automatic scaling. However, the pricing model can be complex and may not be the most cost-effective for small applications like Bandcheck.
 
-Option 2: Azure MySql Database::
+Option 2: Azure MySQL Database::
     Azure Database for MySQL is a fully managed relational database service based on the MySQL community edition. It provides built-in high availability, automated backups, and scaling capabilities.
     This option offers a more straightforward pricing model and may be more cost-effective for applications with moderate data storage needs.
 
@@ -88,6 +160,163 @@ Option 4: Azure Table Storage::
     It offers a simple and cost-effective solution for storing large amounts of structured data. However, it may lack some advanced features found in more robust database solutions.
     Paging and querying capabilities are limited compared to more advanced databases, but it is sufficient for the initial needs of Bandcheck.
 
+Option 5: SQLite with PersistentVolume::
+    SQLite is a self-contained, serverless SQL database engine that stores data in a single file.
+    It requires no separate database server process, eliminating database hosting costs entirely.
+    When combined with Kubernetes PersistentVolumes, it provides data persistence across pod restarts while maintaining simplicity.
+
 === Decision
 
-The use cases of Bandcheck are pretty simple and the data model is not very complex. Azure Table Storage provides simple filter capabilities that are sufficient for the needs of Bandcheck initially. If the needs grow more complex in the future, we can consider migrating to a more robust database solution. For now, Azure Table Storage offers a cost-effective and straightforward solution for storing the application's data.
+We have decided to use **SQLite with PersistentVolume** for the Bandcheck database. This decision reflects the project's cost-conscious approach and actual usage patterns.
+
+**Rationale:**
+
+* **Zero Database Costs:** No managed database service fees
+* **Simplicity:** Single file database, no connection pooling complexity
+* **Performance:** Excellent for read-heavy workloads with moderate write volume
+* **Backup:** Simple file-based backups via `kubectl cp`
+* **Development/Production Parity:** Same database engine in all environments
+* **Sufficient Scale:** Handles thousands of bands and reviews without issues
+
+**Implementation:**
+
+* SQLite database file stored on Kubernetes PersistentVolume (10Gi)
+* Drizzle ORM for type-safe database access
+* Migrations managed via Drizzle Kit
+* Regular backups to external storage
+
+**Migration Path:**
+
+The hexagonal architecture allows easy migration to PostgreSQL or another database if needed:
+
+* Change Drizzle configuration to use PostgreSQL driver
+* Update connection string in environment variables
+* No changes required to business logic or service layer
+
+== Bot Protection
+
+=== Context
+
+User-generated content forms (artist submissions, reviews) need protection against automated bots and spam submissions. The solution should be privacy-friendly, free, and not frustrate legitimate users.
+
+=== Options Considered
+
+Option 1: Google reCAPTCHA::
+    The most widely used CAPTCHA service. Offers v2 (checkbox/"I'm not a robot") and v3 (invisible, score-based).
+    However, it tracks users across sites, has privacy concerns, and can present frustrating image puzzles.
+
+Option 2: hCaptcha::
+    Privacy-focused alternative to reCAPTCHA. Offers similar functionality with better privacy guarantees.
+    Free tier available, but still requires user interaction (clicking checkboxes or solving puzzles).
+
+Option 3: Cloudflare Turnstile::
+    Cloudflare's modern CAPTCHA alternative. Invisible to users in most cases, using challenges only when necessary.
+    Privacy-friendly (doesn't track users across sites), completely free, and leverages Cloudflare's global threat intelligence.
+
+Option 4: Rate Limiting Only::
+    Simple IP-based or user-based rate limiting without any CAPTCHA.
+    Easy to implement but insufficient against distributed bot attacks and sophisticated automation.
+
+=== Decision
+
+We have decided to use **Cloudflare Turnstile** for bot protection in the Bandcheck application.
+
+**Rationale:**
+
+* **User Experience:** Invisible to users in most cases, no puzzles to solve
+* **Privacy-Friendly:** Doesn't track users or collect personal data
+* **Cost:** Completely free with unlimited requests
+* **Effectiveness:** Leverages Cloudflare's threat intelligence network
+* **Easy Integration:** React component and simple server-side verification
+
+**Implementation:**
+
+**Frontend:**
+
+* React Turnstile component on submission forms
+* Automatic challenge presentation when needed
+* Token generated upon successful verification
+* Token sent with form submission
+
+**Backend:**
+
+* Server-to-server verification with Cloudflare API
+* Token validation before processing submissions
+* Rejection of requests with invalid/missing tokens
+* Configurable for testing (test keys available)
+
+**Testing:**
+
+Cloudflare provides test keys for development:
+
+* Site Key: `1x00000000000000000000AA` (always passes)
+* Secret Key: `1x0000000000000000000000000000000AA`
+
+**Configuration:**
+
+* Frontend: `VITE_TURNSTILE_SITE_KEY` environment variable
+* Backend: `TURNSTILE_SECRET_KEY` environment variable
+* Production keys obtained from Cloudflare Dashboard
+
+== Backend Architecture Pattern
+
+=== Context
+
+The backend needs a clear architectural structure that separates business logic from infrastructure concerns, enables testing, and allows for technology changes without major rewrites.
+
+=== Options Considered
+
+Option 1: Traditional Layered Architecture::
+    Classic three-tier architecture with presentation, business logic, and data access layers.
+    Simple and familiar, but can lead to tight coupling between layers and makes testing difficult.
+
+Option 2: MVC (Model-View-Controller)::
+    Standard web application pattern with models, views, and controllers.
+    Works well for traditional server-rendered applications but less suitable for API-first backends.
+
+Option 3: Hexagonal Architecture (Ports & Adapters)::
+    Architecture pattern that places business logic at the center, isolated from external concerns.
+    Dependencies point inward toward the core, with ports (interfaces) defining boundaries and adapters implementing integration with external systems.
+
+=== Decision
+
+We have adopted **Hexagonal Architecture (Ports & Adapters)** for the backend.
+
+**Rationale:**
+
+* **Dependency Inversion:** Core business logic depends only on interfaces, not concrete implementations
+* **Testability:** Easy to test business logic with mocks, no need for real database or HTTP server
+* **Flexibility:** Can swap databases, add new API types (GraphQL), or change authentication without touching business logic
+* **Clear Boundaries:** Explicit separation between domain, ports (interfaces), and adapters (implementations)
+* **Technology Independence:** Business rules don't know about Drizzle, Express, or any framework
+
+**Structure:**
+
+[source]
+----
+src/
+├── core/                        # Business logic (framework-agnostic)
+│   ├── domain/
+│   │   └── entities.ts          # Domain models, DTOs, types
+│   ├── ports/
+│   │   └── repositories.ts      # Port interfaces
+│   └── services/
+│       └── band.service.ts      # Use cases, business rules
+├── adapters/                    # External world implementations
+│   ├── api/                     # Primary/Driving adapters
+│   │   ├── router.ts            # HTTP routing
+│   │   ├── bands.controller.ts  # HTTP handlers
+│   │   └── auth.adapter.ts      # Auth0 integration
+│   └── database/                # Secondary/Driven adapters
+│       └── drizzle.repository.ts # Drizzle ORM implementation
+└── db/                          # Database schema
+    ├── index.ts
+    └── schema.ts
+----
+
+**Benefits Demonstrated:**
+
+* Migrated from Azure Table Storage to SQLite by changing only the database adapter
+* Business logic remained untouched during infrastructure changes
+* Tests run against mock repositories without needing a database
+* Can run the same code on Azure Functions, Kubernetes, or locally

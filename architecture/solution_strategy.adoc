@@ -1,2 +1,423 @@
 = Solution Strategy
 
+This section describes the fundamental decisions and solution strategies that shape the system's architecture.
+
+== Technology Stack
+
+=== Frontend
+
+**React + TypeScript:**
+
+* Component-based architecture for reusable UI elements
+* Strong typing with TypeScript for maintainability
+* Large ecosystem of libraries and tools
+* Excellent developer experience with hot module reload
+
+**Vite:**
+
+* Fast build tooling with instant server start
+* Optimized production builds
+* Native ESM support
+* Superior developer experience compared to webpack
+
+**Material UI:**
+
+* Comprehensive component library following Material Design
+* Accessibility built-in
+* Theming support for consistent design
+* Reduces development time for UI components
+
+**Auth0 React SDK:**
+
+* Out-of-the-box authentication integration
+* OAuth 2.0 / OpenID Connect support
+* Social login providers
+* JWT token management
+
+=== Backend
+
+**Bun Runtime:**
+
+* Fast JavaScript/TypeScript runtime and package manager
+* Native TypeScript support (no transpilation step)
+* Compatible with Node.js packages
+* Excellent performance for I/O operations
+
+**TypeScript:**
+
+* Strong typing for maintainability and refactoring
+* Enhanced IDE support and autocomplete
+* Catches errors at compile time
+* Self-documenting code
+
+**Drizzle ORM:**
+
+* Type-safe SQL query builder
+* Lightweight with minimal overhead
+* Great TypeScript integration
+* Schema migrations built-in
+* Works with SQLite, PostgreSQL, MySQL
+
+**SQLite:**
+
+* Zero-configuration embedded database
+* No separate database server required
+* Excellent for read-heavy workloads
+* Simple backup (single file)
+* Perfect for cost-conscious deployment
+
+=== Infrastructure
+
+**Kubernetes:**
+
+* Container orchestration for scalability and resilience
+* Platform-independent, can run on any infrastructure
+* K3s recommended for lightweight, resource-efficient deployment
+* Can run on cloud VMs, on-premises, or edge devices
+* Portable across providers (no vendor lock-in)
+
+**Docker:**
+
+* Consistent deployment across environments
+* Easy dependency management
+* Multi-platform builds (amd64, arm64)
+* Hosted on GitHub Container Registry (free)
+
+**Cloudflare:**
+
+* DNS management
+* CDN for global content distribution
+* DDoS protection and Web Application Firewall
+* SSL/TLS certificates
+* Turnstile bot protection service
+* Free tier sufficient for current needs
+
+== Architectural Patterns
+
+=== Hexagonal Architecture (Backend)
+
+The backend uses hexagonal architecture (ports and adapters pattern) for clean separation of concerns:
+
+**Core Domain (Center):**
+
+* Business logic and use cases
+* Domain entities and value objects
+* Framework-agnostic, pure TypeScript
+* No external dependencies
+
+**Ports (Interfaces):**
+
+* Define boundaries between core and external world
+* Repository interfaces for data access
+* Service interfaces for use cases
+
+**Adapters (Implementations):**
+
+* **Primary/Driving Adapters:** HTTP API, controllers, auth middleware
+* **Secondary/Driven Adapters:** Database repositories, external services
+
+**Benefits:**
+
+* Business logic independent of frameworks
+* Easy to test with mocks
+* Technology can be swapped without affecting core
+* Clear boundaries and responsibilities
+
+=== Component-Based Architecture (Frontend)
+
+React's component model provides:
+
+* Reusable UI components
+* Clear component hierarchy
+* Props for data flow
+* Context for cross-cutting concerns (auth)
+* Hooks for state management and side effects
+
+=== RESTful API Design
+
+The backend API follows REST principles:
+
+* Resource-based URLs (`/api/bands`, `/api/bands/:id/reviews`)
+* HTTP methods for operations (GET, POST, PUT, DELETE)
+* Stateless communication
+* JSON request/response format
+* Standard HTTP status codes
+
+== Quality Goals Implementation
+
+=== Cost Efficiency
+
+**Strategies:**
+
+* **Free Services:** Auth0 free tier, Cloudflare free tier (DNS, CDN, Turnstile), GitHub Container Registry
+* **SQLite:** Eliminates database hosting costs completely
+* **Kubernetes:** Can run on cheap VPS ($5-10/month) or on-premises hardware
+* **Platform Independence:** No vendor lock-in, can choose cheapest provider
+* **Efficient Runtime:** Bun's performance reduces resource requirements
+* **Static Asset Optimization:** CDN caching via Cloudflare reduces bandwidth costs
+
+**Result:** Platform can run on minimal infrastructure budget (~$5-10/month for VPS or completely free if self-hosted)
+
+=== Maintainability
+
+**Strategies:**
+
+* **TypeScript:** Strong typing catches errors early and aids refactoring
+* **Hexagonal Architecture:** Clear separation allows isolated changes
+* **Consistent Code Style:** ESLint and Prettier enforce standards
+* **Documentation:** Architecture documentation in AsciiDoc format
+* **Version Control:** Git with clear commit messages and PR reviews
+
+**Result:** Code is easy to understand and modify, new contributors can onboard quickly
+
+=== Operability
+
+**Strategies:**
+
+* **Health Checks:** `/health` endpoint for monitoring
+* **Structured Logging:** Consistent log format for debugging
+* **Error Handling:** User-friendly error messages
+* **Deployment Automation:** GitHub Actions for CI/CD
+* **Container Orchestration:** Kubernetes for resilience and scaling
+* **Database Backups:** Simple file-based SQLite backups
+
+**Result:** Easy to deploy, monitor, and troubleshoot in production
+
+== Key Design Decisions
+
+=== Single Page Application (SPA)
+
+**Rationale:**
+
+* Rich, interactive user experience
+* Reduces server load (API only)
+* Client-side routing for instant navigation
+* Better separation between frontend and backend
+
+**Trade-offs:**
+
+* Initial load time slightly higher
+* SEO requires additional consideration
+* JavaScript required for functionality
+
+=== JWT Authentication
+
+**Rationale:**
+
+* Stateless authentication (no server-side sessions)
+* Scalable across multiple backend instances
+* Industry-standard with Auth0 integration
+* Secure token-based approach
+
+**Implementation:**
+
+* Access tokens stored in memory (not localStorage for security)
+* Short expiration times with refresh tokens
+* Validated on every protected API request
+
+=== Cloud to Kubernetes Migration
+
+**Evolution:**
+
+Initially planned for Azure cloud services (Static Web Apps, Azure Functions), but **completely migrated away from Azure** to Kubernetes:
+
+**Reasons for Migration:**
+
+* **Azure Functions Complexity:** Too much overhead adapting HTTP apps to function format, poor developer experience
+* **Vendor Lock-in:** Tied to Azure ecosystem with no easy migration path
+* **Cost Unpredictability:** Serverless pricing can be unpredictable with traffic spikes
+* **Cold Starts:** Latency issues impacted user experience
+* **Static Web Apps Limitations:** Limited control, forced to use Azure when backend was elsewhere
+
+**Benefits of Kubernetes:**
+
+* **Platform Independence:** Can run anywhere (AWS, GCP, Azure, DigitalOcean, on-premises)
+* **Predictable Costs:** Fixed monthly costs regardless of traffic
+* **Performance:** No cold starts, consistent response times
+* **Control:** Full control over infrastructure and configuration
+* **Simplicity:** Standard application deployment without cloud-specific adaptations
+* **Unified Stack:** Frontend and backend in same infrastructure
+
+**Current Setup:**
+
+* Both frontend and backend on Kubernetes
+* Cloudflare for DNS, CDN, and bot protection
+* ArgoCD for GitOps-based continuous deployment
+* No cloud provider lock-in
+
+=== SQLite Over Managed Databases
+
+**Rationale:**
+
+* Zero hosting costs
+* Sufficient for expected scale (thousands of bands/reviews)
+* Simple backups and migrations
+* Excellent for read-heavy workloads
+* Easy development/production parity
+
+**Migration Path:**
+
+Hexagonal architecture allows easy migration to PostgreSQL if needed without changing business logic.
+
+=== Bot Protection Strategy
+
+**Cloudflare Turnstile:**
+
+* Privacy-friendly (no user tracking)
+* Invisible to most users (no puzzles)
+* Free with unlimited requests
+* Effective against automated bots
+
+**Implementation:**
+
+* Frontend widget generates tokens
+* Backend verifies tokens server-side
+* Protects all user-generated content endpoints
+
+== Integration Strategy
+
+=== External Services Integration
+
+**Auth0:**
+
+* OAuth 2.0 / OpenID Connect
+* Social providers (GitHub, Google, etc.)
+* JWT token issuance and validation
+* User management
+
+**Cloudflare Turnstile:**
+
+* Frontend: React component
+* Backend: Server-to-server verification API
+* Test keys available for development
+
+=== CI/CD Pipeline
+
+**GitHub Actions:**
+
+* **Continuous Integration:** Linting, type checking, testing on every PR
+* **Container Builds:** Multi-platform Docker images to GitHub Container Registry
+* **Automated:** Triggered on push to main/dev branches
+* **Fast:** Parallel builds for frontend and backend
+
+**ArgoCD:**
+
+* **GitOps Continuous Deployment:** Git as single source of truth
+* **Automated Sync:** Monitors Git repository, auto-deploys changes
+* **Rollback:** Easy rollback to any previous Git commit
+* **Visibility:** UI showing deployment status and history
+* **Approval Gates:** Manual approval for production deployments
+
+**Workflow:**
+
+1. Push code to GitHub
+2. GitHub Actions runs tests and builds images
+3. Push images to GHCR
+4. Update Kubernetes manifests with new image tags
+5. ArgoCD detects manifest changes
+6. ArgoCD syncs changes to cluster
+7. Kubernetes rolls out new pods
+
+=== Monitoring and Observability
+
+**Current:**
+
+* Kubernetes health probes (liveness/readiness)
+* Application logs via kubectl
+* HTTP endpoint for health checks
+
+**Future Considerations:**
+
+* Application Performance Monitoring (APM)
+* Error tracking (e.g., Sentry)
+* Metrics collection (Prometheus)
+* Distributed tracing
+
+== Development Workflow
+
+=== Local Development
+
+**Frontend:**
+
+[source,bash]
+----
+cd frontend
+npm install
+npm run dev  # Starts Vite dev server on port 5173
+----
+
+**Backend:**
+
+[source,bash]
+----
+cd backend
+bun install
+bun dev  # Starts backend with hot reload on port 3000
+----
+
+**Database:**
+
+* SQLite file created automatically on first run
+* Migrations run via `bun run db:migrate`
+* Seeding via `bun run db:seed`
+
+=== Testing Strategy
+
+**Backend:**
+
+* Unit tests for core services with mock repositories
+* Integration tests with test database
+* E2E tests for API endpoints
+
+**Frontend:**
+
+* Component tests with React Testing Library
+* Integration tests for user flows
+* Accessibility tests
+
+=== Deployment Workflow
+
+1. **Development:** Push to `dev` branch triggers deployment to dev environment
+2. **Pull Request:** Builds are created but not deployed, preview URLs for frontend
+3. **Main Branch:** Merge to `main` deploys to staging/production
+4. **Release:** Create Git tag (e.g., `v1.0.0`) for production release with versioned images
+
+== Future Extensibility
+
+The architecture is designed to support future enhancements:
+
+**Additional Authentication Providers:**
+
+* Add new OAuth providers through Auth0
+* Or swap Auth0 for another provider by changing auth adapter
+
+**Database Migration:**
+
+* Change Drizzle configuration to PostgreSQL
+* Update connection string
+* No business logic changes required
+
+**Additional API Types:**
+
+* Add GraphQL adapter alongside REST
+* Both use same core services
+* No duplication of business logic
+
+**Content Recommendations:**
+
+* Add recommendation service to core domain
+* Implement as new adapter
+* Could use ML model or simple algorithm
+
+**Search Improvements:**
+
+* Add full-text search (SQLite FTS or external search service)
+* Implement in repository adapter
+* Core services remain unchanged
+
+**Caching Layer:**
+
+* Add Redis for caching frequently accessed data
+* Implement as decorator around repository
+* Transparent to business logic
+

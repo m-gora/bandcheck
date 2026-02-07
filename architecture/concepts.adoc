@@ -1,0 +1,569 @@
+= Crosscutting Concepts
+
+This section describes concepts and patterns that are relevant across multiple parts of the system.
+
+== Security
+
+=== Authentication & Authorization
+
+**OAuth 2.0 / OpenID Connect:**
+
+* All authentication handled via Auth0
+* JWT tokens for API authorization
+* Social login providers (GitHub, Google, etc.)
+* No password storage in our system
+
+**Token Management:**
+
+* Access tokens stored in `localStorage` (frontend)
+* Refresh tokens for session persistence
+* Token validation on every protected API call
+* Automatic token refresh via Auth0 SDK
+
+**Authorization Flow:**
+
+1. User initiates login
+2. Redirect to Auth0 hosted login page
+3. User authenticates with social provider
+4. Auth0 issues JWT access token
+5. Frontend stores token in `localStorage`
+6. Token included in `Authorization: Bearer` header
+7. Backend validates JWT signature and claims
+8. Extract user identity from token claims
+
+=== Bot Protection
+
+**Cloudflare Turnstile:**
+
+* Privacy-friendly CAPTCHA alternative
+* Invisible to users in most cases
+* Server-side verification required
+* Protects form submissions (artist submit, reviews)
+
+**Implementation:**
+
+* Frontend: React Turnstile component generates token
+* Backend: Verifies token with Cloudflare API before processing
+* Test keys available for development
+* Free tier with unlimited requests
+
+=== CORS Configuration
+
+**Backend CORS Settings:**
+
+* Configured via `ALLOWED_ORIGINS` environment variable
+* Comma-separated list of allowed domains
+* Credentials enabled for Auth0 cookies
+* Preflight requests handled automatically
+
+**Example:**
+
+[source,bash]
+----
+ALLOWED_ORIGINS=https://bandcheck.example.com,https://dev.bandcheck.example.com
+----
+
+=== Data Protection
+
+**Secrets Management:**
+
+* Kubernetes Secrets for sensitive configuration
+* Environment variables never in source code
+* Separate secrets per environment (dev/prod)
+* ArgoCD manages secret deployment
+
+**Encryption:**
+
+* HTTPS/TLS for all communication
+* Cloudflare handles SSL/TLS termination
+* JWT tokens are signed and verified
+* No sensitive data in logs
+
+== Privacy & Compliance
+
+=== GDPR Compliance
+
+**Data Minimization:**
+
+* Only collect data necessary for functionality
+* User profiles managed by Auth0 (minimal data)
+* No tracking or behavioral analytics
+* No data sharing with third parties
+
+**User Rights:**
+
+* **Right to Access:** Users can view their submitted content
+* **Right to Deletion:** Account deletion removes all user data
+* **Right to Portability:** Data can be exported (manual process)
+* **Right to Rectification:** Users can edit their submissions
+
+**Legal Basis:**
+
+* Consent for account creation
+* Legitimate interest for security (bot protection)
+* Legal obligation for EU compliance pages
+
+=== Cookie Usage
+
+**Strictly Necessary Only:**
+
+The platform uses **only strictly necessary cookies**, exempt from consent requirements:
+
+**Auth0 Authentication:**
+
+* Primary storage: `localStorage` (not cookies)
+* May set minimal cookies during OAuth flow
+* Purpose: Session management, login state
+* Classification: Essential for functionality
+
+**Cloudflare Security:**
+
+* `__cf_bm` - Bot management cookie (30 min)
+* Purpose: DDoS protection, bot detection
+* Classification: Essential for security
+
+**No Tracking:**
+
+* ❌ No Google Analytics or analytics cookies
+* ❌ No marketing/advertising cookies
+* ❌ No social media tracking pixels
+* ❌ No behavioral profiling
+* ❌ No cross-site tracking
+
+**Compliance Status:**
+
+* ✅ No cookie consent banner required (GDPR Recital 30)
+* ✅ Privacy Policy provides transparency
+* ✅ Users can clear data via logout
+* ✅ All usage documented in Privacy Policy
+
+=== Legal Pages
+
+**Required Pages (EU Compliance):**
+
+* **Privacy Policy** (`/privacy`) - GDPR compliance, data processing
+* **Terms of Service** (`/terms`) - User agreement, liability
+* **Imprint** (`/imprint`) - German law (§5 TMG), operator information
+
+**Accessibility:**
+
+* All legal pages linked in footer
+* Available on every page
+* Clear, readable text
+* No authentication required
+
+**Maintenance:**
+
+* Update "Last Modified" date on changes
+* Keep previous versions archived (Git)
+* Notify users of significant changes
+* Legal review recommended before major updates
+
+=== Data Retention
+
+**User Content:**
+
+* Band submissions: Retained indefinitely
+* Reviews: Retained indefinitely
+* Rationale: Community knowledge base
+
+**User Accounts:**
+
+* Auth0 manages account data
+* Inactive accounts: No automatic deletion
+* User-requested deletion: Complete removal
+
+**Logs:**
+
+* Application logs: 30 days retention
+* Kubernetes logs: 7 days retention
+* No PII in logs
+
+== Error Handling
+
+=== Frontend Error Handling
+
+**API Errors:**
+
+* Caught by API service layer
+* Translated to user-friendly messages
+* Displayed via UI notifications (toast/snackbar)
+* Failed requests can be retried
+
+**Common Error Scenarios:**
+
+* 401 Unauthorized → Prompt for login
+* 403 Forbidden → "Permission denied" message
+* 404 Not Found → "Resource not found"
+* 500 Server Error → "Something went wrong, try again"
+
+**Loading States:**
+
+* Skeleton loaders during data fetch
+* Disabled buttons during submission
+* Clear indication of progress
+
+=== Backend Error Handling
+
+**Error Response Format:**
+
+[source,json]
+----
+{
+  "error": {
+    "message": "Human-readable error message",
+    "code": "ERROR_CODE",
+    "status": 400,
+    "details": {} // Optional additional info
+  }
+}
+----
+
+**Error Categories:**
+
+* **Validation Errors (400):** Invalid input data
+* **Authentication Errors (401):** Missing/invalid JWT
+* **Authorization Errors (403):** Insufficient permissions
+* **Not Found Errors (404):** Resource doesn't exist
+* **Server Errors (500):** Unexpected failures
+
+**Error Logging:**
+
+* All errors logged with context
+* No sensitive data in error messages
+* Stack traces in development only
+* Structured logging for parsing
+
+== Logging
+
+=== Log Levels
+
+* **ERROR:** Application errors, failures
+* **WARN:** Warnings, deprecated usage
+* **INFO:** Application lifecycle, key events
+* **DEBUG:** Detailed debugging (dev only)
+
+=== Structured Logging
+
+**Format:**
+
+[source,json]
+----
+{
+  "timestamp": "2026-02-07T12:34:56Z",
+  "level": "INFO",
+  "message": "Band created",
+  "context": {
+    "bandId": "123",
+    "userId": "auth0|456",
+    "ip": "192.0.2.1"
+  }
+}
+----
+
+**Best Practices:**
+
+* Include correlation IDs for request tracing
+* No PII in logs (use user IDs, not emails)
+* Consistent field names across services
+* Timestamp in ISO 8601 format
+
+=== Log Storage
+
+**Kubernetes:**
+
+* Stdout/stderr captured by Kubernetes
+* Accessible via `kubectl logs`
+* 7-day retention by default
+* Can forward to external logging service
+
+**Monitoring:**
+
+* View in ArgoCD for deployment events
+* Cloudflare analytics for traffic patterns
+* Kubernetes metrics for resource usage
+
+== Testing Strategy
+
+=== Backend Testing
+
+**Unit Tests:**
+
+* Core services with mock repositories
+* Business logic validation
+* No external dependencies
+* Fast execution (<1s)
+
+**Integration Tests:**
+
+* Real database interactions (test DB)
+* Repository implementations
+* API endpoint contracts
+
+**Test Database:**
+
+* Separate SQLite file for tests
+* Fresh database per test suite
+* Automatic cleanup after tests
+
+=== Frontend Testing
+
+**Component Tests:**
+
+* React Testing Library
+* User interaction simulation
+* Accessibility checks
+* Visual regression tests
+
+**Integration Tests:**
+
+* Multi-component workflows
+* API mocking (MSW)
+* Authentication flows
+* Form submissions
+
+=== E2E Testing
+
+**Future Consideration:**
+
+* Cypress or Playwright
+* Critical user journeys
+* Run in CI pipeline
+* Production-like environment
+
+== Internationalization
+
+**Current Status:**
+
+* English only (en-US)
+* No i18n framework implemented
+
+**Future Consideration:**
+
+* German translation (target market)
+* React i18next for translations
+* Separate JSON files per language
+* User language preference setting
+
+== Performance
+
+=== Frontend Optimization
+
+**Build Optimization:**
+
+* Vite for fast builds and HMR
+* Code splitting by route
+* Tree shaking unused code
+* Asset optimization (images, fonts)
+
+**Runtime Optimization:**
+
+* React Query for data caching (5 min stale time)
+* Lazy loading components
+* Debounced search inputs
+* Virtualized lists for large datasets
+
+**CDN Caching:**
+
+* Static assets cached by Cloudflare
+* Cache-Control headers configured
+* Immutable assets with hash in filename
+
+=== Backend Optimization
+
+**Database:**
+
+* SQLite indexes on frequently queried fields
+* Pagination for list endpoints
+* Limit query result size
+* Connection pooling (Drizzle handles this)
+
+**API Response:**
+
+* GZIP compression enabled
+* Minimal JSON payloads
+* No over-fetching (return only needed data)
+* ETags for conditional requests
+
+=== Monitoring
+
+**Key Metrics:**
+
+* Response times (p50, p95, p99)
+* Error rates by endpoint
+* Database query performance
+* Pod resource usage (CPU, memory)
+
+**Tools:**
+
+* Kubernetes metrics: `kubectl top`
+* ArgoCD dashboard for deployment health
+* Cloudflare analytics for traffic patterns
+* Future: Prometheus + Grafana
+
+== Documentation
+
+=== Code Documentation
+
+**TypeScript:**
+
+* JSDoc comments for public APIs
+* Type definitions self-document
+* README in each major directory
+* Examples in code comments
+
+**API Documentation:**
+
+* OpenAPI/Swagger specification (future)
+* Endpoint descriptions in code
+* Request/response examples
+* Error scenarios documented
+
+=== Architecture Documentation
+
+**This Documentation (arc42):**
+
+* Single source of truth for architecture
+* AsciiDoc format for version control
+* Diagrams using Mermaid
+* Regular updates with code changes
+
+**Decision Records:**
+
+* Major decisions documented in [architectural_decisions.adoc](architectural_decisions.adoc)
+* Context, options, and rationale
+* Date and responsible person
+* Link to related issues/PRs
+
+== Development Workflow
+
+=== Local Development
+
+**Prerequisites:**
+
+* Node.js or Bun runtime
+* Git for version control
+* Docker (optional, for testing containers)
+* kubectl (optional, for testing K8s manifests)
+
+**Setup:**
+
+[source,bash]
+----
+# Frontend
+cd frontend
+npm install
+npm run dev
+
+# Backend
+cd backend
+bun install
+bun dev
+----
+
+**Environment Variables:**
+
+* Copy `.env.example` to `.env`
+* Configure Auth0 credentials
+* Set Turnstile keys (use test keys for dev)
+
+=== Code Style
+
+**Linting:**
+
+* ESLint for JavaScript/TypeScript
+* Consistent code formatting
+* Pre-commit hooks enforce style
+* Configured in `.eslintrc`
+
+**Formatting:**
+
+* Prettier for consistent formatting
+* Run on save in IDE
+* Automatic in CI pipeline
+
+=== Git Workflow
+
+**Branching:**
+
+* `main` - Production-ready code
+* `dev` - Development branch
+* `feature/*` - Feature branches
+* `fix/*` - Bug fix branches
+
+**Commit Messages:**
+
+* Clear, descriptive messages
+* Reference issue numbers
+* Conventional commits format (optional)
+
+**Pull Requests:**
+
+* CI must pass
+* Code review required
+* Squash and merge to main
+
+=== CI/CD Pipeline
+
+**Continuous Integration:**
+
+* Run on every PR
+* Linting, type checking, tests
+* Build verification
+* Fails if any check fails
+
+**Continuous Deployment:**
+
+* GitHub Actions builds images
+* Push to GHCR
+* ArgoCD syncs to cluster
+* Manual approval for production
+
+== Maintainability
+
+=== Code Organization
+
+**Backend:**
+
+* Hexagonal architecture (ports & adapters)
+* Clear separation of concerns
+* Domain logic independent of frameworks
+* Easy to test and modify
+
+**Frontend:**
+
+* Component-based architecture
+* Reusable components
+* Hooks for logic reuse
+* Context for shared state
+
+=== Dependency Management
+
+**Updates:**
+
+* Regular dependency updates
+* Automated security updates (Dependabot)
+* Test after updates
+* Pin major versions
+
+**Version Control:**
+
+* Lock files committed (`package-lock.json`, `bun.lockb`)
+* Reproducible builds
+* Document breaking changes
+
+=== Technical Debt
+
+**Known Issues:**
+
+* Manual data deletion process (should be automated)
+* No automated E2E tests
+* Limited monitoring/observability
+* No disaster recovery plan
+
+**Addressing Strategy:**
+
+* Prioritize based on impact
+* Document in GitHub issues
+* Include in sprint planning
+* Regular refactoring sessions

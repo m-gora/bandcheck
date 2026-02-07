@@ -1,6 +1,6 @@
 :toc:
 
-= Bandcheck
+= Bandcheck Architecture Documentation
 
 include::introduction.adoc[leveloffset=+1]
 
@@ -10,20 +10,43 @@ include::context.adoc[leveloffset=+1]
 
 include::solution_strategy.adoc[leveloffset=+1]
 
-== Building Block View
+include::building_blocks.adoc[leveloffset=+1]
 
 == Runtime View
 
-== Deployment View
+_(To be documented: sequence diagrams for key scenarios)_
 
-== Crosscutting Concepts
+include::deployment.adoc[leveloffset=+1]
 
-== Architectural Decisions
+include::concepts.adoc[leveloffset=+1]
 
 include::architectural_decisions.adoc[leveloffset=+1]
 
-== Quality Requirements
+include::quality_requirements.adoc[leveloffset=+1]
 
 == Risks & Technical Debt
 
+_(To be documented: known risks and technical debt items)_
+
 == Glossary
+
+**SPA (Single Page Application):**
+A web application that loads a single HTML page and dynamically updates content as the user interacts with the app.
+
+**JWT (JSON Web Token):**
+A compact, URL-safe means of representing claims to be transferred between two parties. Used for authentication.
+
+**Hexagonal Architecture:**
+An architectural pattern that separates business logic from external concerns through ports (interfaces) and adapters (implementations).
+
+**GDPR (General Data Protection Regulation):**
+EU regulation on data protection and privacy in the European Union and the European Economic Area.
+
+**K3s:**
+A lightweight Kubernetes distribution designed for resource-constrained environments and edge computing.
+
+**Drizzle ORM:**
+A TypeScript ORM with a focus on type safety and developer experience.
+
+**Bun:**
+A fast all-in-one JavaScript runtime and toolkit designed as a drop-in replacement for Node.js.

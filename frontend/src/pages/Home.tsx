@@ -9,6 +9,8 @@ const Home = () => {
       sx={{
         minHeight: '100vh',
         position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
         '&::before': {
           content: '""',
           display: 'block',

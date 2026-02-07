@@ -2,16 +2,117 @@
 
 This section outlines the key constraints that have influenced the architecture of the Bandcheck application. These constraints include both technical and non-technical factors that have shaped design decisions.
 
+== Technical Constraints
+
 Licensing::
     All software components and libraries used in the Bandcheck application must be open source
     and compatible with the project's overall licensing strategy. This ensures that the platform
-    remains free and accessible to all users.
-
-Data Privacy::
-    The architecture must comply with data protection regulations (e.g., GDPR) and prioritize
-    user privacy. This includes implementing measures to protect personal information and
-    providing users with control over their data.
+    remains free and accessible to all users. The project is licensed under an open-source license,
+    making the codebase transparent and allowing community contributions.
 
 Pricing::
     Since Bandcheck is not monetized, the architecture must minimize operational costs. This includes selecting cost-effective cloud services and optimizing resource usage to ensure sustainability without compromising performance.
     Where possible, leverage free tiers of cloud providers and open-source solutions to reduce expenses.
+    
+    Cost-optimization strategies:
+    
+    * Use Azure Static Web Apps free tier for frontend hosting
+    * Deploy backend on cost-effective Kubernetes (K3s)
+    * Use SQLite for database to avoid managed database costs
+    * Leverage GitHub Container Registry for free container storage
+    * Utilize Cloudflare Turnstile's free tier for bot protection
+
+== Legal and Compliance Constraints
+
+Data Privacy (GDPR)::
+    The architecture must comply with EU General Data Protection Regulation (GDPR) and prioritize
+    user privacy. This includes implementing measures to protect personal information and
+    providing users with control over their data.
+    
+    **Requirements:**
+    
+    * Privacy Policy documenting data collection and usage
+    * User rights implementation (access, deletion, portability)
+    * Documented data processing purposes
+    * Third-party service disclosures (Auth0, Cloudflare)
+    * Contact method for data subject requests
+    * Data retention and deletion policies
+    
+    See [concepts.adoc](concepts.adoc) for detailed compliance implementation including cookie usage.
+
+German Law Compliance (TMG)::
+    As the platform may operate under German jurisdiction, compliance with the Telemediengesetz (TMG)
+    is required, specifically §5 TMG (Impressum/Imprint requirement).
+    
+    **Requirements:**
+    
+    * Imprint page with operator information
+    * Complete contact details (name, address, email)
+    * Responsible person for content
+    * Business registration details (if applicable)
+    * VAT ID (if applicable)
+    * Easily accessible from all pages
+
+EU E-Commerce Directive::
+    Compliance with the EU E-Commerce Directive for online services.
+    
+    **Requirements:**
+    
+    * Terms of Service defining usage rules
+    * Clear liability limitations
+    * Dispute resolution mechanisms
+    * Transparent content policies
+    * Accessible legal information
+
+== Security Constraints
+
+Authentication and Authorization::
+    User authentication must follow industry best practices and use established protocols.
+    
+    * OAuth 2.0 / OpenID Connect for authentication
+    * JWT token-based authorization
+    * Social login support (GitHub, Google, etc.)
+    * No storage of user passwords
+    * Multi-factor authentication support
+
+Bot Protection::
+    Forms and user-generated content submissions must be protected against automated abuse.
+    
+    * Implementation of Cloudflare Turnstile for bot detection
+    * Server-side verification of all submissions
+    * Privacy-friendly approach (no user tracking)
+    * Free tier usage to minimize costs
+
+Secure Communication::
+    All communication must be encrypted in production environments.
+    
+    * HTTPS/TLS for all endpoints
+    * Secure cookie attributes
+    * CORS configuration for trusted origins only
+    * Security headers (CSP, HSTS, etc.)
+
+Data Protection::
+    User data must be protected at rest and in transit.
+    
+    * Encrypted connections to external services
+    * Secure storage of secrets (Kubernetes Secrets, environment variables)
+    * No hardcoded credentials in codebase
+    * Regular security updates via automated builds
+
+== Organizational Constraints
+
+Non-Profit Operation::
+    The platform operates as a non-profit service, which influences technical and business decisions.
+    
+    * No monetization features required
+    * Focus on community value over commercial features
+    * Sustainability through cost-minimization
+    * Transparency in operations and code
+
+Community-Driven Development::
+    Development follows open-source community principles.
+    
+    * Public GitHub repository
+    * Community contributions welcome
+    * Transparent decision-making
+    * Documentation for contributors

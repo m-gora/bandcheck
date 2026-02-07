@@ -1,0 +1,446 @@
+= Building Block View
+
+This section describes the static decomposition of the system into building blocks and their relationships.
+
+== Level 1: System Context
+
+At the highest level, Bandcheck consists of a frontend application, a backend API, external services, and Cloudflare for DNS/CDN.
+
+[mermaid]
+....
+graph TB
+    Users[Users] --> CF[Cloudflare<br/>DNS + CDN]
+    CF --> Frontend[Frontend SPA<br/>React + TypeScript<br/>nginx on Kubernetes]
+    Frontend --> Backend[Backend API<br/>Bun + TypeScript<br/>on Kubernetes]
+    Frontend --> Auth0[Auth0<br/>Authentication]
+    Frontend --> Turnstile[Cloudflare Turnstile<br/>Bot Protection]
+    Backend --> Auth0
+    Backend --> Database[(SQLite Database<br/>PersistentVolume)]
+....
+
+**Users:**
+
+* Access application through web browsers
+* Traffic routed through Cloudflare
+
+**Cloudflare:**
+
+* DNS management and resolution
+* CDN for caching static assets
+* DDoS protection and WAF
+* SSL/TLS termination
+* Turnstile bot protection service
+
+**Frontend SPA:**
+
+* Single Page Application built with React and TypeScript
+* Material UI components for consistent design
+* Vite for build tooling and hot module reload
+* Served by nginx in Docker container
+* Deployed on Kubernetes
+
+**Backend API:**
+
+* RESTful API built with Bun runtime and TypeScript
+* Hexagonal architecture for clean separation of concerns
+* JWT authentication via Auth0
+* Deployed on Kubernetes with Docker containers
+
+**External Services:**
+
+* **Auth0:** OAuth 2.0 / OpenID Connect authentication provider
+* **Cloudflare Turnstile:** Bot protection for forms
+
+**Database:**
+
+* SQLite embedded SQL database
+* Stored on Kubernetes PersistentVolume
+* No separate database server required
+
+== Level 2: Backend Building Blocks
+
+The backend follows hexagonal architecture with clear separation between core business logic and external adapters.
+
+[mermaid]
+....
+graph TB
+    subgraph Primary Adapters [Primary Adapters - Driving Side]
+        Router[HTTP Router<br/>router.ts]
+        Controllers[Controllers<br/>bands.controller.ts]
+        Auth[Auth Adapter<br/>auth.adapter.ts]
+    end
+    
+    subgraph Core Domain [Core Domain - Business Logic]
+        Entities[Domain Entities<br/>entities.ts]
+        Services[Services<br/>band.service.ts]
+        Ports[Port Interfaces<br/>repositories.ts]
+    end
+    
+    subgraph Secondary Adapters [Secondary Adapters - Driven Side]
+        Repository[Drizzle Repository<br/>drizzle.repository.ts]
+        Schema[Database Schema<br/>schema.ts]
+    end
+    
+    Router --> Controllers
+    Controllers --> Auth
+    Controllers --> Services
+    Services --> Ports
+    Services --> Entities
+    Ports <--> Repository
+    Repository --> Schema
+....
+
+=== Primary Adapters (Driving/Left Side)
+
+These adapters receive requests from the outside world and drive the application.
+
+**HTTP Router (`router.ts`):**
+
+* Handles HTTP routing and request dispatching
+* CORS configuration
+* Request/response middleware
+* Routes to appropriate controllers
+
+**Controllers (`bands.controller.ts`):**
+
+* HTTP request/response handling
+* Input validation and sanitization
+* DTO transformation
+* Error handling and HTTP status codes
+* Cloudflare Turnstile verification
+
+**Auth Adapter (`auth.adapter.ts`):**
+
+* JWT token verification
+* Auth0 integration
+* User identity extraction
+* Authorization checks
+
+=== Core Domain (Business Logic)
+
+The heart of the application, containing all business rules and use cases.
+
+**Domain Entities (`entities.ts`):**
+
+[source,typescript]
+----
+interface Band {
+  id: string;
+  name: string;
+  genres: string[];
+  description: string;
+  createdBy: string;
+  createdAt: Date;
+}
+
+interface Review {
+  id: string;
+  bandId: string;
+  rating: number;
+  contentWarnings: ContentWarning[];
+  comment: string;
+  createdBy: string;
+  createdAt: Date;
+}
+
+interface ContentWarning {
+  type: string;
+  severity: 'low' | 'medium' | 'high';
+  description: string;
+}
+----
+
+**Services (`band.service.ts`, `review.service.ts`):**
+
+* Business logic and use cases
+* Validation of business rules
+* Orchestration of repository calls
+* No knowledge of HTTP, databases, or frameworks
+
+**Port Interfaces (`repositories.ts`):**
+
+[source,typescript]
+----
+interface BandRepository {
+  findAll(query: GetBandsQuery): Promise<GetBandsResult>;
+  findById(id: string): Promise<Band | null>;
+  create(band: CreateBandDto): Promise<Band>;
+  update(id: string, band: UpdateBandDto): Promise<Band>;
+  delete(id: string): Promise<void>;
+}
+
+interface ReviewRepository {
+  findByBandId(bandId: string): Promise<Review[]>;
+  create(review: CreateReviewDto): Promise<Review>;
+  update(id: string, review: UpdateReviewDto): Promise<Review>;
+  delete(id: string): Promise<void>;
+}
+----
+
+=== Secondary Adapters (Driven/Right Side)
+
+These adapters are driven by the core domain and implement integration with external systems.
+
+**Drizzle Repository (`drizzle.repository.ts`):**
+
+* Implements `BandRepository` and `ReviewRepository` interfaces
+* ORM integration with Drizzle
+* SQL query construction
+* Data mapping between database and domain entities
+
+**Database Schema (`schema.ts`):**
+
+[source,typescript]
+----
+export const bands = sqliteTable('bands', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  genres: text('genres', { mode: 'json' }).$type<string[]>(),
+  description: text('description'),
+  createdBy: text('created_by').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+});
+
+export const reviews = sqliteTable('reviews', {
+  id: text('id').primaryKey(),
+  bandId: text('band_id').notNull().references(() => bands.id),
+  rating: integer('rating').notNull(),
+  contentWarnings: text('content_warnings', { mode: 'json' })
+    .$type<ContentWarning[]>(),
+  comment: text('comment'),
+  createdBy: text('created_by').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+});
+----
+
+== Level 3: Frontend Building Blocks
+
+The frontend is organized as a React SPA with component-based architecture.
+
+[mermaid]
+....
+graph TB
+    subgraph Pages
+        Home[Home Page]
+        Discover[Discover Page]
+        ArtistDetail[Artist Detail Page]
+        SubmitArtist[Submit Artist Page]
+        WriteReview[Write Review Page]
+    end
+    
+    subgraph Components
+        NavBar[Navigation Bar]
+        BandCard[Band Card]
+        BandsList[Bands List]
+        BandDetails[Band Details]
+        SignInCard[Sign In Card]
+        Footer[Footer]
+    end
+    
+    subgraph Context
+        AuthContext[Auth Context<br/>Auth0 Provider]
+    end
+    
+    subgraph Services
+        API[API Service<br/>HTTP Client]
+    end
+    
+    subgraph Hooks
+        useBands[useBands Hook]
+    end
+    
+    Pages --> Components
+    Pages --> Hooks
+    Components --> AuthContext
+    Hooks --> API
+    API --> Backend[Backend API]
+    AuthContext --> Auth0Service[Auth0]
+....
+
+=== Pages
+
+Top-level page components corresponding to routes.
+
+**Home (`Home.tsx`):**
+
+* Landing page with hero section
+* Feature highlights
+* Call-to-action
+
+**Discover (`Discover.tsx`):**
+
+* Browse and search bands
+* Genre filtering
+* Pagination
+* Uses `useBands` hook
+
+**Artist Detail (`ArtistDetail.tsx`):**
+
+* Band information display
+* Reviews list with content warnings
+* Review submission (authenticated users)
+
+**Submit Artist (`SubmitArtist.tsx`):**
+
+* Artist submission form
+* Cloudflare Turnstile integration
+* Genre selection
+* Authentication required
+
+**Write Review (`WriteReview.tsx`):**
+
+* Review submission form
+* Content warning selection
+* Rating input
+* Authentication required
+
+=== Shared Components
+
+Reusable UI components used across pages.
+
+**Navigation Bar (`NavBar/index.tsx`):**
+
+* Application navigation
+* User authentication status
+* Mobile menu support
+
+**Band Card (`BandCard.tsx`):**
+
+* Display band information in card format
+* Genre tags
+* Click to navigate to details
+
+**Bands List (`BandsList.tsx`):**
+
+* List of band cards
+* Grid layout
+* Loading states
+
+**Band Details (`BandDetails.tsx`):**
+
+* Full band information
+* Reviews display
+* Content warning summaries
+
+**Footer (`Footer.tsx`):**
+
+* Links to legal pages (Privacy, Terms, Imprint)
+* Social media links
+* Platform information
+
+=== Context Providers
+
+**Auth Context (`AuthContext.tsx`):**
+
+* Auth0 React SDK integration
+* User authentication state
+* Login/logout functions
+* JWT token management
+
+=== Hooks
+
+**useBands (`useBands.ts`):**
+
+* Fetch bands from API
+* Search and filter functionality
+* Caching and state management
+* Error handling
+
+=== Services
+
+**API Service (`api.ts`):**
+
+* HTTP client configuration (fetch/axios)
+* Base URL and headers
+* Request/response interceptors
+* JWT token attachment
+* Error handling
+
+== Cross-Cutting Concepts
+
+=== Dependency Injection
+
+Dependency injection in the backend is handled at application startup in `server.ts`:
+
+[source,typescript]
+----
+// 1. Initialize adapters
+const bandRepo = new DrizzleBandRepository();
+const reviewRepo = new DrizzleReviewRepository();
+
+// 2. Inject into core services
+const bandService = new BandServiceImpl(bandRepo, reviewRepo);
+const reviewService = new ReviewServiceImpl(reviewRepo, bandRepo);
+
+// 3. Inject into API router
+const handleRequest = createApiRouter(bandService, reviewService);
+----
+
+=== Error Handling
+
+**Backend:**
+
+* Services throw domain-specific errors
+* Controllers catch and translate to HTTP status codes
+* Consistent error response format:
+
+[source,json]
+----
+{
+  "error": {
+    "message": "Band not found",
+    "code": "BAND_NOT_FOUND",
+    "status": 404
+  }
+}
+----
+
+**Frontend:**
+
+* API service catches HTTP errors
+* Components display user-friendly error messages
+* Loading and error states in UI
+
+=== Authentication Flow
+
+1. User clicks "Sign In" button
+2. Frontend redirects to Auth0 login page
+3. User authenticates with social provider (GitHub, Google)
+4. Auth0 redirects back with authorization code
+5. Frontend exchanges code for JWT tokens
+6. JWT access token stored in memory
+7. API requests include JWT in Authorization header
+8. Backend validates JWT signature and claims
+9. Backend extracts user identity for authorization
+
+=== Data Flow
+
+**Read Flow (Get Bands):**
+
+1. User opens Discover page in browser
+2. DNS request resolves via Cloudflare
+3. Request routed to Kubernetes ingress
+4. `useBands` hook calls API service
+5. API service sends GET request to `/api/bands`
+6. Backend router routes to BandsController
+7. Controller calls BandService
+8. Service calls BandRepository
+9. Repository queries SQLite database via Drizzle
+10. Data flows back through layers
+11. Frontend displays bands in UI
+12. Static assets cached by Cloudflare CDN
+
+**Write Flow (Submit Artist):**
+
+1. User fills submission form
+2. Cloudflare Turnstile generates verification token
+3. Form submits with band data and token
+4. Request routed through Cloudflare to Kubernetes
+5. Backend validates Turnstile token with Cloudflare API
+6. Backend validates JWT authentication with Auth0
+7. Controller calls BandService
+8. Service validates business rules
+9. Service calls BandRepository
+10. Repository inserts into SQLite database
+11. Success response returned to frontend
+12. Frontend redirects to new band page

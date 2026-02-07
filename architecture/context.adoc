@@ -36,28 +36,36 @@ Metal Archives::
 
 [mermaid]
 ....
-graph LR
-    U[Users] -- browsing/submission --> A[Bandcheck]
-    A -- storage/retrieval --> DB[(Database)]
-    A -- openid connect --> IdP[Identity Provider (Auth0)]
-    A -- data import --> MA[Metal Archives]
-    A -- review summarization --> L[Large Language Model]
+graph TB
+    U[Users] -- HTTPS --> CF[Cloudflare<br/>DNS + CDN]
+    CF -- HTTPS --> BC[Bandcheck Platform<br/>Frontend + Backend]
+    BC -- storage/retrieval --> DB[(SQLite Database<br/>PersistentVolume)]
+    BC -- OpenID Connect --> Auth0[Auth0<br/>Identity Provider]
+    BC -- bot verification --> Turnstile[Cloudflare Turnstile<br/>Bot Protection]
+    BC -- data import --> MA[Metal Archives]
+    BC -- review summarization --> LLM[Large Language Model]
 ....
 
 Users::
-    Interact with the Bandcheck application through web browsers or mobile devices. They can browse content, submit reviews, and manage their profiles.
+    Interact with the Bandcheck application through web browsers or mobile devices. They can browse content, submit reviews, and manage their profiles. All traffic is routed through Cloudflare for DNS resolution and CDN caching.
 
-Bandcheck::
-    The main application that processes user requests, manages business logic, and interfaces with other system components
+Cloudflare::
+    Provides DNS management and CDN services. Handles traffic routing and SSL/TLS termination. Also provides Turnstile bot protection service.
 
-Database::
-    A persistent storage system that holds user data, reviews, content warnings, and band information.
+Bandcheck Platform::
+    The main application consisting of frontend (React SPA) and backend (Bun API) running on Kubernetes. Processes user requests, manages business logic, and interfaces with other system components.
 
-Identity Provider (Auth0)::
-    Provides authentication services, allowing users to securely log in and access their accounts on the Bandcheck platform.
+SQLite Database::
+    A persistent storage system on Kubernetes PersistentVolume that holds user data, reviews, content warnings, and band information. Embedded database without separate server process.
+
+Auth0 (Identity Provider)::
+    Provides authentication services via OAuth 2.0 / OpenID Connect, allowing users to securely log in using social providers (GitHub, Google, etc.) and access their accounts.
+
+Cloudflare Turnstile::
+    Bot protection service that verifies form submissions are from real users, not automated bots. Privacy-friendly alternative to traditional CAPTCHAs.
 
 Metal Archives::
-    An external data source that may be used to import band information into the Bandcheck database.
+    An external data source that may be used to import band information into the Bandcheck database (future feature).
 
 Large Language Model::
-    A service that processes and summarizes user reviews to generate content warnings, enhancing the user experience by providing concise information.
+    A service that processes and summarizes user reviews to generate content warnings, enhancing the user experience by providing concise information (future feature).

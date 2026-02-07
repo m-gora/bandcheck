@@ -1,0 +1,540 @@
+= Deployment View
+
+This section describes the deployment architecture of the Bandcheck application, including infrastructure, CI/CD pipelines, and environment configurations.
+
+== Infrastructure Overview
+
+The Bandcheck platform is deployed on Kubernetes with Cloudflare providing DNS and CDN services.
+
+[mermaid]
+....
+graph TB
+    subgraph Internet
+        Users[Users]
+        CF[Cloudflare<br/>DNS + CDN + Turnstile]
+    end
+    
+    subgraph Kubernetes Cluster
+        Ingress[NGINX Ingress<br/>SSL Termination]
+        FE[Frontend Deployment<br/>nginx serving SPA]
+        BE[Backend Deployment<br/>Bun Runtime]
+        PV[(PersistentVolume<br/>SQLite Database)]
+        
+        Ingress --> FE
+        Ingress --> BE
+        BE --> PV
+    end
+    
+    subgraph External Services
+        Auth0[Auth0<br/>Authentication]
+        GHCR[GitHub Container Registry<br/>Docker Images]
+        ArgoCD[ArgoCD<br/>GitOps CD]
+    end
+    
+    Users --> CF
+    CF --> Ingress
+    FE --> Auth0
+    BE --> Auth0
+    FE --> CF
+    
+    GHCR -.->|Pull Images| FE
+    GHCR -.->|Pull Images| BE
+    ArgoCD -.->|Deploy| Ingress
+....
+
+== Deployment Environments
+
+=== Development Environment
+
+Automatically deploys on push to `dev` branch.
+
+**Frontend:**
+
+* Deployed to Kubernetes development namespace
+* Uses latest Docker image from `dev` branch
+* ArgoCD monitors Git repository for changes
+* Exposed via Ingress with dev subdomain
+
+**Backend:**
+
+* Deployed to Kubernetes development namespace
+* Uses latest Docker image from `dev` branch
+* Connects to development Auth0 tenant
+* ArgoCD manages deployment
+
+=== Production Environment
+
+Triggered by merges to `main` branch or version tags.
+
+**Frontend:**
+
+* Deployed to Kubernetes production namespace
+* Uses versioned Docker images (e.g., `v1.0.0`)
+* Custom domain via Cloudflare DNS
+* SSL/TLS certificates via cert-manager or Cloudflare
+* ArgoCD with manual approval for production
+
+**Backend:**
+
+* Deployed to Kubernetes production namespace
+* Uses versioned Docker images
+* High availability with multiple replicas
+* Production Auth0 tenant
+* ArgoCD manages deployment with approval gates
+
+== Container Strategy
+
+=== Backend Container
+
+**Base Image:** `oven/bun:1` +
+**Platforms:** linux/amd64, linux/arm64 +
+**Size:** ~150MB (compressed) +
+**Registry:** GitHub Container Registry (ghcr.io)
+
+**Image Tags:**
+
+* `latest` - Latest build from main branch
+* `main` - Latest build from main branch
+* `dev` - Latest build from dev branch
+* `v1.0.0` - Semver tags from git tags
+* `main-sha-abc123` - Branch + commit SHA
+* `pr-42` - Pull request builds
+
+**Build Process:**
+
+1. Checkout code from repository
+2. Setup Docker Buildx for multi-platform builds
+3. Authenticate with GitHub Container Registry
+4. Extract metadata for tags and labels
+5. Build for amd64 and arm64 architectures
+6. Push to registry
+
+**Pulling Images:**
+
+[source,bash]
+----
+# Pull latest
+docker pull ghcr.io/marcodoes/bandcheck/backend:latest
+
+# Pull specific version
+docker pull ghcr.io/marcodoes/bandcheck/backend:v1.0.0
+
+# Pull from dev branch
+docker pull ghcr.io/marcodoes/bandcheck/backend:dev
+----
+
+=== Frontend Container
+
+**Base Image:** nginx +
+**Purpose:** Serve static assets +
+**Configuration:** Custom nginx.conf for SPA routing
+
+== Kubernetes Deployment
+
+=== Prerequisites
+
+* Kubernetes cluster (K3s recommended for cost-efficiency)
+* NGINX Ingress Controller
+* cert-manager for TLS certificates (optional)
+* Storage provisioner for PersistentVolumes
+
+=== Kubernetes Resources
+
+**Namespace:**
+
+* `bandcheck` - Main application namespace
+
+**Backend Deployment:**
+
+* Replicas: 2 (configurable)
+* Resource limits: CPU and memory constraints
+* Health checks: Liveness and readiness probes
+* Volume mounts: PersistentVolume for SQLite database
+
+**Frontend Deployment:**
+
+* Replicas: 2 (configurable)
+* nginx-based static file server
+* Custom routing for SPA
+
+**Services:**
+
+* `bandcheck-backend` - ClusterIP service for backend pods
+* `bandcheck-frontend` - ClusterIP service for frontend pods
+
+**Ingress:**
+
+* HTTPS with TLS certificates
+* Routes `/api/*` to backend service
+* Routes `/*` to frontend service
+* CORS configuration via middleware
+
+**PersistentVolumeClaim:**
+
+* Size: 10Gi
+* Access Mode: ReadWriteOnce
+* Storage for SQLite database
+
+=== Setup Commands
+
+[source,bash]
+----
+# Create namespace
+kubectl apply -f k8s/namespace.yaml
+
+# Create secrets
+kubectl create secret generic bandcheck-secrets \
+  --namespace bandcheck \
+  --from-literal=auth0-domain="auth.marcodoes.tech" \
+  --from-literal=auth0-audience="https://api.bandcheck.marcodoes.tech"
+
+# Create PersistentVolumeClaim
+kubectl apply -f k8s/pvc.yaml
+
+# Deploy application
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl apply -f k8s/ingress.yaml
+----
+
+=== Database Management
+
+SQLite database is stored on a PersistentVolume for data persistence across pod restarts.
+
+**Backup:**
+
+[source,bash]
+----
+# Backup database
+kubectl exec -n bandcheck deployment/bandcheck-backend -- \
+  cat /app/data/bandcheck.db > backup.db
+
+# Copy database from pod
+kubectl cp bandcheck/POD_NAME:/app/data/bandcheck.db ./backup.db
+----
+
+**Restore:**
+
+[source,bash]
+----
+# Scale down deployment
+kubectl scale deployment/bandcheck-backend --replicas=0 -n bandcheck
+
+# Copy backup to pod
+kubectl cp ./backup.db bandcheck/POD_NAME:/app/data/bandcheck.db
+
+# Scale up deployment
+kubectl scale deployment/bandcheck-backend --replicas=2 -n bandcheck
+----
+
+== CI/CD Pipeline
+
+=== Overview
+
+The deployment pipeline uses **GitHub Actions** for continuous integration and **ArgoCD** for continuous deployment.
+
+**GitHub Actions:**
+
+* Builds and tests code
+* Creates Docker images for frontend and backend
+* Pushes images to GitHub Container Registry (GHCR)
+* Tags images based on branch/version
+
+**ArgoCD:**
+
+* Monitors Git repository for Kubernetes manifest changes
+* Automatically syncs changes to cluster
+* Provides UI for deployment visibility
+* Manages rollbacks and deployment history
+* Can require manual approval for production
+
+=== GitHub Actions Workflows
+
+**CI Workflow (`ci.yml`):**
+
+* **Triggers:** Push to main/dev branches, PRs
+* **Purpose:** Linting, type checking, building, testing
+* **Runs:** On every push and PR
+
+**Backend Build (`backend-build.yml`):**
+
+* **Triggers:** Push to main/dev, PRs, manual dispatch
+* **Actions:**
+** Build multi-platform Docker images (amd64, arm64)
+** Run tests
+** Push to GitHub Container Registry
+** Tag images: `latest`, `main`, `dev`, `v1.0.0`, `sha-abc123`
+
+**Frontend Build (`frontend-build.yml`):**
+
+* **Triggers:** Push to main/dev, PRs, manual dispatch
+* **Actions:**
+** Build React application
+** Create nginx-based Docker image
+** Push to GitHub Container Registry
+** Tag appropriately based on branch/version
+
+=== ArgoCD Configuration
+
+**Application Setup:**
+
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bandcheck-backend
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/marcodoes/bandcheck
+    targetRevision: main
+    path: backend/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: bandcheck
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+----
+
+**Deployment Process:**
+
+1. Developer pushes code to Git repository
+2. GitHub Actions builds Docker images
+3. Images pushed to GHCR with appropriate tags
+4. Developer updates Kubernetes manifests with new image tags
+5. Commits manifest changes to Git
+6. ArgoCD detects changes in Git repository
+7. ArgoCD syncs changes to Kubernetes cluster
+8. New pods deployed with updated images
+9. Health checks verify deployment success
+
+**Manual Sync for Production:**
+
+* Production ArgoCD application configured with manual sync
+* Requires approval via ArgoCD UI or CLI
+* Allows for change review before production deployment
+
+=== GitHub Secrets Configuration
+
+**Required for All Environments:**
+
+* `GITHUB_TOKEN` - Automatically provided by GitHub (for GHCR)
+* `DOCKER_USERNAME` - GitHub username
+* `DOCKER_PASSWORD` - GitHub Personal Access Token with packages:write scope
+
+**Build-time Secrets:**
+
+* `VITE_API_BASE_URL` - Backend API URL
+* `VITE_AUTH0_DOMAIN` - Auth0 domain
+* `VITE_AUTH0_CLIENT_ID` - Auth0 client ID
+* `VITE_TURNSTILE_SITE_KEY` - Cloudflare Turnstile site key
+
+**Runtime Secrets (Kubernetes):**
+
+Stored in Kubernetes Secrets, managed by ArgoCD:
+
+* `auth0-domain` - Auth0 tenant domain
+* `auth0-audience` - Auth0 API identifier
+* `turnstile-secret-key` - Cloudflare Turnstile secret
+----
+
+== Environment Configuration
+
+=== Frontend Configuration
+
+**Development:**
+
+Uses `.env` file with `VITE_` prefixed variables during local development.
+
+**Production:**
+
+Environment variables baked into the Docker image at build time via GitHub Actions.
+
+**Required Build-time Variables:**
+
+[source,bash]
+----
+VITE_AUTH0_DOMAIN=your-domain.auth0.com
+VITE_AUTH0_CLIENT_ID=your-auth0-client-id
+VITE_AUTH0_REDIRECT_URI=https://bandcheck.example.com
+VITE_API_BASE_URL=https://api.bandcheck.example.com/api
+VITE_TURNSTILE_SITE_KEY=your-cloudflare-site-key
+----
+
+**Deployment:**
+
+Frontend is built into a static bundle and served via nginx in a Docker container.
+
+=== Backend Configuration
+
+**Environment Variables:**
+
+* `AUTH0_DOMAIN` - Auth0 tenant domain
+* `AUTH0_AUDIENCE` - Auth0 API audience/identifier
+* `PORT` - Server port (default: 3000)
+* `DATABASE_URL` - SQLite database path
+* `ALLOWED_ORIGINS` - Comma-separated CORS origins
+* `TURNSTILE_SECRET_KEY` - Cloudflare Turnstile secret key
+* `NODE_ENV` - Environment (production/development)
+
+**Kubernetes Configuration:**
+
+Configured via ConfigMap and Secrets in the `bandcheck` namespace, managed by ArgoCD.
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bandcheck-backend-config
+  namespace: bandcheck
+data:
+  PORT: "3000"
+  DATABASE_URL: "/app/data/bandcheck.db"
+  ALLOWED_ORIGINS: "https://bandcheck.example.com"
+  NODE_ENV: "production"
+----
+
+=== Cloudflare Configuration
+
+**DNS:**
+
+* A/AAAA records point to Kubernetes ingress IP
+* Cloudflare proxy enabled for CDN and DDoS protection
+* SSL/TLS mode: Full (strict) or Flexible
+
+**Turnstile:**
+
+* Site key configured in frontend environment variables
+* Secret key stored in Kubernetes secrets
+* Widget configured in submission forms
+
+== Scaling and Monitoring
+
+=== Manual Scaling
+
+[source,bash]
+----
+# Scale backend to 3 replicas
+kubectl scale deployment/bandcheck-backend --replicas=3 -n bandcheck
+
+# Scale frontend
+kubectl scale deployment/bandcheck-frontend --replicas=3 -n bandcheck
+----
+
+=== Auto-Scaling (Optional)
+
+[source,bash]
+----
+# Configure horizontal pod autoscaler
+kubectl autoscale deployment bandcheck-backend \
+  --min=2 --max=5 --cpu-percent=80 -n bandcheck
+----
+
+=== Monitoring
+
+**Kubernetes:**
+
+* Pod status: `kubectl get pods -n bandcheck`
+* Logs: `kubectl logs -f deployment/bandcheck-backend -n bandcheck`
+* Resource usage: `kubectl top pods -n bandcheck`
+
+**ArgoCD:**
+
+* Deployment status in ArgoCD UI
+* Sync history and deployment timeline
+* Resource health checks
+* Application logs and events
+
+**Cloudflare:**
+
+* Analytics dashboard for traffic patterns
+* Security events and threats blocked
+* Turnstile verification statistics
+
+== Troubleshooting
+
+=== Common Issues
+
+**Image Pull Errors:**
+
+Ensure GitHub Container Registry authentication is configured:
+
+[source,bash]
+----
+echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+----
+
+**Database Persistence:**
+
+Verify PersistentVolumeClaim is bound:
+
+[source,bash]
+----
+kubectl get pvc -n bandcheck
+kubectl describe pvc bandcheck-data -n bandcheck
+----
+
+**Service Not Accessible:**
+
+Check ingress and service configuration:
+
+[source,bash]
+----
+kubectl get ingress -n bandcheck
+kubectl get svc -n bandcheck
+kubectl get endpoints -n bandcheck
+----
+
+**Backend Startup Issues:**
+
+View detailed logs:
+
+[source,bash]
+----
+kubectl logs --tail=100 deployment/bandcheck-backend -n bandcheck
+kubectl describe pod -l app=bandcheck-backend -n bandcheck
+----
+
+=== Rollback Strategy
+
+**ArgoCD:**
+
+* Rollback via ArgoCD UI to previous synced state
+* Select specific Git commit to deploy
+* ArgoCD maintains full deployment history
+
+**Kubernetes:**
+
+[source,bash]
+----
+# Rollback to previous deployment
+kubectl rollout undo deployment/bandcheck-backend -n bandcheck
+
+# Rollback to specific revision
+kubectl rollout undo deployment/bandcheck-backend --to-revision=2 -n bandcheck
+
+# Check rollout history
+kubectl rollout history deployment/bandcheck-backend -n bandcheck
+----
+
+**Git-based Rollback:**
+
+* Revert Git commits containing Kubernetes manifest changes
+* ArgoCD automatically syncs to previous state
+* Most reliable approach as it maintains Git as source of truth
+
+== Security Considerations
+
+* All traffic uses HTTPS/TLS via Cloudflare
+* Secrets managed via Kubernetes Secrets
+* RBAC configured for ArgoCD and Kubernetes access
+* Service accounts follow principle of least privilege
+* CORS configured to allow only trusted origins
+* Auth0 JWT validation on all protected endpoints
+* Regular security updates via automated container builds
+* Cloudflare provides DDoS protection and WAF
