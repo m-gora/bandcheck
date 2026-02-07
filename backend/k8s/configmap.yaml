@@ -4,7 +4,7 @@ metadata:
   name: bandcheck-backend-config
   namespace: bandcheck
 data:
-  AUTH0_DOMAIN: "blackanthrax.eu.auth0.com/"
+  AUTH0_DOMAIN: "blackanthrax.eu.auth0.com"
   AUTH0_AUDIENCE: "https://api.bandcheck.marcodoes.tech"
   ALLOWED_ORIGINS: "https://bandcheck.marcodoes.tech,http://localhost:5173"
   NODE_ENV: "production"
