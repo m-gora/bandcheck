@@ -21,33 +21,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-backend-${{ hashFiles('backend/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-backend-
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Lint backend
-        run: npm run lint --if-present
+        run: bun run lint --if-present
 
       - name: Type check
-        run: npm run type-check --if-present
+        run: bun run type-check --if-present
 
       - name: Build backend
-        run: npm run build
+        run: bun run build
 
       - name: Test backend
-        run: npm test --if-present
+        run: bun test --if-present
 
   # Lint and Test Frontend
   frontend-ci:
@@ -59,30 +51,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-frontend-${{ hashFiles('frontend/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-frontend-
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Lint frontend
-        run: npm run lint --if-present
+        run: bun run lint --if-present
 
       - name: Type check
-        run: npm run type-check --if-present
+        run: bun run type-check --if-present
 
       - name: Build frontend
-        run: npm run build
+        run: bun run build
         env:
           # Use dummy values for CI builds to satisfy environment checks
           VITE_API_BASE_URL: "https://api.example.com"
@@ -90,5 +74,4 @@ jobs:
           VITE_AUTH0_CLIENT_ID: "dummy_client_id"
 
       - name: Test frontend
-        run: npm test --if-present
-
+        run: bun test --if-present
