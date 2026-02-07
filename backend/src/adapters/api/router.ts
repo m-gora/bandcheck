@@ -35,6 +35,24 @@ export function createApiRouter(bandService: BandServiceImpl, reviewService: Rev
         });
       }
 
+      // GET /api/statistics
+      if (url.pathname === '/api/statistics' && req.method === 'GET') {
+        const response = await bandsController.getStatistics(bandService);
+        return addCorsHeaders(response, origin);
+      }
+
+      // GET /api/bands/latest (must come before /api/bands/:id)
+      if (url.pathname === '/api/bands/latest' && req.method === 'GET') {
+        const response = await bandsController.getLatestBands(bandService, req);
+        return addCorsHeaders(response, origin);
+      }
+
+      // GET /api/reviews/latest
+      if (url.pathname === '/api/reviews/latest' && req.method === 'GET') {
+        const response = await bandsController.getLatestReviews(reviewService, req);
+        return addCorsHeaders(response, origin);
+      }
+
       // GET /api/bands
       if (url.pathname === '/api/bands' && req.method === 'GET') {
         const response = await bandsController.getBands(bandService, req);
@@ -72,24 +90,6 @@ export function createApiRouter(bandService: BandServiceImpl, reviewService: Rev
         }
         const bandId = url.pathname.split('/')[3];
         const response = await bandsController.createReview(reviewService, req, bandId, authResult.user);
-        return addCorsHeaders(response, origin);
-      }
-
-      // GET /api/statistics
-      if (url.pathname === '/api/statistics' && req.method === 'GET') {
-        const response = await bandsController.getStatistics(bandService);
-        return addCorsHeaders(response, origin);
-      }
-
-      // GET /api/bands/latest
-      if (url.pathname === '/api/bands/latest' && req.method === 'GET') {
-        const response = await bandsController.getLatestBands(bandService, req);
-        return addCorsHeaders(response, origin);
-      }
-
-      // GET /api/reviews/latest
-      if (url.pathname === '/api/reviews/latest' && req.method === 'GET') {
-        const response = await bandsController.getLatestReviews(reviewService, req);
         return addCorsHeaders(response, origin);
       }
 
