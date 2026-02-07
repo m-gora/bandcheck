@@ -18,6 +18,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { useAuth } from '../context/AuthContext';
 import { useCreateBand } from '../hooks/useBands';
 
@@ -72,6 +73,7 @@ export default function SubmitArtist() {
   });
   
   const [memberInput, setMemberInput] = React.useState('');
+  const [turnstileToken, setTurnstileToken] = React.useState<string>('');
   const [success, setSuccess] = React.useState(false);
   const [error, setError] = React.useState('');
 
@@ -134,6 +136,11 @@ export default function SubmitArtist() {
       return;
     }
 
+    if (!turnstileToken) {
+      setError('Please complete the security verification');
+      return;
+    }
+
     // Clear previous errors
     setError('');
 
@@ -148,6 +155,7 @@ export default function SubmitArtist() {
         website: formData.website || undefined,
         imageUrl: formData.imageUrl || undefined,
         members: formData.members.length > 0 ? formData.members : undefined,
+        turnstileToken,
       };
 
       await createBandMutation.mutateAsync(bandData);
@@ -390,12 +398,25 @@ export default function SubmitArtist() {
                   />
                 </Stack>
 
+                {/* Turnstile Security Check */}
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                  <Turnstile
+                    siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    onError={() => {
+                      setTurnstileToken('');
+                      setError('Security verification failed. Please try again.');
+                    }}
+                    onExpire={() => setTurnstileToken('')}
+                  />
+                </Box>
+
                 {/* Submit Button */}
                 <Button
                   type="submit"
                   variant="contained"
                   size="large"
-                  disabled={createBandMutation.isPending}
+                  disabled={createBandMutation.isPending || !turnstileToken}
                   sx={{
                     borderRadius: '12px',
                     py: 1.5,

@@ -7,11 +7,14 @@ export interface BandRepository {
   create(band: Band): Promise<Band>;
   update(id: string, band: Partial<Band>): Promise<Band>;
   existsByName(name: string): Promise<boolean>;
+  getStatistics(): Promise<{ safe: number; unsafe: number; controversial: number; pending: number; total: number }>;
+  findLatest(limit: number): Promise<Band[]>;
 }
 
 export interface ReviewRepository {
   findByBandId(bandId: string): Promise<Review[]>;
   create(review: Review): Promise<Review>;
+  findLatest(limit: number): Promise<Array<Review & { bandName?: string }>>;
 }
 
 // Service ports (primary/driving ports)

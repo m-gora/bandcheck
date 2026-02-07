@@ -49,6 +49,14 @@ export class BandServiceImpl {
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
+
+  async getStatistics(): Promise<{ safe: number; unsafe: number; controversial: number; pending: number; total: number }> {
+    return this.bandRepo.getStatistics();
+  }
+
+  async getLatestBands(limit: number): Promise<Band[]> {
+    return this.bandRepo.findLatest(limit);
+  }
 }
 
 export class ReviewServiceImpl {
@@ -99,18 +107,30 @@ export class ReviewServiceImpl {
     return review;
   }
 
-  private calculateSafetyStatus(reviews: Review[]): 'safe' | 'unsafe' | 'pending' {
+  private calculateSafetyStatus(reviews: Review[]): 'safe' | 'unsafe' | 'controversial' | 'pending' {
     if (reviews.length === 0) return 'pending';
     
     const safeCount = reviews.filter(r => r.safetyAssessment === 'safe').length;
     const unsafeCount = reviews.filter(r => r.safetyAssessment === 'unsafe').length;
+    const controversialCount = reviews.filter(r => r.safetyAssessment === 'controversial').length;
     
-    if (unsafeCount > safeCount) return 'unsafe';
-    if (safeCount > unsafeCount) return 'safe';
+    // If any unsafe reviews, mark as unsafe
+    if (unsafeCount > 0) return 'unsafe';
+    
+    // If any controversial reviews but no unsafe, mark as controversial
+    if (controversialCount > 0) return 'controversial';
+    
+    // If only safe reviews, mark as safe
+    if (safeCount > 0) return 'safe';
+    
     return 'pending';
   }
 
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  }
+
+  async getLatestReviews(limit: number): Promise<Array<Review & { bandName?: string }>> {
+    return this.reviewRepo.findLatest(limit);
   }
 }

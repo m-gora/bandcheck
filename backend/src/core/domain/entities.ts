@@ -9,7 +9,7 @@ export interface Band {
   website?: string;
   imageUrl?: string;
   members?: string[];
-  safetyStatus: 'safe' | 'unsafe' | 'pending';
+  safetyStatus: 'safe' | 'unsafe' | 'controversial' | 'pending';
   reviewCount: number;
   createdAt: string;
   updatedAt: string;
@@ -21,7 +21,7 @@ export interface Review {
   userId: string;
   userDisplayName: string;
   userAvatarUrl?: string;
-  safetyAssessment: 'safe' | 'unsafe';
+  safetyAssessment: 'safe' | 'unsafe' | 'controversial';
   comment: string;
   evidence: string[];
   createdAt: string;
@@ -37,10 +37,11 @@ export interface CreateBandRequest {
   website?: string;
   imageUrl?: string;
   members?: string[];
+  turnstileToken?: string;
 }
 
 export interface CreateReviewRequest {
-  safetyAssessment: 'safe' | 'unsafe';
+  safetyAssessment: 'safe' | 'unsafe' | 'controversial';
   comment: string;
   evidence?: string[];
 }

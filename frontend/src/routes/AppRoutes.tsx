@@ -9,6 +9,7 @@ import ArtistDetail from "../pages/ArtistDetail"
 import SubmitArtist from "../pages/SubmitArtist"
 import WriteReview from "../pages/WriteReview"
 import About from "../pages/About"
+import SafetyReports from "../pages/SafetyReports"
 
 const AppRoutes = () => {
   return (
@@ -25,6 +26,7 @@ const AppRoutes = () => {
           <Route path="/submit-artist" element={<SubmitArtist />} />
           <Route path="/artist/:id/review" element={<WriteReview />} />
           <Route path="/about" element={<About />} />
+          <Route path="/safety-reports" element={<SafetyReports />} />
         </Routes>
     </BrowserRouter>
   )

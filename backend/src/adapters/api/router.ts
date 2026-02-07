@@ -75,6 +75,24 @@ export function createApiRouter(bandService: BandServiceImpl, reviewService: Rev
         return addCorsHeaders(response, origin);
       }
 
+      // GET /api/statistics
+      if (url.pathname === '/api/statistics' && req.method === 'GET') {
+        const response = await bandsController.getStatistics(bandService);
+        return addCorsHeaders(response, origin);
+      }
+
+      // GET /api/bands/latest
+      if (url.pathname === '/api/bands/latest' && req.method === 'GET') {
+        const response = await bandsController.getLatestBands(bandService, req);
+        return addCorsHeaders(response, origin);
+      }
+
+      // GET /api/reviews/latest
+      if (url.pathname === '/api/reviews/latest' && req.method === 'GET') {
+        const response = await bandsController.getLatestReviews(reviewService, req);
+        return addCorsHeaders(response, origin);
+      }
+
       return new Response(JSON.stringify({ error: 'Not Found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },

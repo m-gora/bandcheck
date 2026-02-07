@@ -4,8 +4,8 @@ export async function getBands(service: BandServiceImpl, req: Request) {
   const url = new URL(req.url);
   const search = url.searchParams.get('search') || undefined;
   const genre = url.searchParams.get('genre') || undefined;
-  const limit = parseInt(url.searchParams.get('limit') || '50');
-  const offset = parseInt(url.searchParams.get('offset') || '0');
+  const limit = Number.parseInt(url.searchParams.get('limit') || '50');
+  const offset = Number.parseInt(url.searchParams.get('offset') || '0');
 
   const result = await service.getAllBands({ search, genre, limit, offset });
   return Response.json(result);
@@ -32,6 +32,40 @@ export async function createBand(service: BandServiceImpl, req: Request, user: a
       { error: 'Bad Request', message: 'Name, description, and at least one genre are required' },
       { status: 400 }
     );
+  }
+
+  // Verify Turnstile token if provided
+  if (body.turnstileToken) {
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    if (turnstileSecret) {
+      try {
+        const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            secret: turnstileSecret,
+            response: body.turnstileToken,
+          }),
+        });
+
+        const verifyData = await verifyResponse.json() as { success: boolean; 'error-codes'?: string[] };
+        
+        if (!verifyData.success) {
+          return Response.json(
+            { error: 'Forbidden', message: 'Security verification failed. Please try again.' },
+            { status: 403 }
+          );
+        }
+      } catch (error) {
+        console.error('Turnstile verification error:', error);
+        return Response.json(
+          { error: 'Internal Server Error', message: 'Failed to verify security token' },
+          { status: 500 }
+        );
+      }
+    }
   }
 
   try {
@@ -71,4 +105,25 @@ export async function createReview(service: ReviewServiceImpl, req: Request, ban
     }
     throw error;
   }
+}
+
+export async function getStatistics(service: BandServiceImpl) {
+  const stats = await service.getStatistics();
+  return Response.json(stats);
+}
+
+export async function getLatestBands(service: BandServiceImpl, req: Request) {
+  const url = new URL(req.url);
+  const limit = Number.parseInt(url.searchParams.get('limit') || '5');
+  
+  const bands = await service.getLatestBands(limit);
+  return Response.json({ bands });
+}
+
+export async function getLatestReviews(service: ReviewServiceImpl, req: Request) {
+  const url = new URL(req.url);
+  const limit = Number.parseInt(url.searchParams.get('limit') || '5');
+  
+  const reviews = await service.getLatestReviews(limit);
+  return Response.json({ reviews });
 }

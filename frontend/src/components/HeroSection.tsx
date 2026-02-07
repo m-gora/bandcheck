@@ -100,6 +100,7 @@ export default function HeroSection() {
             variant="outlined"
             size="large"
             startIcon={<AssessmentIcon />}
+            onClick={() => navigate('/safety-reports')}
             sx={{
               px: 4,
               py: 1.5,

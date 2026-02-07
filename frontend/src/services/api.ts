@@ -32,7 +32,7 @@ export interface Band {
   website?: string;
   imageUrl?: string;
   members?: string[];
-  safetyStatus: 'safe' | 'unsafe' | 'pending';
+  safetyStatus: 'safe' | 'unsafe' | 'controversial' | 'pending';
   reviewCount: number;
   createdAt: string;
   updatedAt: string;
@@ -44,7 +44,7 @@ export interface Review {
   userId: string;
   userDisplayName: string;
   userAvatarUrl?: string;
-  safetyAssessment: 'safe' | 'unsafe';
+  safetyAssessment: 'safe' | 'unsafe' | 'controversial';
   comment: string;
   evidence: string[];
   createdAt: string;
@@ -70,12 +70,29 @@ export interface CreateBandRequest {
   website?: string;
   imageUrl?: string;
   members?: string[];
+  turnstileToken?: string;
 }
 
 export interface CreateReviewRequest {
-  safetyAssessment: 'safe' | 'unsafe';
+  safetyAssessment: 'safe' | 'unsafe' | 'controversial';
   comment: string;
   evidence: string[];
+}
+
+export interface Statistics {
+  safe: number;
+  unsafe: number;
+  controversial: number;
+  pending: number;
+  total: number;
+}
+
+export interface BandWithDate extends Band {
+  createdAt: string;
+}
+
+export interface ReviewWithBandName extends Review {
+  bandName?: string;
 }
 
 // API functions
@@ -149,5 +166,43 @@ export const api = {
     }
     
     return response.json();
+  },
+
+  // Get statistics
+  getStatistics: async (): Promise<Statistics> => {
+    const response = await fetch(`${API_BASE_URL}/statistics`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch statistics: ${response.status} ${response.statusText}`);
+    }
+    
+    return response.json();
+  },
+
+  // Get latest bands
+  getLatestBands: async (limit: number = 5): Promise<BandWithDate[]> => {
+    const response = await fetch(`${API_BASE_URL}/bands/latest?limit=${limit}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch latest bands: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return data.bands || [];
+  },
+
+  // Get latest reviews
+  getLatestReviews: async (limit: number = 5): Promise<ReviewWithBandName[]> => {
+    const response = await fetch(`${API_BASE_URL}/reviews/latest?limit=${limit}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch latest reviews: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return data.reviews || [];
   },
 };

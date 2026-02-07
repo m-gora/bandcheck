@@ -48,7 +48,7 @@ const BandDetails: React.FC = () => {
   
   // Form state for new review
   const [reviewForm, setReviewForm] = useState({
-    safetyAssessment: 'safe' as 'safe' | 'unsafe',
+    safetyAssessment: 'safe' as 'safe' | 'unsafe' | 'controversial',
     comment: '',
     evidence: [''],
   });
@@ -137,6 +137,7 @@ const BandDetails: React.FC = () => {
     switch (status) {
       case 'safe': return 'success';
       case 'unsafe': return 'error';
+      case 'controversial': return 'warning';
       default: return 'warning';
     }
   };
@@ -445,11 +446,12 @@ const BandDetails: React.FC = () => {
               <InputLabel>Safety Assessment</InputLabel>
               <Select
                 value={reviewForm.safetyAssessment}
-                onChange={(e) => setReviewForm(prev => ({ ...prev, safetyAssessment: e.target.value as 'safe' | 'unsafe' }))}
+                onChange={(e) => setReviewForm(prev => ({ ...prev, safetyAssessment: e.target.value as 'safe' | 'unsafe' | 'controversial' }))}
                 label="Safety Assessment"
               >
                 <MenuItem value="safe">Safe</MenuItem>
                 <MenuItem value="unsafe">Unsafe</MenuItem>
+                <MenuItem value="controversial">Controversial</MenuItem>
               </Select>
             </FormControl>
 

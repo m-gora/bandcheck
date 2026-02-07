@@ -7,8 +7,6 @@ export class DrizzleBandRepository implements BandRepository {
   async findAll(query: GetBandsQuery): Promise<GetBandsResult> {
     const { search, genre, limit = 50, offset = 0 } = query;
     
-    let dbQuery = db.select().from(bands);
-    
     // Apply filters
     const conditions = [];
     if (search) {
@@ -23,11 +21,12 @@ export class DrizzleBandRepository implements BandRepository {
       conditions.push(like(bands.genres, `%${genre}%`));
     }
     
+    let allBands;
     if (conditions.length > 0) {
-      dbQuery = dbQuery.where(and(...conditions));
+      allBands = await db.select().from(bands).where(and(...conditions)).all();
+    } else {
+      allBands = await db.select().from(bands).all();
     }
-    
-    const allBands = await dbQuery.all();
     
     // Parse JSON fields and sort
     const parsedBands = allBands.map(band => this.toDomain(band));
@@ -78,6 +77,37 @@ export class DrizzleBandRepository implements BandRepository {
     return !!existing;
   }
 
+  async getStatistics(): Promise<{ safe: number; unsafe: number; controversial: number; pending: number; total: number }> {
+    const allBands = await db.select().from(bands).all();
+    
+    const stats = {
+      safe: 0,
+      unsafe: 0,
+      controversial: 0,
+      pending: 0,
+      total: allBands.length,
+    };
+
+    for (const band of allBands) {
+      if (band.safetyStatus === 'safe') stats.safe++;
+      else if (band.safetyStatus === 'unsafe') stats.unsafe++;
+      else if (band.safetyStatus === 'controversial') stats.controversial++;
+      else stats.pending++;
+    }
+
+    return stats;
+  }
+
+  async findLatest(limit: number): Promise<Band[]> {
+    const latestBands = await db.select()
+      .from(bands)
+      .orderBy(desc(bands.createdAt))
+      .limit(limit)
+      .all();
+    
+    return latestBands.map(band => this.toDomain(band));
+  }
+
   private toDomain(band: any): Band {
     return {
       ...band,
@@ -109,6 +139,23 @@ export class DrizzleReviewRepository implements ReviewRepository {
   async create(review: Review): Promise<Review> {
     await db.insert(reviews).values(this.toPersistence(review));
     return review;
+  }
+
+  async findLatest(limit: number): Promise<Array<Review & { bandName?: string }>> {
+    const latestReviews = await db.select({
+      review: reviews,
+      bandName: bands.name,
+    })
+      .from(reviews)
+      .leftJoin(bands, eq(reviews.bandId, bands.id))
+      .orderBy(desc(reviews.createdAt))
+      .limit(limit)
+      .all();
+    
+    return latestReviews.map(({ review, bandName }) => ({
+      ...this.toDomain(review),
+      bandName: bandName || undefined,
+    }));
   }
 
   private toDomain(review: any): Review {

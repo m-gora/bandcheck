@@ -12,6 +12,7 @@
     "@auth0/auth0-react": "^2.8.0",
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
+    "@marsidev/react-turnstile": "^1.4.2",
     "@mui/icons-material": "latest",
     "@mui/material": "latest",
     "@tanstack/react-query": "^5.90.5",
