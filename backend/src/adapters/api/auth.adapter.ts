@@ -162,8 +162,15 @@ export const authorizeModerator = async (
         return authResult;
     }
 
-    // Check if user has moderator or admin role
-    const userRoles = authResult.user.roles || [];
+    // Extract roles from token - they may be in different locations depending on Auth0 configuration
+    const user = authResult.user;
+    const namespace = 'https://bandcheck.marcodoes.tech';
+    const rolesFromNamespace = user[`${namespace}/roles`] as string[] | undefined;
+    const rolesFromClaim = user.roles;
+    const userRoles = rolesFromNamespace || rolesFromClaim || [];
+    
+    console.log(`Checking moderator access for user ${user.sub}, roles:`, userRoles);
+    
     const hasModeratorAccess = userRoles.includes('moderator') || userRoles.includes('admin');
 
     if (!hasModeratorAccess) {
