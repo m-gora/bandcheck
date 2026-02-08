@@ -47,6 +47,11 @@ spec:
             configMapKeyRef:
               name: bandcheck-backend-config
               key: ALLOWED_ORIGINS
+        - name: TURNSTILE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bandcheck-secret
+              key: TURNSTILE_KEY
         volumeMounts:
         - name: data
           mountPath: /app/data
