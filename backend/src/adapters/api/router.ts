@@ -1,4 +1,4 @@
-import { authorize } from './auth.adapter';
+import { authorize, authorizeModerator } from './auth.adapter';
 import * as bandsController from './bands.controller';
 import type { BandServiceImpl, ReviewServiceImpl } from '../../core/services/band.service';
 
@@ -90,6 +90,50 @@ export function createApiRouter(bandService: BandServiceImpl, reviewService: Rev
         }
         const bandId = url.pathname.split('/')[3];
         const response = await bandsController.createReview(reviewService, req, bandId, authResult.user);
+        return addCorsHeaders(response, origin);
+      }
+      
+      // PATCH /api/bands/:id (moderator only)
+      if (url.pathname.match(/^\/api\/bands\/[^\/]+$/) && req.method === 'PATCH') {
+        const authResult = await authorizeModerator(req);
+        if (!authResult.authorized || !authResult.user) {
+          return new Response(JSON.stringify(authResult.response?.body || { error: 'Unauthorized' }), {
+            status: authResult.response?.status || 401,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+          });
+        }
+        const bandId = url.pathname.split('/')[3];
+        const response = await bandsController.updateBand(bandService, req, bandId, authResult.user);
+        return addCorsHeaders(response, origin);
+      }
+      
+      // DELETE /api/bands/:id (moderator only)
+      if (url.pathname.match(/^\/api\/bands\/[^\/]+$/) && req.method === 'DELETE') {
+        const authResult = await authorizeModerator(req);
+        if (!authResult.authorized || !authResult.user) {
+          return new Response(JSON.stringify(authResult.response?.body || { error: 'Unauthorized' }), {
+            status: authResult.response?.status || 401,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+          });
+        }
+        const bandId = url.pathname.split('/')[3];
+        const response = await bandsController.deleteBand(bandService, req, bandId, authResult.user);
+        return addCorsHeaders(response, origin);
+      }
+      
+      // DELETE /api/bands/:bandId/reviews/:reviewId (moderator only)
+      if (url.pathname.match(/^\/api\/bands\/[^\/]+\/reviews\/[^\/]+$/) && req.method === 'DELETE') {
+        const authResult = await authorizeModerator(req);
+        if (!authResult.authorized || !authResult.user) {
+          return new Response(JSON.stringify(authResult.response?.body || { error: 'Unauthorized' }), {
+            status: authResult.response?.status || 401,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+          });
+        }
+        const pathParts = url.pathname.split('/');
+        const bandId = pathParts[3];
+        const reviewId = pathParts[5];
+        const response = await bandsController.deleteReview(reviewService, req, bandId, reviewId, authResult.user);
         return addCorsHeaders(response, origin);
       }
 

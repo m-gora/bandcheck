@@ -6,6 +6,7 @@ export interface BandRepository {
   findById(id: string): Promise<Band | null>;
   create(band: Band): Promise<Band>;
   update(id: string, band: Partial<Band>): Promise<Band>;
+  delete(id: string): Promise<void>;
   existsByName(name: string): Promise<boolean>;
   getStatistics(): Promise<{ safe: number; unsafe: number; controversial: number; pending: number; total: number }>;
   findLatest(limit: number): Promise<Band[]>;
@@ -14,6 +15,7 @@ export interface BandRepository {
 export interface ReviewRepository {
   findByBandId(bandId: string): Promise<Review[]>;
   create(review: Review): Promise<Review>;
+  delete(id: string): Promise<void>;
   findLatest(limit: number): Promise<Array<Review & { bandName?: string }>>;
 }
 

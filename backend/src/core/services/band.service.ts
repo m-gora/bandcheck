@@ -46,6 +46,30 @@ export class BandServiceImpl {
     return this.bandRepo.create(band);
   }
 
+  async updateBand(id: string, data: Partial<CreateBandRequest>): Promise<Band> {
+    const band = await this.bandRepo.findById(id);
+    if (!band) {
+      throw new Error('Band not found');
+    }
+
+    const now = new Date().toISOString();
+    const updateData: Partial<Band> = {
+      ...data,
+      updatedAt: now,
+    };
+
+    return this.bandRepo.update(id, updateData);
+  }
+
+  async deleteBand(id: string): Promise<void> {
+    const band = await this.bandRepo.findById(id);
+    if (!band) {
+      throw new Error('Band not found');
+    }
+
+    await this.bandRepo.delete(id);
+  }
+
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
@@ -132,5 +156,20 @@ export class ReviewServiceImpl {
 
   async getLatestReviews(limit: number): Promise<Array<Review & { bandName?: string }>> {
     return this.reviewRepo.findLatest(limit);
+  }
+
+  async deleteReview(id: string, bandId: string): Promise<void> {
+    await this.reviewRepo.delete(id);
+
+    // Recalculate band safety status after review deletion
+    const allReviews = await this.reviewRepo.findByBandId(bandId);
+    const newSafetyStatus = this.calculateSafetyStatus(allReviews);
+    const now = new Date().toISOString();
+    
+    await this.bandRepo.update(bandId, {
+      safetyStatus: newSafetyStatus,
+      reviewCount: allReviews.length,
+      updatedAt: now,
+    });
   }
 }

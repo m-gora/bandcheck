@@ -205,4 +205,50 @@ export const api = {
     const data = await response.json();
     return data.reviews || [];
   },
+
+  // Update a band (moderator only)
+  updateBand: async (bandId: string, updates: Partial<CreateBandRequest>): Promise<Band> => {
+    const response = await fetch(`${API_BASE_URL}/bands/${bandId}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(updates),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Unknown error' }));
+      throw new Error(error.message || `Failed to update band: ${response.status} ${response.statusText}`);
+    }
+    
+    return response.json();
+  },
+
+  // Delete a band (moderator only)
+  deleteBand: async (bandId: string): Promise<{ message: string }> => {
+    const response = await fetch(`${API_BASE_URL}/bands/${bandId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Unknown error' }));
+      throw new Error(error.message || `Failed to delete band: ${response.status} ${response.statusText}`);
+    }
+    
+    return response.json();
+  },
+
+  // Delete a review (moderator only)
+  deleteReview: async (bandId: string, reviewId: string): Promise<{ message: string }> => {
+    const response = await fetch(`${API_BASE_URL}/bands/${bandId}/reviews/${reviewId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Unknown error' }));
+      throw new Error(error.message || `Failed to delete review: ${response.status} ${response.statusText}`);
+    }
+    
+    return response.json();
+  },
 };

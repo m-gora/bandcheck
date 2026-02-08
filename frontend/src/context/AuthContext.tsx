@@ -8,6 +8,8 @@ interface AuthContextType {
   isLoading: boolean;
   loginWithRedirect: () => void;
   logout: () => void;
+  roles: string[];
+  isModerator: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,13 +72,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     void loginWithRedirect();
   };
 
+  // Extract roles from user metadata
+  const roles = React.useMemo(() => {
+    if (!user) return [];
+    // Auth0 roles can be in different places depending on configuration
+    const namespace = 'https://bandcheck.marcodoes.tech';
+    const rolesFromNamespace = user[`${namespace}/roles`] as string[] | undefined;
+    const rolesFromMeta = (user as any)?.roles as string[] | undefined;
+    return rolesFromNamespace || rolesFromMeta || [];
+  }, [user]);
+
+  const isModerator = React.useMemo(() => {
+    return roles.includes('moderator') || roles.includes('admin');
+  }, [roles]);
+
   const value: AuthContextType = React.useMemo(() => ({
     user,
     isAuthenticated,
     isLoading,
     loginWithRedirect: handleLogin,
     logout,
-  }), [user, isAuthenticated, isLoading, logout]);
+    roles,
+    isModerator,
+  }), [user, isAuthenticated, isLoading, logout, roles, isModerator]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

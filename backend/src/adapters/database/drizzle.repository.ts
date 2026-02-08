@@ -69,6 +69,13 @@ export class DrizzleBandRepository implements BandRepository {
     return updated;
   }
 
+  async delete(id: string): Promise<void> {
+    // First delete all reviews for this band
+    await db.delete(reviews).where(eq(reviews.bandId, id));
+    // Then delete the band
+    await db.delete(bands).where(eq(bands.id, id));
+  }
+
   async existsByName(name: string): Promise<boolean> {
     const existing = await db.select()
       .from(bands)
@@ -139,6 +146,10 @@ export class DrizzleReviewRepository implements ReviewRepository {
   async create(review: Review): Promise<Review> {
     await db.insert(reviews).values(this.toPersistence(review));
     return review;
+  }
+
+  async delete(id: string): Promise<void> {
+    await db.delete(reviews).where(eq(reviews.id, id));
   }
 
   async findLatest(limit: number): Promise<Array<Review & { bandName?: string }>> {

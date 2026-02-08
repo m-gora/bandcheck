@@ -24,6 +24,8 @@ import {
   DialogActions,
   Skeleton,
   Paper,
+  IconButton,
+  Menu,
 } from '@mui/material';
 import {
   LocationOn,
@@ -35,16 +37,26 @@ import {
   Person,
   Star,
   MusicNote,
+  MoreVert,
+  Edit,
+  Delete,
 } from '@mui/icons-material';
 import { useBandDetails, useCreateReview } from '../hooks/useBands';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 
 const BandDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isModerator } = useAuth();
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewError, setReviewError] = useState('');
+  const [editBandDialogOpen, setEditBandDialogOpen] = useState(false);
+  const [deleteBandDialogOpen, setDeleteBandDialogOpen] = useState(false);
+  const [deleteReviewId, setDeleteReviewId] = useState<string | null>(null);
+  const [operationError, setOperationError] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   
   // Form state for new review
   const [reviewForm, setReviewForm] = useState({
@@ -53,8 +65,19 @@ const BandDetails: React.FC = () => {
     evidence: [''],
   });
 
+  // Form state for editing band
+  const [editBandForm, setEditBandForm] = useState({
+    name: '',
+    description: '',
+    genres: [] as string[],
+    location: '',
+    formed: '',
+    website: '',
+    safetyStatus: 'pending' as 'safe' | 'unsafe' | 'controversial' | 'pending',
+  });
+
   // Fetch band details
-  const { data, isLoading, error } = useBandDetails(id!);
+  const { data, isLoading, error, refetch } = useBandDetails(id!);
   
   // Create review mutation
   const createReviewMutation = useCreateReview(id!);
@@ -125,6 +148,71 @@ const BandDetails: React.FC = () => {
     }
   };
 
+  // Moderator actions
+  const handleOpenEditBand = () => {
+    if (data?.band) {
+      setEditBandForm({
+        name: data.band.name,
+        description: data.band.description,
+        genres: data.band.genres,
+        location: data.band.location || '',
+        formed: data.band.formed || '',
+        website: data.band.website || '',
+        safetyStatus: data.band.safetyStatus,
+      });
+      setEditBandDialogOpen(true);
+    }
+  };
+
+  const handleUpdateBand = async () => {
+    if (!id) return;
+    
+    setIsUpdating(true);
+    setOperationError('');
+    
+    try {
+      await api.updateBand(id, editBandForm);
+      setEditBandDialogOpen(false);
+      await refetch();
+    } catch (error: any) {
+      setOperationError(error.message || 'Failed to update band');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteBand = async () => {
+    if (!id) return;
+    
+    setIsDeleting(true);
+    setOperationError('');
+    
+    try {
+      await api.deleteBand(id);
+      navigate('/discover');
+    } catch (error: any) {
+      setOperationError(error.message || 'Failed to delete band');
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!id) return;
+    
+    setIsDeleting(true);
+    setOperationError('');
+    
+    try {
+      await api.deleteReview(id, reviewId);
+      setDeleteReviewId(null);
+      await refetch();
+    } catch (error: any) {
+      setOperationError(error.message || 'Failed to delete review');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -188,15 +276,40 @@ const BandDetails: React.FC = () => {
       {/* Band Header */}
       <Box sx={{ mb: 4 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2 }}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            {band.name}
-          </Typography>
-          <Chip
-            label={band.safetyStatus.charAt(0).toUpperCase() + band.safetyStatus.slice(1)}
-            color={getSafetyColor(band.safetyStatus) as any}
-            size="medium"
-            icon={<Shield />}
-          />
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h3" component="h1" gutterBottom>
+              {band.name}
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Chip
+              label={band.safetyStatus.charAt(0).toUpperCase() + band.safetyStatus.slice(1)}
+              color={getSafetyColor(band.safetyStatus) as any}
+              size="medium"
+              icon={<Shield />}
+            />
+            {isModerator && (
+              <Stack direction="row" spacing={1}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Edit />}
+                  onClick={handleOpenEditBand}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="error"
+                  startIcon={<Delete />}
+                  onClick={() => setDeleteBandDialogOpen(true)}
+                >
+                  Delete
+                </Button>
+              </Stack>
+            )}
+          </Stack>
         </Stack>
 
         {/* Band Image and Description */}
@@ -357,11 +470,23 @@ const BandDetails: React.FC = () => {
                           </Typography>
                         </Box>
                       </Box>
-                      <Chip
-                        label={review.safetyAssessment.charAt(0).toUpperCase() + review.safetyAssessment.slice(1)}
-                        color={getSafetyColor(review.safetyAssessment) as any}
-                        size="small"
-                      />
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Chip
+                          label={review.safetyAssessment.charAt(0).toUpperCase() + review.safetyAssessment.slice(1)}
+                          color={getSafetyColor(review.safetyAssessment) as any}
+                          size="small"
+                        />
+                        {isModerator && (
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => setDeleteReviewId(review.id)}
+                            title="Delete review"
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        )}
+                      </Stack>
                     </Stack>
 
                     <Typography variant="body2" paragraph>
@@ -508,6 +633,156 @@ const BandDetails: React.FC = () => {
             disabled={createReviewMutation.isPending || !reviewForm.comment.trim()}
           >
             {createReviewMutation.isPending ? <CircularProgress size={20} /> : 'Submit Review'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Band Dialog (Moderator only) */}
+      <Dialog open={editBandDialogOpen} onClose={() => setEditBandDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Edit Band</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            {operationError && (
+              <Alert severity="error" onClose={() => setOperationError('')}>
+                {operationError}
+              </Alert>
+            )}
+            
+            <TextField
+              label="Band Name"
+              value={editBandForm.name}
+              onChange={(e) => setEditBandForm(prev => ({ ...prev, name: e.target.value }))}
+              fullWidth
+            />
+
+            <TextField
+              label="Description"
+              multiline
+              rows={4}
+              value={editBandForm.description}
+              onChange={(e) => setEditBandForm(prev => ({ ...prev, description: e.target.value }))}
+              fullWidth
+            />
+
+            <TextField
+              label="Genres (comma-separated)"
+              value={editBandForm.genres.join(', ')}
+              onChange={(e) => setEditBandForm(prev => ({ 
+                ...prev, 
+                genres: e.target.value.split(',').map(g => g.trim()).filter(Boolean)
+              }))}
+              fullWidth
+            />
+
+            <TextField
+              label="Location"
+              value={editBandForm.location}
+              onChange={(e) => setEditBandForm(prev => ({ ...prev, location: e.target.value }))}
+              fullWidth
+            />
+
+            <TextField
+              label="Formed Year"
+              value={editBandForm.formed}
+              onChange={(e) => setEditBandForm(prev => ({ ...prev, formed: e.target.value }))}
+              fullWidth
+            />
+
+            <TextField
+              label="Website"
+              value={editBandForm.website}
+              onChange={(e) => setEditBandForm(prev => ({ ...prev, website: e.target.value }))}
+              fullWidth
+            />
+
+            <FormControl fullWidth>
+              <InputLabel>Safety Status</InputLabel>
+              <Select
+                value={editBandForm.safetyStatus}
+                onChange={(e) => setEditBandForm(prev => ({ 
+                  ...prev, 
+                  safetyStatus: e.target.value as 'safe' | 'unsafe' | 'controversial' | 'pending'
+                }))}
+                label="Safety Status"
+              >
+                <MenuItem value="safe">Safe</MenuItem>
+                <MenuItem value="unsafe">Unsafe</MenuItem>
+                <MenuItem value="controversial">Controversial</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setOperationError('');
+            setEditBandDialogOpen(false);
+          }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleUpdateBand}
+            variant="contained"
+            disabled={isUpdating || !editBandForm.name.trim() || !editBandForm.description.trim()}
+          >
+            {isUpdating ? <CircularProgress size={20} /> : 'Update Band'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Band Confirmation Dialog (Moderator only) */}
+      <Dialog open={deleteBandDialogOpen} onClose={() => !isDeleting && setDeleteBandDialogOpen(false)}>
+        <DialogTitle>Delete Band</DialogTitle>
+        <DialogContent>
+          {operationError && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setOperationError('')}>
+              {operationError}
+            </Alert>
+          )}
+          <Typography>
+            Are you sure you want to delete this band? This will also delete all associated reviews. 
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteBandDialogOpen(false)} disabled={isDeleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteBand}
+            color="error"
+            variant="contained"
+            disabled={isDeleting}
+          >
+            {isDeleting ? <CircularProgress size={20} /> : 'Delete Band'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Review Confirmation Dialog (Moderator only) */}
+      <Dialog open={!!deleteReviewId} onClose={() => !isDeleting && setDeleteReviewId(null)}>
+        <DialogTitle>Delete Review</DialogTitle>
+        <DialogContent>
+          {operationError && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setOperationError('')}>
+              {operationError}
+            </Alert>
+          )}
+          <Typography>
+            Are you sure you want to delete this review? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteReviewId(null)} disabled={isDeleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => deleteReviewId && handleDeleteReview(deleteReviewId)}
+            color="error"
+            variant="contained"
+            disabled={isDeleting}
+          >
+            {isDeleting ? <CircularProgress size={20} /> : 'Delete Review'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -127,3 +127,47 @@ export async function getLatestReviews(service: ReviewServiceImpl, req: Request)
   const reviews = await service.getLatestReviews(limit);
   return Response.json({ reviews });
 }
+
+export async function updateBand(service: BandServiceImpl, req: Request, bandId: string, user: any) {
+  const body = await req.json();
+  
+  try {
+    const band = await service.updateBand(bandId, body);
+    return Response.json(band);
+  } catch (error: any) {
+    if (error.message === 'Band not found') {
+      return Response.json(
+        { error: 'Not Found', message: error.message },
+        { status: 404 }
+      );
+    }
+    throw error;
+  }
+}
+
+export async function deleteBand(service: BandServiceImpl, req: Request, bandId: string, user: any) {
+  try {
+    await service.deleteBand(bandId);
+    return Response.json({ message: 'Band deleted successfully' });
+  } catch (error: any) {
+    if (error.message === 'Band not found') {
+      return Response.json(
+        { error: 'Not Found', message: error.message },
+        { status: 404 }
+      );
+    }
+    throw error;
+  }
+}
+
+export async function deleteReview(service: ReviewServiceImpl, req: Request, bandId: string, reviewId: string, user: any) {
+  try {
+    await service.deleteReview(reviewId, bandId);
+    return Response.json({ message: 'Review deleted successfully' });
+  } catch (error: any) {
+    return Response.json(
+      { error: 'Internal Server Error', message: error.message },
+      { status: 500 }
+    );
+  }
+}

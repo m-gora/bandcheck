@@ -50,15 +50,19 @@ This backend uses Azure Functions with TypeScript and Azure Table Storage (via A
 
 All endpoints run on `http://localhost:7071/api/` when developing locally.
 
-### GET `/bands`
+### Public Endpoints
+
+#### GET `/bands`
 Retrieve all bands with optional filtering
 - Query params: `search`, `genre`, `limit`, `offset`
 
-### GET `/bands/{bandId}`
+#### GET `/bands/{bandId}`
 Get specific band details with reviews
 
-### POST `/bands` 
-Submit a new band
+### Authenticated Endpoints
+
+#### POST `/bands` 
+Submit a new band (requires authentication)
 ```json
 {
   "name": "Band Name",
@@ -71,17 +75,76 @@ Submit a new band
 }
 ```
 
-### POST `/bands/{bandId}/review`
-Submit a safety review for a band
+#### POST `/bands/{bandId}/reviews`
+Submit a safety review for a band (requires authentication)
 ```json
 {
-  "safetyAssessment": "safe|unsafe",
+  "safetyAssessment": "safe|unsafe|controversial",
   "comment": "Review text",
-  "evidence": ["Evidence 1", "Evidence 2"],
-  "userId": "user-id",
-  "userDisplayName": "User Name"
+  "evidence": ["Evidence 1", "Evidence 2"]
 }
 ```
+
+### Moderator Endpoints
+
+The following endpoints require a user with `moderator` or `admin` role:
+
+#### PATCH `/bands/{bandId}`
+Update band information (moderator only)
+```json
+{
+  "name": "Updated Band Name",
+  "description": "Updated description",
+  "safetyStatus": "safe|unsafe|controversial|pending"
+}
+```
+
+#### DELETE `/bands/{bandId}`
+Delete a band and all its reviews (moderator only)
+
+#### DELETE `/bands/{bandId}/reviews/{reviewId}`
+Delete a specific review (moderator only)
+
+## 🔐 Authentication & Authorization
+
+### Setting up Auth0 Roles
+
+1. **Create Roles in Auth0:**
+   - Go to User Management → Roles in Auth0 Dashboard
+   - Create a role called `moderator`
+   - Optionally create an `admin` role for higher privileges
+
+2. **Add Roles to JWT Token:**
+   - Go to Actions → Flows → Login
+   - Create a new Action with this code:
+   ```javascript
+   exports.onExecutePostLogin = async (event, api) => {
+     const namespace = 'https://your-app.com';
+     if (event.authorization) {
+       api.idToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);
+       api.accessToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);
+     }
+   };
+   ```
+   - Deploy and add it to your Login flow
+
+3. **Assign Roles to Users:**
+   - Go to User Management → Users
+   - Select a user and assign the `moderator` role
+
+4. **Configure Environment Variables:**
+   ```bash
+   AUTH0_DOMAIN=your-domain.auth0.com
+   AUTH0_AUDIENCE=your-api-identifier
+   ```
+
+### Authorization Flow
+
+- **Public endpoints** - No authentication required
+- **Authenticated endpoints** - Valid JWT token required
+- **Moderator endpoints** - Valid JWT token + `moderator` or `admin` role required
+
+The backend checks for roles in the JWT token under the `roles` claim. Make sure your Auth0 configuration adds roles to the access token.
 
 ## 🗃️ Data Storage
 
