@@ -3,16 +3,7 @@ FROM oven/bun:1 AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lockb* ./
-
-# Install dependencies
-RUN bun install --frozen-lockfile
-
-# Copy source files
-COPY . .
-
-# Build arguments for Vite environment variables
+# Build arguments (declare early for better caching)
 ARG VITE_API_BASE_URL
 ARG VITE_AUTH0_DOMAIN
 ARG VITE_AUTH0_CLIENT_ID
@@ -25,6 +16,15 @@ ENV VITE_AUTH0_DOMAIN=$VITE_AUTH0_DOMAIN
 ENV VITE_AUTH0_CLIENT_ID=$VITE_AUTH0_CLIENT_ID
 ENV VITE_AUTH0_AUDIENCE=$VITE_AUTH0_AUDIENCE
 ENV VITE_TURNSTILE_KEY=$VITE_TURNSTILE_KEY
+
+# Copy package files first (better layer caching)
+COPY package.json bun.lockb* ./
+
+# Install dependencies (this layer is cached unless package files change)
+RUN bun install --frozen-lockfile
+
+# Copy source files
+COPY . .
 
 # Build the application
 RUN bun run build
