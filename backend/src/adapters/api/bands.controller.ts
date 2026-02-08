@@ -36,7 +36,7 @@ export async function createBand(service: BandServiceImpl, req: Request, user: a
 
   // Verify Turnstile token if provided
   if (body.turnstileToken) {
-    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    const turnstileSecret = process.env.TURNSTILE_KEY;
     if (turnstileSecret) {
       try {
         const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
