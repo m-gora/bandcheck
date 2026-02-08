@@ -154,7 +154,7 @@ export const api = {
     review: Review;
     updatedBand: { safetyStatus: Band['safetyStatus']; reviewCount: number };
   }> => {
-    const response = await fetch(`${API_BASE_URL}/bands/${bandId}/review`, {
+    const response = await fetch(`${API_BASE_URL}/bands/${bandId}/reviews`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(review),
