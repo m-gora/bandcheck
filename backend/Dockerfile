@@ -1,25 +1,24 @@
-# Use Bun's official image
-FROM oven/bun:1 AS base
+# Build stage - install dependencies
+FROM oven/bun:1 AS install
+WORKDIR /app
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile --production
+
+# Production stage - distroless
+FROM oven/bun:1-distroless
 WORKDIR /app
 
-# Install dependencies
-FROM base AS install
-COPY package.json ./
-RUN bun install
-
-# Copy source code
-FROM base AS release
+# Copy dependencies and source
 COPY --from=install /app/node_modules ./node_modules
-COPY . .
+COPY package.json ./
+COPY src/ ./src/
+COPY drizzle/ ./drizzle/
+COPY drizzle.config.ts ./
 
-# Create data directory with proper permissions before switching user
-RUN mkdir -p /app/data && chown -R bun:bun /app
+# Create data directory
+# Note: distroless runs as nonroot (uid 65534) by default
+VOLUME ["/app/data"]
 
-# Expose port
 EXPOSE 3000
 
-# Set user to non-root
-USER bun
-
-# Use entrypoint script for database initialization
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+ENTRYPOINT ["bun", "run", "src/server.ts"]

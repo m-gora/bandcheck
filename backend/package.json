@@ -11,19 +11,25 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "build": "echo 'No build step needed for Bun'",
+    "lint": "eslint src/",
+    "type-check": "tsc --noEmit",
     "docker:build": "docker build -t bandcheck-backend .",
     "docker:run": "docker run -p 3000:3000 --env-file .env bandcheck-backend",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
     "drizzle-orm": "^0.45.1",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^3.2.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@libsql/client": "^0.17.0",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/bun": "^1.3.10",
     "@types/jsonwebtoken": "^9.0.10",
-    "drizzle-kit": "^0.31.8"
+    "drizzle-kit": "^0.31.9",
+    "eslint": "^10.0.3",
+    "typescript-eslint": "^8.56.1"
   }
 }
