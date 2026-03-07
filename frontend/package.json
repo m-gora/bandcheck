@@ -16,7 +16,7 @@
     "@mui/icons-material": "latest",
     "@mui/material": "latest",
     "@tanstack/react-query": "^5.90.5",
-    "@tanstack/react-query-devtools": "^5.90.2",
+    "@tanstack/react-query-devtools": "^5.91.3",
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "^7.1.5"
