@@ -20,7 +20,7 @@
   "dependencies": {
     "drizzle-orm": "^0.45.2",
     "jsonwebtoken": "^9.0.3",
-    "jwks-rsa": "^3.2.2"
+    "jwks-rsa": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
