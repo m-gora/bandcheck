@@ -16,7 +16,7 @@
     "@emotion/styled": "^11.14.1",
     "@marsidev/react-turnstile": "^1.4.2",
     "@mui/icons-material": "^7.3.4",
-    "@mui/material": "^7.3.4",
+    "@mui/material": "^7.3.9",
     "@tanstack/react-query": "^5.96.2",
     "@tanstack/react-query-devtools": "^5.91.3",
     "react": "^19.2.0",
