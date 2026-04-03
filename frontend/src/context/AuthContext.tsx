@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useAuth0, User } from '@auth0/auth0-react';
 import { setAuthToken } from '../services/api';
 
@@ -60,17 +60,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateToken();
   }, [isAuthenticated, getAccessTokenSilently]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     auth0Logout({
       logoutParams: {
         returnTo: globalThis.location.origin,
       },
     });
-  };
+  }, [auth0Logout]);
 
-  const handleLogin = () => {
+  const handleLogin = useCallback(() => {
     void loginWithRedirect();
-  };
+  }, [loginWithRedirect]);
 
   // Extract roles from user metadata
   const roles = React.useMemo(() => {
@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Auth0 roles can be in different places depending on configuration
     const namespace = 'https://bandcheck.marcodoes.tech';
     const rolesFromNamespace = user[`${namespace}/roles`] as string[] | undefined;
-    const rolesFromMeta = (user as any)?.roles as string[] | undefined;
+    const rolesFromMeta = (user as Record<string, unknown>)?.roles as string[] | undefined;
     return rolesFromNamespace || rolesFromMeta || [];
   }, [user]);
 
@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     roles,
     isModerator,
-  }), [user, isAuthenticated, isLoading, logout, roles, isModerator]);
+  }), [user, isAuthenticated, isLoading, handleLogin, logout, roles, isModerator]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

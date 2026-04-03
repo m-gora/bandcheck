@@ -1,4 +1,5 @@
 import type { BandServiceImpl, ReviewServiceImpl } from '../../core/services/band.service';
+import type { AuthenticatedUser } from './auth.adapter';
 
 export async function getBands(service: BandServiceImpl, req: Request) {
   const url = new URL(req.url);
@@ -24,12 +25,12 @@ export async function getBandDetails(service: BandServiceImpl, req: Request, ban
   return Response.json(result);
 }
 
-export async function createBand(service: BandServiceImpl, req: Request, user: any) {
+export async function createBand(service: BandServiceImpl, req: Request, user: AuthenticatedUser) {
   const body = await req.json();
   
-  if (!body.name || !body.description || !body.genres || body.genres.length === 0) {
+  if (!body.name || !body.genres || body.genres.length === 0) {
     return Response.json(
-      { error: 'Bad Request', message: 'Name, description, and at least one genre are required' },
+      { error: 'Bad Request', message: 'Name and at least one genre are required' },
       { status: 400 }
     );
   }
@@ -71,8 +72,8 @@ export async function createBand(service: BandServiceImpl, req: Request, user: a
   try {
     const band = await service.createBand(body, user.sub);
     return Response.json(band, { status: 201 });
-  } catch (error: any) {
-    if (error.message === 'A band with this name already exists') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'A band with this name already exists') {
       return Response.json(
         { error: 'Conflict', message: error.message },
         { status: 409 }
@@ -82,7 +83,7 @@ export async function createBand(service: BandServiceImpl, req: Request, user: a
   }
 }
 
-export async function createReview(service: ReviewServiceImpl, req: Request, bandId: string, user: any) {
+export async function createReview(service: ReviewServiceImpl, req: Request, bandId: string, user: AuthenticatedUser) {
   const body = await req.json();
   
   if (!body.safetyAssessment || !body.comment) {
@@ -96,8 +97,8 @@ export async function createReview(service: ReviewServiceImpl, req: Request, ban
     const userName = user.name || user.email || 'Anonymous User';
     const review = await service.createReview(bandId, body, user.sub, userName, user.picture);
     return Response.json(review, { status: 201 });
-  } catch (error: any) {
-    if (error.message === 'Band not found') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Band not found') {
       return Response.json(
         { error: 'Not Found', message: error.message },
         { status: 404 }
@@ -128,14 +129,14 @@ export async function getLatestReviews(service: ReviewServiceImpl, req: Request)
   return Response.json({ reviews });
 }
 
-export async function updateBand(service: BandServiceImpl, req: Request, bandId: string, user: any) {
+export async function updateBand(service: BandServiceImpl, req: Request, bandId: string, _user: AuthenticatedUser) {
   const body = await req.json();
   
   try {
     const band = await service.updateBand(bandId, body);
     return Response.json(band);
-  } catch (error: any) {
-    if (error.message === 'Band not found') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Band not found') {
       return Response.json(
         { error: 'Not Found', message: error.message },
         { status: 404 }
@@ -145,12 +146,12 @@ export async function updateBand(service: BandServiceImpl, req: Request, bandId:
   }
 }
 
-export async function deleteBand(service: BandServiceImpl, req: Request, bandId: string, user: any) {
+export async function deleteBand(service: BandServiceImpl, _req: Request, bandId: string, _user: AuthenticatedUser) {
   try {
     await service.deleteBand(bandId);
     return Response.json({ message: 'Band deleted successfully' });
-  } catch (error: any) {
-    if (error.message === 'Band not found') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Band not found') {
       return Response.json(
         { error: 'Not Found', message: error.message },
         { status: 404 }
@@ -160,13 +161,14 @@ export async function deleteBand(service: BandServiceImpl, req: Request, bandId:
   }
 }
 
-export async function deleteReview(service: ReviewServiceImpl, req: Request, bandId: string, reviewId: string, user: any) {
+export async function deleteReview(service: ReviewServiceImpl, _req: Request, bandId: string, reviewId: string, _user: AuthenticatedUser) {
   try {
     await service.deleteReview(reviewId, bandId);
     return Response.json({ message: 'Review deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return Response.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message },
       { status: 500 }
     );
   }

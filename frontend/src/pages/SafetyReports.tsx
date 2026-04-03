@@ -18,7 +18,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { api, BandWithDate, ReviewWithBandName } from '../services/api';
 
 export default function SafetyReports() {
   const navigate = useNavigate();
@@ -30,8 +30,8 @@ export default function SafetyReports() {
     pending: 0,
     total: 0,
   });
-  const [latestBands, setLatestBands] = React.useState<any[]>([]);
-  const [latestReviews, setLatestReviews] = React.useState<any[]>([]);
+  const [latestBands, setLatestBands] = React.useState<BandWithDate[]>([]);
+  const [latestReviews, setLatestReviews] = React.useState<ReviewWithBandName[]>([]);
 
   React.useEffect(() => {
     const fetchData = async () => {

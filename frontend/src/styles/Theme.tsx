@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import type { ThemeOptions } from '@mui/material/styles';
-import { inputsCustomizations } from './inputs';
 import { dataDisplayCustomizations } from './dataDisplay';
 import { feedbackCustomizations } from './feedback';
 import { navigationCustomizations } from './navigation';
 import { surfacesCustomizations } from './surfaces';
-import { colorSchemes, typography, shadows, shape } from './themePrimitives';
+import { colorSchemes, typography, shadows } from './themePrimitives';
 
 interface AppThemeProps {
   children: React.ReactNode;

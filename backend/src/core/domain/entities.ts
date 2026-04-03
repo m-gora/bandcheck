@@ -1,8 +1,9 @@
 // Core domain entities
 export interface Band {
   id: string;
+  maId?: string;
   name: string;
-  description: string;
+  description?: string;
   genres: string[];
   location?: string;
   formed?: string;
@@ -30,7 +31,8 @@ export interface Review {
 
 export interface CreateBandRequest {
   name: string;
-  description: string;
+  maId?: string;
+  description?: string;
   genres: string[];
   location?: string;
   formed?: string;

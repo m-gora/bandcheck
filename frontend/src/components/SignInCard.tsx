@@ -2,16 +2,8 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import MuiCard from '@mui/material/Card';
-import Checkbox from '@mui/material/Checkbox';
-import Divider from '@mui/material/Divider';
-import FormLabel from '@mui/material/FormLabel';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Link from '@mui/material/Link';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
-import ForgotPassword from './ForgotPassword';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons';
 import { Microsoft } from '@mui/icons-material';
 
@@ -35,16 +27,16 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 export default function SignInCard() {
   const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
+  const [_emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [open, setOpen] = React.useState(false);
+  const [_passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
+  const [_open, setOpen] = React.useState(false);
 
-  const handleClickOpen = () => {
+  const _handleClickOpen = () => {
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const _handleClose = () => {
     setOpen(false);
   };
 
@@ -60,7 +52,7 @@ export default function SignInCard() {
     });
   };
 
-  const validateInputs = () => {
+  const _validateInputs = () => {
     const email = document.getElementById('email') as HTMLInputElement;
     const password = document.getElementById('password') as HTMLInputElement;
 

@@ -3,8 +3,8 @@ import type { BandRepository, ReviewRepository } from '../ports/repositories';
 
 export class BandServiceImpl {
   constructor(
-    private bandRepo: BandRepository,
-    private reviewRepo: ReviewRepository
+    private readonly bandRepo: BandRepository,
+    private readonly reviewRepo: ReviewRepository
   ) {}
 
   async getAllBands(query: GetBandsQuery): Promise<GetBandsResult> {
@@ -19,18 +19,28 @@ export class BandServiceImpl {
     return { band, reviews };
   }
 
-  async createBand(data: CreateBandRequest, userId: string): Promise<Band> {
-    // Check if band already exists
+  async createBand(data: CreateBandRequest, _userId: string): Promise<Band> {
+    // Check if band already exists by name
     const exists = await this.bandRepo.existsByName(data.name);
     if (exists) {
       throw new Error('A band with this name already exists');
     }
 
+    // Check if band already exists by Metal Archives ID
+    if (data.maId) {
+      const existsByMaId = await this.bandRepo.existsByMaId(data.maId);
+      if (existsByMaId) {
+        throw new Error('A band with this name already exists');
+      }
+    }
+
     const now = new Date().toISOString();
     const band: Band = {
       id: this.generateId(),
+      maId: data.maId,
       name: data.name,
-      description: data.description,
+      description: data.description ?? '',
+
       genres: data.genres,
       location: data.location,
       formed: data.formed,
@@ -85,8 +95,8 @@ export class BandServiceImpl {
 
 export class ReviewServiceImpl {
   constructor(
-    private reviewRepo: ReviewRepository,
-    private bandRepo: BandRepository
+    private readonly reviewRepo: ReviewRepository,
+    private readonly bandRepo: BandRepository
   ) {}
 
   async createReview(

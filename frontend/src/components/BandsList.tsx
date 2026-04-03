@@ -15,12 +15,12 @@ import {
   CircularProgress,
   Alert,
   Container,
-  Grid,
   Skeleton,
 } from '@mui/material';
-import { LocationOn, Language, CalendarToday, MusicNote } from '@mui/icons-material';
+import { LocationOn, Language, MusicNote } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useBands } from '../hooks/useBands';
+import { Band } from '../services/api';
 
 const BandsList: React.FC = () => {
   const navigate = useNavigate();
@@ -43,16 +43,16 @@ const BandsList: React.FC = () => {
     selectedGenre || undefined
   );
 
-  const handleBandClick = (bandId: string) => {
+  const handleBandClick = React.useCallback((bandId: string) => {
     navigate(`/bands/${bandId}`);
-  };
+  }, [navigate]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     refetch();
   };
 
-  const renderBandCard = React.useCallback((band: any) => (
+  const renderBandCard = React.useCallback((band: Band) => (
     <Card
       key={band.id}
       sx={{
@@ -166,7 +166,7 @@ const BandsList: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
-  ), [navigate]);
+  ), [handleBandClick]);
 
   const renderSkeletonCards = React.useMemo(() => (
     <>

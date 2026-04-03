@@ -14,7 +14,6 @@ import {
   Shield,
   Search,
   People,
-  Star,
   Security,
   Groups,
   Verified,
@@ -52,7 +51,7 @@ const About: React.FC = () => {
     { number: 'Evidence', label: 'Based Warnings' }
   ];
 
-  const team = [
+  const _team = [
     {
       name: 'Marco',
       role: 'Creator & Developer',

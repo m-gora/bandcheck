@@ -52,7 +52,7 @@ export class DrizzleBandRepository implements BandRepository {
   }
 
   async update(id: string, bandData: Partial<Band>): Promise<Band> {
-    const updateData: any = { ...bandData };
+    const updateData: Record<string, unknown> = { ...bandData };
     if (updateData.genres) {
       updateData.genres = JSON.stringify(updateData.genres);
     }
@@ -80,6 +80,14 @@ export class DrizzleBandRepository implements BandRepository {
     const existing = await db.select()
       .from(bands)
       .where(eq(bands.name, name))
+      .get();
+    return !!existing;
+  }
+
+  async existsByMaId(maId: string): Promise<boolean> {
+    const existing = await db.select()
+      .from(bands)
+      .where(eq(bands.maId, maId))
       .get();
     return !!existing;
   }
@@ -115,15 +123,16 @@ export class DrizzleBandRepository implements BandRepository {
     return latestBands.map(band => this.toDomain(band));
   }
 
-  private toDomain(band: any): Band {
+  private toDomain(band: Record<string, unknown>): Band {
     return {
       ...band,
+      maId: (band.maId as string | null) ?? undefined,
       genres: typeof band.genres === 'string' ? JSON.parse(band.genres) : band.genres,
       members: typeof band.members === 'string' ? JSON.parse(band.members) : (band.members || []),
-    };
+    } as Band;
   }
 
-  private toPersistence(band: Band): any {
+  private toPersistence(band: Band): Record<string, unknown> {
     return {
       ...band,
       genres: JSON.stringify(band.genres),
@@ -169,14 +178,14 @@ export class DrizzleReviewRepository implements ReviewRepository {
     }));
   }
 
-  private toDomain(review: any): Review {
+  private toDomain(review: Record<string, unknown>): Review {
     return {
       ...review,
       evidence: typeof review.evidence === 'string' ? JSON.parse(review.evidence) : (review.evidence || []),
     };
   }
 
-  private toPersistence(review: Review): any {
+  private toPersistence(review: Review): Record<string, unknown> {
     return {
       ...review,
       evidence: JSON.stringify(review.evidence),

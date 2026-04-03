@@ -15,7 +15,7 @@ export default function ColorModeSelect(props: SelectProps) {
         setMode(event.target.value as 'system' | 'light' | 'dark')
       }
       SelectDisplayProps={{
-        // @ts-ignore
+        // @ts-expect-error data-screenshot is a custom attribute not in the type definition
         'data-screenshot': 'toggle-mode',
       }}
       {...props}

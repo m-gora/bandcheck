@@ -17,11 +17,11 @@ export interface AuthenticatedUser {
     name?: string;
     picture?: string;
     roles?: string[]; // User roles from Auth0 (e.g., ['moderator', 'admin'])
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 // Get signing key for JWT verification
-function getKey(header: any, callback: any) {
+function getKey(header: jwt.JwtHeader, callback: (err: Error | null, key?: string) => void) {
     client.getSigningKey(header.kid, (err, key) => {
         if (err) {
             callback(err);
@@ -74,7 +74,7 @@ const verifyToken = (token: string): Promise<AuthenticatedUser> => {
 // This is AUTHENTICATION: validates user identity via token verification
 export const authorize = async (
     request: Request
-): Promise<{ authorized: boolean; user?: AuthenticatedUser; response?: { status: number; body: any } }> => {
+): Promise<{ authorized: boolean; user?: AuthenticatedUser; response?: { status: number; body: Record<string, string> } }> => {
     try {
         const authHeader = request.headers.get('authorization');
         
@@ -154,7 +154,7 @@ export const authorize = async (
 // This is AUTHORIZATION: validates user permissions after authentication
 export const authorizeModerator = async (
     request: Request
-): Promise<{ authorized: boolean; user?: AuthenticatedUser; response?: { status: number; body: any } }> => {
+): Promise<{ authorized: boolean; user?: AuthenticatedUser; response?: { status: number; body: Record<string, string> } }> => {
     // First authenticate the user (verify token)
     const authResult = await authorize(request);
     

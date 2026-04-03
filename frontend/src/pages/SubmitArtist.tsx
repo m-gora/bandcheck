@@ -8,10 +8,6 @@ import {
   Button,
   Paper,
   Chip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Alert,
   Autocomplete,
 } from '@mui/material';
@@ -167,8 +163,8 @@ export default function SubmitArtist() {
         navigate('/discover');
       }, 2000);
       
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit artist. Please try again.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit artist. Please try again.');
     }
   };
 
