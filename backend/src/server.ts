@@ -4,10 +4,11 @@ import { DrizzleBandRepository, DrizzleReviewRepository } from './adapters/datab
 import { migrate } from 'drizzle-orm/bun-sqlite/migrator';
 import { db } from './db';
 
+const PORT = process.env.PORT || 3000;
+
 // Run migrations on startup
 migrate(db, { migrationsFolder: './drizzle' });
-
-const PORT = process.env.PORT || 3000;
+console.log('✅ Database migrations applied');
 
 // Initialize repositories (driven/secondary adapters)
 const bandRepository = new DrizzleBandRepository();

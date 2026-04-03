@@ -1,5 +1,5 @@
 # Build stage
-FROM oven/bun:1 AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
@@ -29,8 +29,8 @@ COPY . .
 # Build the application
 RUN bun run build
 
-# Production stage - hardened nginx (runs as non-root uid 101)
-FROM nginxinc/nginx-unprivileged:stable-alpine
+# Production stage
+FROM nginx:1.28-alpine
 
 # Copy custom nginx config
 COPY k8s/nginx.conf /etc/nginx/conf.d/default.conf
