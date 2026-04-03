@@ -25,6 +25,9 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           runAsNonRoot: true
+          runAsUser: 65532
+          runAsGroup: 65532
+          readOnlyRootFilesystem: true
           capabilities:
             drop:
               - ALL
@@ -64,6 +67,8 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /app/data
+        - name: tmp
+          mountPath: /tmp
         resources:
           requests:
             memory: "256Mi"
@@ -87,3 +92,5 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: bandcheck-backend-data
+      - name: tmp
+        emptyDir: {}
