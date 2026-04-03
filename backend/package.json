@@ -18,7 +18,7 @@
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.45.2",
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^3.2.2"
   },
