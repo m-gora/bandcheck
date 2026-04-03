@@ -132,11 +132,22 @@ export class DrizzleBandRepository implements BandRepository {
     } as Band;
   }
 
-  private toPersistence(band: Band): Record<string, unknown> {
+  private toPersistence(band: Band): typeof bands.$inferInsert {
     return {
-      ...band,
+      id: band.id,
+      maId: band.maId ?? null,
+      name: band.name,
+      description: band.description ?? '',
       genres: JSON.stringify(band.genres),
-      members: JSON.stringify(band.members),
+      location: band.location ?? null,
+      formed: band.formed ?? null,
+      website: band.website ?? null,
+      imageUrl: band.imageUrl ?? null,
+      members: JSON.stringify(band.members ?? []),
+      safetyStatus: band.safetyStatus,
+      reviewCount: band.reviewCount,
+      createdAt: band.createdAt,
+      updatedAt: band.updatedAt,
     };
   }
 }
@@ -182,13 +193,21 @@ export class DrizzleReviewRepository implements ReviewRepository {
     return {
       ...review,
       evidence: typeof review.evidence === 'string' ? JSON.parse(review.evidence) : (review.evidence || []),
-    };
+    } as Review;
   }
 
-  private toPersistence(review: Review): Record<string, unknown> {
+  private toPersistence(review: Review): typeof reviews.$inferInsert {
     return {
-      ...review,
+      id: review.id,
+      bandId: review.bandId,
+      userId: review.userId,
+      userDisplayName: review.userDisplayName,
+      userAvatarUrl: review.userAvatarUrl ?? null,
+      safetyAssessment: review.safetyAssessment,
+      comment: review.comment,
       evidence: JSON.stringify(review.evidence),
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
     };
   }
 }
