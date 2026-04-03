@@ -25,7 +25,6 @@ import {
   Skeleton,
   Paper,
   IconButton,
-  Menu,
 } from '@mui/material';
 import {
   LocationOn,
@@ -35,9 +34,7 @@ import {
   Add,
   Shield,
   Person,
-  Star,
   MusicNote,
-  MoreVert,
   Edit,
   Delete,
 } from '@mui/icons-material';
@@ -135,15 +132,16 @@ const BandDetails: React.FC = () => {
         comment: '',
         evidence: [''],
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to submit review:', error);
+      const message = error instanceof Error ? error.message : '';
       // Handle specific error cases
-      if (error.message?.includes('already reviewed') || error.message?.includes('User has already reviewed this band')) {
+      if (message.includes('already reviewed') || message.includes('User has already reviewed this band')) {
         setReviewError('You have already submitted a review for this band. Each user can only submit one review per band.');
-      } else if (error.message?.includes('unauthorized') || error.message?.includes('authentication')) {
+      } else if (message.includes('unauthorized') || message.includes('authentication')) {
         setReviewError('Authentication failed. Please log in again and try again.');
       } else {
-        setReviewError(error.message || 'Failed to submit review. Please try again.');
+        setReviewError(message || 'Failed to submit review. Please try again.');
       }
     }
   };
@@ -174,8 +172,8 @@ const BandDetails: React.FC = () => {
       await api.updateBand(id, editBandForm);
       setEditBandDialogOpen(false);
       await refetch();
-    } catch (error: any) {
-      setOperationError(error.message || 'Failed to update band');
+    } catch (error: unknown) {
+      setOperationError(error instanceof Error ? error.message : 'Failed to update band');
     } finally {
       setIsUpdating(false);
     }
@@ -190,8 +188,8 @@ const BandDetails: React.FC = () => {
     try {
       await api.deleteBand(id);
       navigate('/discover');
-    } catch (error: any) {
-      setOperationError(error.message || 'Failed to delete band');
+    } catch (error: unknown) {
+      setOperationError(error instanceof Error ? error.message : 'Failed to delete band');
       setIsDeleting(false);
     }
   };
@@ -206,8 +204,8 @@ const BandDetails: React.FC = () => {
       await api.deleteReview(id, reviewId);
       setDeleteReviewId(null);
       await refetch();
-    } catch (error: any) {
-      setOperationError(error.message || 'Failed to delete review');
+    } catch (error: unknown) {
+      setOperationError(error instanceof Error ? error.message : 'Failed to delete review');
     } finally {
       setIsDeleting(false);
     }
@@ -284,7 +282,7 @@ const BandDetails: React.FC = () => {
           <Stack direction="row" spacing={1} alignItems="center">
             <Chip
               label={band.safetyStatus.charAt(0).toUpperCase() + band.safetyStatus.slice(1)}
-              color={getSafetyColor(band.safetyStatus) as any}
+              color={getSafetyColor(band.safetyStatus) as 'default' | 'success' | 'error' | 'warning'}
               size="medium"
               icon={<Shield />}
             />
@@ -473,7 +471,7 @@ const BandDetails: React.FC = () => {
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Chip
                           label={review.safetyAssessment.charAt(0).toUpperCase() + review.safetyAssessment.slice(1)}
-                          color={getSafetyColor(review.safetyAssessment) as any}
+                          color={getSafetyColor(review.safetyAssessment) as 'default' | 'success' | 'error' | 'warning'}
                           size="small"
                         />
                         {isModerator && (
@@ -528,7 +526,7 @@ const BandDetails: React.FC = () => {
                   </Typography>
                   <Chip
                     label={band.safetyStatus.charAt(0).toUpperCase() + band.safetyStatus.slice(1)}
-                    color={getSafetyColor(band.safetyStatus) as any}
+                    color={getSafetyColor(band.safetyStatus) as 'default' | 'success' | 'error' | 'warning'}
                     size="small"
                   />
                 </Box>

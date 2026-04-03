@@ -1,0 +1,19 @@
+{
+  "name": "bandcheck-crawler",
+  "version": "1.0.0",
+  "description": "Metal Archives crawler using Playwright",
+  "type": "module",
+  "scripts": {
+    "browse": "bun src/index.ts browse",
+    "scrape": "bun src/index.ts scrape",
+    "crawl": "bun src/index.ts crawl",
+    "stats": "bun src/index.ts stats",
+    "import": "bun src/import.ts"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

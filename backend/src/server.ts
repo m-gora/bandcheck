@@ -21,7 +21,7 @@ const reviewService = new ReviewServiceImpl(reviewRepository, bandRepository);
 const handleRequest = createApiRouter(bandService, reviewService);
 
 // Start server
-const server = Bun.serve({
+const _server = Bun.serve({
   port: PORT,
   fetch: handleRequest,
 });

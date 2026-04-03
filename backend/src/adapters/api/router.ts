@@ -60,7 +60,7 @@ export function createApiRouter(bandService: BandServiceImpl, reviewService: Rev
       }
       
       // GET /api/bands/:id
-      if (url.pathname.match(/^\/api\/bands\/[^\/]+$/) && req.method === 'GET') {
+      if (url.pathname.match(/^\/api\/bands\/[^/]+$/) && req.method === 'GET') {
         const bandId = url.pathname.split('/')[3];
         const response = await bandsController.getBandDetails(bandService, req, bandId);
         return addCorsHeaders(response, origin);
@@ -80,7 +80,7 @@ export function createApiRouter(bandService: BandServiceImpl, reviewService: Rev
       }
       
       // POST /api/bands/:id/reviews (authenticated)
-      if (url.pathname.match(/^\/api\/bands\/[^\/]+\/reviews$/) && req.method === 'POST') {
+      if (url.pathname.match(/^\/api\/bands\/[^/]+\/reviews$/) && req.method === 'POST') {
         const authResult = await authorize(req);
         if (!authResult.authorized || !authResult.user) {
           return new Response(JSON.stringify(authResult.response?.body || { error: 'Unauthorized' }), {
@@ -94,7 +94,7 @@ export function createApiRouter(bandService: BandServiceImpl, reviewService: Rev
       }
       
       // PATCH /api/bands/:id (moderator only)
-      if (url.pathname.match(/^\/api\/bands\/[^\/]+$/) && req.method === 'PATCH') {
+      if (url.pathname.match(/^\/api\/bands\/[^/]+$/) && req.method === 'PATCH') {
         const authResult = await authorizeModerator(req);
         if (!authResult.authorized || !authResult.user) {
           return new Response(JSON.stringify(authResult.response?.body || { error: 'Unauthorized' }), {
@@ -108,7 +108,7 @@ export function createApiRouter(bandService: BandServiceImpl, reviewService: Rev
       }
       
       // DELETE /api/bands/:id (moderator only)
-      if (url.pathname.match(/^\/api\/bands\/[^\/]+$/) && req.method === 'DELETE') {
+      if (url.pathname.match(/^\/api\/bands\/[^/]+$/) && req.method === 'DELETE') {
         const authResult = await authorizeModerator(req);
         if (!authResult.authorized || !authResult.user) {
           return new Response(JSON.stringify(authResult.response?.body || { error: 'Unauthorized' }), {
@@ -122,7 +122,7 @@ export function createApiRouter(bandService: BandServiceImpl, reviewService: Rev
       }
       
       // DELETE /api/bands/:bandId/reviews/:reviewId (moderator only)
-      if (url.pathname.match(/^\/api\/bands\/[^\/]+\/reviews\/[^\/]+$/) && req.method === 'DELETE') {
+      if (url.pathname.match(/^\/api\/bands\/[^/]+\/reviews\/[^/]+$/) && req.method === 'DELETE') {
         const authResult = await authorizeModerator(req);
         if (!authResult.authorized || !authResult.user) {
           return new Response(JSON.stringify(authResult.response?.body || { error: 'Unauthorized' }), {

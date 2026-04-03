@@ -161,7 +161,7 @@ export default function WriteReview() {
         navigate(`/artist/${id}`);
       }, 2000);
       
-    } catch (err) {
+    } catch {
       setError('Failed to submit review. Please try again.');
     } finally {
       setLoading(false);

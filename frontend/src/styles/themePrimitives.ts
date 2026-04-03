@@ -19,6 +19,7 @@ declare module '@mui/material/styles/createPalette' {
     900: string;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface PaletteColor extends ColorRange {}
 
   interface Palette {
@@ -394,7 +395,7 @@ export const shape = {
   borderRadius: 12,
 };
 
-// @ts-ignore
+// @ts-expect-error Shadows tuple type doesn't accept string CSS variables but they work at runtime
 const defaultShadows: Shadows = [
   'none',
   'var(--template-palette-baseShadow)',

@@ -9,7 +9,6 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import { gray, brand } from './themePrimitives';
 
-/* eslint-disable import/prefer-default-export */
 export const inputsCustomizations: Components<Theme> = {
   MuiButtonBase: {
     defaultProps: {
@@ -29,7 +28,7 @@ export const inputsCustomizations: Components<Theme> = {
   },
   MuiButton: {
     styleOverrides: {
-      root: ({ theme }) => ({
+      root: ({ theme: _theme }) => ({
         boxShadow: 'none',
         borderRadius: 12,
         textTransform: 'none',
@@ -51,7 +50,7 @@ export const inputsCustomizations: Components<Theme> = {
         padding: '16px 32px',
         fontSize: '1rem',
       },
-      containedPrimary: ({ theme }) => ({
+      containedPrimary: ({ theme: _theme }) => ({
         backgroundColor: brand[500],
         color: 'white',
         border: 'none',
@@ -122,7 +121,7 @@ export const inputsCustomizations: Components<Theme> = {
           },
         }),
       }),
-      outlinedPrimary: ({ theme }) => ({
+      outlinedPrimary: ({ theme: _theme }) => ({
         color: brand[600],
         borderColor: brand[300],
         '&:hover': {

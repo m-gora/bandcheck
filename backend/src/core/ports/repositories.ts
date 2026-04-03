@@ -8,6 +8,7 @@ export interface BandRepository {
   update(id: string, band: Partial<Band>): Promise<Band>;
   delete(id: string): Promise<void>;
   existsByName(name: string): Promise<boolean>;
+  existsByMaId(maId: string): Promise<boolean>;
   getStatistics(): Promise<{ safe: number; unsafe: number; controversial: number; pending: number; total: number }>;
   findLatest(limit: number): Promise<Band[]>;
 }

@@ -3,8 +3,9 @@ import { sql } from 'drizzle-orm';
 
 export const bands = sqliteTable('bands', {
   id: text('id').primaryKey(),
+  maId: text('ma_id'),
   name: text('name').notNull(),
-  description: text('description').notNull(),
+  description: text('description').notNull().default(''),
   genres: text('genres').notNull(), // JSON array
   location: text('location'),
   formed: text('formed'),
