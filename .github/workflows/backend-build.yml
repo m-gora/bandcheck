@@ -9,14 +9,6 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-build.yml'
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - main
-      - dev
-    paths:
-      - 'backend/**'
   workflow_dispatch:
 
 env:
