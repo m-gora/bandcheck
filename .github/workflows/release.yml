@@ -1,0 +1,75 @@
+---
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.0 — without the v prefix)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to push tag + create release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Use a token that can push to the protected branch/tags
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate version format
+        run: |
+          if ! echo "${{ inputs.version }}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$'; then
+            echo "::error::Version '${{ inputs.version }}' is not valid semver (expected X.Y.Z or X.Y.Z-label)"
+            exit 1
+          fi
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump package.json versions
+        run: |
+          VERSION="${{ inputs.version }}"
+          # Update backend/package.json
+          jq --arg v "$VERSION" '.version = $v' backend/package.json > /tmp/pkg.json \
+            && mv /tmp/pkg.json backend/package.json
+          # Update frontend/package.json
+          jq --arg v "$VERSION" '.version = $v' frontend/package.json > /tmp/pkg.json \
+            && mv /tmp/pkg.json frontend/package.json
+
+      - name: Commit version bump
+        run: |
+          VERSION="${{ inputs.version }}"
+          git add backend/package.json frontend/package.json
+          # Only commit if there are staged changes
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: bump version to $VERSION"
+            git push origin HEAD
+          fi
+
+      - name: Create and push tag
+        run: |
+          TAG="v${{ inputs.version }}"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: v${{ inputs.version }}
+          generate_release_notes: true
+          prerelease: ${{ inputs.prerelease }}
