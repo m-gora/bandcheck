@@ -10,7 +10,7 @@ on:
       - 'frontend/**'
       - '.github/workflows/frontend-build.yml'
     tags:
-      - 'v*'
+      - 'frontend-v*'
   workflow_dispatch:
 
 env:

@@ -10,7 +10,7 @@ on:
       - 'backend/**'
       - '.github/workflows/backend-build.yml'
     tags:
-      - 'v*'
+      - 'backend-v*'
   workflow_dispatch:
 
 env:
