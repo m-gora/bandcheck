@@ -14,10 +14,16 @@ export default defineConfig({
     // Optimize dependencies
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'mui-vendor': ['@mui/material', '@mui/icons-material'],
-          'auth-vendor': ['@auth0/auth0-react'],
+        manualChunks(id) {
+          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+            return 'react-vendor';
+          }
+          if (id.includes('@mui/material') || id.includes('@mui/icons-material')) {
+            return 'mui-vendor';
+          }
+          if (id.includes('@auth0/auth0-react')) {
+            return 'auth-vendor';
+          }
         },
       },
     },

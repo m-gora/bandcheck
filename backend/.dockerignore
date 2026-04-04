@@ -50,7 +50,7 @@ docs/
 k8s/
 K8S_DEPLOYMENT.md
 
-# Drizzle migrations (applied separately)
+# Drizzle migrations (generated during Docker build stage)
 drizzle/
 
 # Database files (don't include local DB in image)
