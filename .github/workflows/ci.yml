@@ -75,7 +75,7 @@ jobs:
           VITE_AUTH0_CLIENT_ID: "dummy_client_id"
 
       - name: Test frontend
-        run: bun test
+        run: bun run test
 
   # Trivy Security Scanning
   trivy-fs:
