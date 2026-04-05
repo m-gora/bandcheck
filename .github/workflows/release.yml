@@ -30,7 +30,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install semantic-release
+      - name: Release
+        working-directory: ./backend
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm install -g \
             semantic-release \
@@ -38,12 +41,7 @@ jobs:
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator \
             @semantic-release/github
-
-      - name: Release
-        working-directory: ./backend
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release-monorepo
+          semantic-release-monorepo
 
   release-frontend:
     name: Release Frontend
@@ -64,7 +62,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install semantic-release
+      - name: Release
+        working-directory: ./frontend
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm install -g \
             semantic-release \
@@ -72,9 +73,4 @@ jobs:
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator \
             @semantic-release/github
-
-      - name: Release
-        working-directory: ./frontend
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release-monorepo
+          semantic-release-monorepo

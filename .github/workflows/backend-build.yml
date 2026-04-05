@@ -51,14 +51,14 @@ jobs:
             type=ref,event=branch
             # Tag with PR number for pull requests
             type=ref,event=pr
-            # Tag with semver for version tags
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            # Tag with semver for backend-v* version tags
+            type=match,pattern=backend-v(.*),group=1
+            type=match,pattern=backend-v(\d+\.\d+)\.\d+,group=1
+            type=match,pattern=backend-v(\d+)\.\d+\.\d+,group=1
             # Tag with commit SHA
-            type=sha,prefix={{branch}}-
-            # Tag as latest for main branch
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha
+            # Tag as latest for main branch or version tag pushes
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' || github.ref == 'refs/heads/main' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
