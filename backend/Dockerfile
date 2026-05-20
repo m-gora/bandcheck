@@ -21,4 +21,4 @@ COPY drizzle.config.ts ./
 EXPOSE 3000
 
 # Migrations run automatically in server.ts on startup
-CMD ["bun", "run", "src/server.ts"]
+CMD ["src/server.ts"]

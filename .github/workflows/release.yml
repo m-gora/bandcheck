@@ -41,7 +41,7 @@ jobs:
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator \
             @semantic-release/github
-          semantic-release-monorepo
+          semantic-release
 
   release-frontend:
     name: Release Frontend
@@ -73,4 +73,4 @@ jobs:
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator \
             @semantic-release/github
-          semantic-release-monorepo
+          semantic-release

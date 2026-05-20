@@ -1,4 +1,5 @@
 {
+  "extends": "semantic-release-monorepo",
   "tagFormat": "backend-v${version}",
   "branches": ["main"],
   "plugins": [
