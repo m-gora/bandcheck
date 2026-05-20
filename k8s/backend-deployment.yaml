@@ -40,7 +40,7 @@ spec:
           mountPath: /app/data
       containers:
       - name: backend
-        image: ghcr.io/m-gora/bandcheck/backend:1.0.1
+        image: ghcr.io/m-gora/bandcheck/backend:1.0.2
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
