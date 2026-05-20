@@ -3,11 +3,6 @@ name: Build and Push Frontend
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-build.yml'
     tags:
       - 'frontend-v*'
   workflow_dispatch:
@@ -47,18 +42,12 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # Tag with branch name for branch pushes
-            type=ref,event=branch
-            # Tag with PR number for pull requests
-            type=ref,event=pr
             # Tag with semver for frontend-v* version tags
             type=match,pattern=frontend-v(.*),group=1
             type=match,pattern=frontend-v(\d+\.\d+)\.\d+,group=1
             type=match,pattern=frontend-v(\d+)\.\d+\.\d+,group=1
-            # Tag with commit SHA
-            type=sha
-            # Tag as latest for main branch or version tag pushes
-            type=raw,value=latest,enable=${{ github.ref_type == 'tag' || github.ref == 'refs/heads/main' }}
+            # Tag as latest
+            type=raw,value=latest
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
