@@ -21,7 +21,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: frontend
-        image: ghcr.io/m-gora/bandcheck/frontend:v1.0.1
+        image: ghcr.io/m-gora/bandcheck/frontend:1.0.1
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false

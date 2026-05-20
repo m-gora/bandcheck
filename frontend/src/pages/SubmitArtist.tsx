@@ -288,21 +288,16 @@ export default function SubmitArtist() {
                       variant="outlined"
                     />
                   )}
-                  renderTags={(value, getTagProps) =>
-                    value.map((option, index) => (
-                      <Chip
-                        {...getTagProps({ index })}
-                        key={option}
-                        label={option}
-                        size="small"
-                        sx={{
-                          borderRadius: '8px',
-                          backgroundColor: 'primary.100',
-                          color: 'primary.700',
-                        }}
-                      />
-                    ))
-                  }
+                  slotProps={{
+                    chip: {
+                      size: 'small',
+                      sx: {
+                        borderRadius: '8px',
+                        backgroundColor: 'primary.100',
+                        color: 'primary.700',
+                      },
+                    },
+                  }}
                 />
 
                 {/* Band Members */}
@@ -343,7 +338,7 @@ export default function SubmitArtist() {
                   </Stack>
 
                   {formData.members.length > 0 && (
-                    <Stack direction="row" flexWrap="wrap" gap={1}>
+                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                       {formData.members.map((member) => (
                         <Chip
                           key={member}

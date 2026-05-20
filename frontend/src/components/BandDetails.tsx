@@ -273,13 +273,13 @@ const BandDetails: React.FC = () => {
 
       {/* Band Header */}
       <Box sx={{ mb: 4 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2 }}>
+        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box sx={{ flex: 1 }}>
             <Typography variant="h3" component="h1" gutterBottom>
               {band.name}
             </Typography>
           </Box>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <Chip
               label={band.safetyStatus.charAt(0).toUpperCase() + band.safetyStatus.slice(1)}
               color={getSafetyColor(band.safetyStatus) as 'default' | 'success' | 'error' | 'warning'}
@@ -343,7 +343,7 @@ const BandDetails: React.FC = () => {
 
           {/* Description */}
           <Box>
-            <Typography variant="body1" color="text.secondary" paragraph>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
               {band.description}
             </Typography>
           </Box>
@@ -352,14 +352,14 @@ const BandDetails: React.FC = () => {
         {/* Band Details */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ mb: 3 }}>
           {band.location && (
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <LocationOn color="action" />
               <Typography variant="body2">{band.location}</Typography>
             </Box>
           )}
           
           {band.website && (
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Language color="action" />
               <Typography 
                 variant="body2" 
@@ -375,7 +375,7 @@ const BandDetails: React.FC = () => {
           )}
 
           {band.formed && (
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CalendarToday color="action" />
               <Typography variant="body2">Formed {band.formed}</Typography>
             </Box>
@@ -383,14 +383,14 @@ const BandDetails: React.FC = () => {
         </Stack>
 
         {/* Genres */}
-        <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 3 }}>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', mb: 3 }}>
           {band.genres.map((genre, index) => (
             <Chip key={index} label={genre} variant="outlined" color="primary" />
           ))}
         </Stack>
 
         {/* Stats */}
-        <Box display="flex" gap={3}>
+        <Box sx={{ display: 'flex', gap: 3 }}>
           <Typography variant="body2" color="text.secondary">
             {band.reviewCount} review{band.reviewCount !== 1 ? 's' : ''}
           </Typography>
@@ -407,7 +407,7 @@ const BandDetails: React.FC = () => {
         
         {/* Reviews List */}
         <Box>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h5" component="h2">
               Reviews ({reviews.length})
             </Typography>
@@ -451,8 +451,8 @@ const BandDetails: React.FC = () => {
               {reviews.map((review) => (
                 <Card key={review.id} variant="outlined">
                   <CardContent>
-                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2 }}>
-                      <Box display="flex" alignItems="center" gap={2}>
+                    <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar 
                           src={review.userAvatarUrl} 
                           sx={{ bgcolor: 'primary.main' }}
@@ -468,7 +468,7 @@ const BandDetails: React.FC = () => {
                           </Typography>
                         </Box>
                       </Box>
-                      <Stack direction="row" spacing={1} alignItems="center">
+                      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                         <Chip
                           label={review.safetyAssessment.charAt(0).toUpperCase() + review.safetyAssessment.slice(1)}
                           color={getSafetyColor(review.safetyAssessment) as 'default' | 'success' | 'error' | 'warning'}
@@ -487,13 +487,13 @@ const BandDetails: React.FC = () => {
                       </Stack>
                     </Stack>
 
-                    <Typography variant="body2" paragraph>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
                       {review.comment}
                     </Typography>
 
                     {review.evidence.length > 0 && (
                       <Box>
-                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
                           Evidence:
                         </Typography>
                         <Stack spacing={0.5}>

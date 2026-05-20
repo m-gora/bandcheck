@@ -45,13 +45,13 @@ export default function Imprint() {
           <Paper elevation={0} sx={{ p: 4, border: '1px solid', borderColor: 'divider' }}>
             <Stack spacing={3}>
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Service Provider
                 </Typography>
                 <Typography variant="body1">
                   BandCheck
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   Non-profit community platform
                 </Typography>
               </Box>
@@ -59,7 +59,7 @@ export default function Imprint() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Contact Information
                 </Typography>
                 <Typography variant="body1" component="div">
@@ -81,10 +81,10 @@ export default function Imprint() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Responsible for Content
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   According to § 55 Abs. 2 RStV (Germany):
                 </Typography>
                 <Typography variant="body1">
@@ -97,14 +97,14 @@ export default function Imprint() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   EU Dispute Resolution
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   The European Commission provides a platform for online dispute resolution (ODR): 
                   https://ec.europa.eu/consumers/odr/
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   Our email address can be found in the contact information above.
                 </Typography>
               </Box>
@@ -112,10 +112,10 @@ export default function Imprint() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Consumer Dispute Resolution
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We are not willing or obliged to participate in dispute resolution proceedings before a consumer arbitration board.
                 </Typography>
               </Box>
@@ -123,13 +123,13 @@ export default function Imprint() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Liability for Content
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   As a service provider, we are responsible for our own content on these pages in accordance with general legislation. However, we are not obligated to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   User-generated content (reviews, band submissions) represents the opinions of individual users and does not necessarily reflect the views of BandCheck.
                 </Typography>
               </Box>
@@ -137,10 +137,10 @@ export default function Imprint() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Liability for Links
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   Our website contains links to external websites over whose content we have no control. Therefore, we cannot accept any liability for this external content. The respective provider or operator of the pages is always responsible for the content of the linked pages.
                 </Typography>
               </Box>
@@ -148,19 +148,19 @@ export default function Imprint() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Copyright & Open Source License
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   BandCheck is <strong>open source software</strong> released under the <strong>MIT License</strong>.
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   Source Code: <Link href="https://github.com/m-gora/bandcheck" target="_blank" rel="noopener noreferrer" sx={{ color: 'primary.main' }}>github.com/m-gora/bandcheck</Link>
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   The platform is provided free of charge as a non-profit community service. Anyone is welcome to contribute, fork, or extend the platform under the terms of the MIT License.
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   User-generated content (reviews, band submissions, comments) remains the property of the respective users. By submitting content, users grant BandCheck a non-exclusive license to display and distribute this content on the platform for the benefit of the community.
                 </Typography>
               </Box>
@@ -168,10 +168,10 @@ export default function Imprint() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Data Protection
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   Information about the handling of your personal data can be found in our Privacy Policy.
                 </Typography>
               </Box>
@@ -179,10 +179,10 @@ export default function Imprint() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Third-Party Services
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   This platform uses the following third-party services:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -194,7 +194,7 @@ export default function Imprint() {
           </Paper>
 
           <Alert severity="warning">
-            <Typography variant="body2" fontWeight="bold" gutterBottom>
+            <Typography variant="body2" sx={{ fontWeight: 'bold' }} gutterBottom>
               Important Notice
             </Typography>
             <Typography variant="body2">

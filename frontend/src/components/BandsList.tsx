@@ -114,7 +114,7 @@ const BandsList: React.FC = () => {
 
           <Stack spacing={1} sx={{ mb: 2 }}>
             {/* Genres */}
-            <Stack direction="row" spacing={0.5} flexWrap="wrap">
+            <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap' }}>
               {band.genres.map((genre: string, index: number) => (
                 <Chip
                   key={index}
@@ -128,7 +128,7 @@ const BandsList: React.FC = () => {
 
             {/* Location */}
             {band.location && (
-              <Box display="flex" alignItems="center" gap={0.5}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <LocationOn fontSize="small" color="action" />
                 <Typography variant="caption" color="text.secondary">
                   {band.location}
@@ -138,7 +138,7 @@ const BandsList: React.FC = () => {
 
             {/* Website */}
             {band.website && (
-              <Box display="flex" alignItems="center" gap={0.5}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Language fontSize="small" color="action" />
                 <Typography variant="caption" color="text.secondary">
                   Website
@@ -148,7 +148,7 @@ const BandsList: React.FC = () => {
           </Stack>
 
           {/* Safety Status */}
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Chip
               label={band.safetyStatus.charAt(0).toUpperCase() + band.safetyStatus.slice(1)}
               color={
@@ -180,7 +180,7 @@ const BandsList: React.FC = () => {
               <Skeleton variant="rectangular" width={60} height={24} sx={{ mr: 1, display: 'inline-block' }} />
               <Skeleton variant="rectangular" width={80} height={24} sx={{ display: 'inline-block' }} />
             </Box>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Skeleton variant="rectangular" width={80} height={24} />
               <Skeleton variant="text" width={60} height={16} />
             </Box>
@@ -192,16 +192,16 @@ const BandsList: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ pt: { xs: 12, sm: 14 }, pb: 4 }}>
-      <Typography variant="h4" component="h2" gutterBottom textAlign="center">
+      <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center' }}>
         Explore Bands
       </Typography>
-      <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mb: 4 }}>
+      <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', mb: 4 }}>
         Discover and review local bands. Help build a safer music community.
       </Typography>
 
       {/* Search and Filter Controls */}
       <Box component="form" onSubmit={handleSearchSubmit} sx={{ mb: 4 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: 'center' }}>
           <TextField
             fullWidth
             label="Search bands..."
@@ -268,7 +268,7 @@ const BandsList: React.FC = () => {
 
       {/* No Results */}
       {!isLoading && data?.bands.length === 0 && (
-        <Box textAlign="center" py={4}>
+        <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" gutterBottom>
             No bands found
           </Typography>

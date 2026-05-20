@@ -38,10 +38,10 @@ export default function TermsOfService() {
           <Paper elevation={0} sx={{ p: 4, border: '1px solid', borderColor: 'divider' }}>
             <Stack spacing={3}>
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   1. Acceptance of Terms
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   By accessing and using BandCheck, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.
                 </Typography>
               </Box>
@@ -49,10 +49,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   2. Description of Service
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   BandCheck is a community-driven platform that allows users to:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -61,7 +61,7 @@ export default function TermsOfService() {
                   <li>Provide safety assessments and reviews of bands</li>
                   <li>Access community-driven safety ratings</li>
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   The service is provided on a <strong>non-profit basis</strong> for informational and community purposes only. This platform is maintained and funded by its operator without commercial intent, as a service to the music community.
                 </Typography>
               </Box>
@@ -69,10 +69,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   3. User Accounts
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   To access certain features, you must create an account. You agree to:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -86,10 +86,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   4. User Conduct
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   You agree NOT to:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -106,13 +106,13 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   5. Content and Reviews
                 </Typography>
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                   5.1 User-Generated Content
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   By submitting content (reviews, band submissions, comments), you:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -125,7 +125,7 @@ export default function TermsOfService() {
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                   5.2 Content Standards
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   All reviews and submissions must:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -138,7 +138,7 @@ export default function TermsOfService() {
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                   5.3 Community Opinion
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   Safety assessments and reviews represent individual user opinions and do not necessarily reflect the views of BandCheck. We do not endorse or verify the accuracy of user-submitted content.
                 </Typography>
               </Box>
@@ -146,19 +146,19 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   6. Intellectual Property & Open Source
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   BandCheck is operated as a non-profit, community service and is <strong>open source software</strong> released under the <strong>MIT License</strong>.
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   The complete source code is available at: <Link href="https://github.com/m-gora/bandcheck" target="_blank" rel="noopener noreferrer" sx={{ color: 'primary.main' }}>github.com/m-gora/bandcheck</Link>
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   Under the MIT License, you are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, subject to the conditions in the license. This means anyone can contribute to, fork, or extend the platform.
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   User-generated content (reviews, band submissions) remains the property of the users who created it, and the community benefits from these contributions.
                 </Typography>
               </Box>
@@ -166,10 +166,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   7. Disclaimer of Warranties
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   BandCheck is provided "AS IS" without warranties of any kind. We do not guarantee:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -183,10 +183,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   8. Limitation of Liability
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   To the maximum extent permitted by law, BandCheck and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the service.
                 </Typography>
               </Box>
@@ -194,10 +194,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   9. Content Moderation
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We reserve the right to:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -210,10 +210,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   10. Termination
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   You may terminate your account at any time. We may terminate or suspend your access immediately, without prior notice, for any breach of these Terms.
                 </Typography>
               </Box>
@@ -221,10 +221,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   11. Changes to Terms
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We reserve the right to modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms.
                 </Typography>
               </Box>
@@ -232,10 +232,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   12. Governing Law
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   These Terms shall be governed by and construed in accordance with the laws of the European Union and applicable national laws, without regard to conflict of law provisions.
                 </Typography>
               </Box>
@@ -243,10 +243,10 @@ export default function TermsOfService() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   13. Contact Information
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   For questions about these Terms, please contact us through the information provided in our Imprint page.
                 </Typography>
               </Box>

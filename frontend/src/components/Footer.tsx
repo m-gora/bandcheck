@@ -30,10 +30,10 @@ export default function Footer() {
       <Container maxWidth="lg">
         <Stack spacing={4}>
           {/* Brand and Description */}
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
             <ShieldIcon sx={{ fontSize: 32, color: 'primary.main' }} />
             <Box>
-              <Typography variant="h6" fontWeight="bold" color="text.primary">
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }} color="text.primary">
                 BandCheck
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -58,7 +58,7 @@ export default function Footer() {
           >
             {/* Platform */}
             <Stack spacing={1}>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+              <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }} gutterBottom>
                 Platform
               </Typography>
               <Link
@@ -97,7 +97,7 @@ export default function Footer() {
 
             {/* Legal */}
             <Stack spacing={1}>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+              <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }} gutterBottom>
                 Legal
               </Typography>
               <Link
@@ -128,7 +128,7 @@ export default function Footer() {
 
             {/* Community */}
             <Stack spacing={1}>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+              <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }} gutterBottom>
                 Community
               </Typography>
               <Link
@@ -143,7 +143,7 @@ export default function Footer() {
 
             {/* Connect */}
             <Stack spacing={1}>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+              <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }} gutterBottom>
                 Connect
               </Typography>
               <Box>
@@ -167,8 +167,7 @@ export default function Footer() {
           {/* Copyright and Legal Links */}
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
-            justifyContent="space-between"
-            alignItems={{ xs: 'flex-start', sm: 'center' }}
+            sx={{ justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}
             spacing={2}
           >
             <Typography variant="body2" color="text.secondary">

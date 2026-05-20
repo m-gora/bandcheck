@@ -241,10 +241,10 @@ export default function WriteReview() {
             />
             
             <Box>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                 {band.name}
               </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
                 {band.genres.slice(0, 2).map((genre) => (
                   <Chip
                     key={genre}
@@ -325,7 +325,7 @@ export default function WriteReview() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <CheckCircleIcon sx={{ color: 'success.main', fontSize: '20px' }} />
                           <Box>
-                            <Typography variant="body1" fontWeight="bold">
+                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                               Safe
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
@@ -351,7 +351,7 @@ export default function WriteReview() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <WarningIcon sx={{ color: 'error.main', fontSize: '20px' }} />
                           <Box>
-                            <Typography variant="body1" fontWeight="bold">
+                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                               Unsafe
                             </Typography>
                             <Typography variant="body2" color="text.secondary">

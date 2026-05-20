@@ -79,14 +79,14 @@ const About: React.FC = () => {
 
       {/* Mission Statement */}
       <Paper elevation={2} sx={{ p: 6, mb: 8, bgcolor: 'primary.50', borderRadius: 3 }}>
-        <Typography variant="h4" component="h2" gutterBottom textAlign="center" color="primary.main">
+        <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center' }} color="primary.main">
           Our Mission
         </Typography>
-        <Typography variant="h6" textAlign="center" sx={{ lineHeight: 1.7, color: 'text.secondary', mb: 3 }}>
+        <Typography variant="h6" sx={{ textAlign: 'center', lineHeight: 1.7, color: 'text.secondary', mb: 3 }}>
           Bandcheck's mission is to make discovering music safer. Our service delivers tools where the 
           community contributes to safer listening experiences by building a shared knowledge base of content warnings.
         </Typography>
-        <Typography variant="body1" textAlign="center" sx={{ lineHeight: 1.6, color: 'text.secondary' }}>
+        <Typography variant="body1" sx={{ textAlign: 'center', lineHeight: 1.6, color: 'text.secondary' }}>
           Reviews are evidence-based and focus on content warnings rather than subjective ratings. 
           This empowers users to make informed decisions about the music they choose to listen to. 
           The whole platform is non-profit and open source because we believe access to information 
@@ -96,7 +96,7 @@ const About: React.FC = () => {
 
       {/* Features */}
       <Box sx={{ mb: 8 }}>
-        <Typography variant="h4" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+        <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center', mb: 6 }}>
           What We Do
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 4 }}>
@@ -124,12 +124,12 @@ const About: React.FC = () => {
 
       {/* Core Principles */}
       <Paper elevation={1} sx={{ p: 6, mb: 8, bgcolor: 'background.default', borderRadius: 3 }}>
-        <Typography variant="h4" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+        <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center', mb: 6 }}>
           Core Principles
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 4 }}>
           {stats.map((stat, index) => (
-            <Box key={index} textAlign="center">
+            <Box key={index} sx={{ textAlign: 'center' }}>
               <Typography variant="h5" component="div" color="primary.main" sx={{ fontWeight: 'bold', mb: 1 }}>
                 {stat.number}
               </Typography>
@@ -143,11 +143,11 @@ const About: React.FC = () => {
 
       {/* How It Works */}
       <Box sx={{ mb: 8 }}>
-        <Typography variant="h4" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+        <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center', mb: 6 }}>
           How It Works
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 4 }}>
-          <Box textAlign="center">
+          <Box sx={{ textAlign: 'center' }}>
             <Avatar sx={{ bgcolor: 'secondary.main', width: 80, height: 80, mx: 'auto', mb: 3 }}>
               <Typography variant="h4" color="white">1</Typography>
             </Avatar>
@@ -158,7 +158,7 @@ const About: React.FC = () => {
               Search our database of bands with comprehensive content warning filters to find music that's right for you.
             </Typography>
           </Box>
-          <Box textAlign="center">
+          <Box sx={{ textAlign: 'center' }}>
             <Avatar sx={{ bgcolor: 'secondary.main', width: 80, height: 80, mx: 'auto', mb: 3 }}>
               <Typography variant="h4" color="white">2</Typography>
             </Avatar>
@@ -169,7 +169,7 @@ const About: React.FC = () => {
               Access evidence-based information about lyrical themes, content types, and potential triggers.
             </Typography>
           </Box>
-          <Box textAlign="center">
+          <Box sx={{ textAlign: 'center' }}>
             <Avatar sx={{ bgcolor: 'secondary.main', width: 80, height: 80, mx: 'auto', mb: 3 }}>
               <Typography variant="h4" color="white">3</Typography>
             </Avatar>
@@ -185,7 +185,7 @@ const About: React.FC = () => {
 
       {/* Creator Section */}
       <Box sx={{ mb: 8 }}>
-        <Typography variant="h4" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+        <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center', mb: 6 }}>
           Creator & Community
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 6 }}>
@@ -215,7 +215,7 @@ const About: React.FC = () => {
             </CardContent>
           </Card>
         </Box>
-        <Box textAlign="center">
+        <Box sx={{ textAlign: 'center' }}>
           <Typography variant="h6" gutterBottom>
             Open Source Future
           </Typography>
@@ -229,11 +229,11 @@ const About: React.FC = () => {
 
       {/* Values */}
       <Paper elevation={2} sx={{ p: 6, mb: 8, bgcolor: 'background.paper', borderRadius: 3 }}>
-        <Typography variant="h4" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+        <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center', mb: 6 }}>
           Our Values
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 4 }}>
-          <Stack alignItems="center" textAlign="center">
+          <Stack sx={{ alignItems: 'center', textAlign: 'center' }}>
             <Security sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>
               Informed Choice
@@ -242,7 +242,7 @@ const About: React.FC = () => {
               Everyone deserves access to information that helps them make informed decisions about their music consumption.
             </Typography>
           </Stack>
-          <Stack alignItems="center" textAlign="center">
+          <Stack sx={{ alignItems: 'center', textAlign: 'center' }}>
             <Groups sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>
               Evidence Based
@@ -251,7 +251,7 @@ const About: React.FC = () => {
               All content warnings focus on factual information rather than subjective opinions or ratings.
             </Typography>
           </Stack>
-          <Stack alignItems="center" textAlign="center">
+          <Stack sx={{ alignItems: 'center', textAlign: 'center' }}>
             <TrendingUp sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
             <Typography variant="h6" gutterBottom>
               Open Access

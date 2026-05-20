@@ -151,22 +151,22 @@ export default function BandOverview() {
               placeholder="Search bands, genres, or locations..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: 'text.secondary' }} />
-                  </InputAdornment>
-                ),
-                sx: {
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
                   borderRadius: '12px',
                   backgroundColor: 'background.paper',
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor: 'divider',
                   },
-                },
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
                   '&:hover .MuiOutlinedInput-notchedOutline': {
                     borderColor: 'primary.main',
                   },

@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import WarningIcon from '@mui/icons-material/Warning';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import { useNavigate } from 'react-router-dom';
@@ -155,9 +155,9 @@ export default function SafetyReports() {
               }}
             >
               <CardContent>
-                <Stack spacing={2} alignItems="center" textAlign="center">
+                <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center' }}>
                   <VerifiedUserIcon sx={{ fontSize: 48 }} />
-                  <Typography variant="h3" fontWeight="bold">
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                     {statistics.safe}
                   </Typography>
                   <Typography variant="h6">Safe Bands</Typography>
@@ -173,9 +173,9 @@ export default function SafetyReports() {
               }}
             >
               <CardContent>
-                <Stack spacing={2} alignItems="center" textAlign="center">
+                <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center' }}>
                   <WarningIcon sx={{ fontSize: 48 }} />
-                  <Typography variant="h3" fontWeight="bold">
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                     {statistics.unsafe}
                   </Typography>
                   <Typography variant="h6">Unsafe Bands</Typography>
@@ -191,9 +191,9 @@ export default function SafetyReports() {
               }}
             >
               <CardContent>
-                <Stack spacing={2} alignItems="center" textAlign="center">
+                <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center' }}>
                   <WarningIcon sx={{ fontSize: 48 }} />
-                  <Typography variant="h3" fontWeight="bold">
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                     {statistics.controversial}
                   </Typography>
                   <Typography variant="h6">Controversial</Typography>
@@ -209,9 +209,9 @@ export default function SafetyReports() {
               }}
             >
               <CardContent>
-                <Stack spacing={2} alignItems="center" textAlign="center">
+                <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center' }}>
                   <HelpOutlineIcon sx={{ fontSize: 48 }} />
-                  <Typography variant="h3" fontWeight="bold">
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                     {statistics.pending}
                   </Typography>
                   <Typography variant="h6">Pending Review</Typography>
@@ -227,9 +227,9 @@ export default function SafetyReports() {
               }}
             >
               <CardContent>
-                <Stack spacing={2} alignItems="center" textAlign="center">
+                <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center' }}>
                   <TrendingUpIcon sx={{ fontSize: 48 }} />
-                  <Typography variant="h3" fontWeight="bold">
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                     {statistics.total}
                   </Typography>
                   <Typography variant="h6">Total Bands</Typography>
@@ -243,7 +243,7 @@ export default function SafetyReports() {
           <Stack spacing={3}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <TrendingUpIcon color="primary" />
-              <Typography variant="h5" fontWeight="bold">
+              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                 Latest Bands Added
               </Typography>
             </Box>
@@ -265,7 +265,7 @@ export default function SafetyReports() {
                     onClick={() => navigate(`/artist/${band.id}`)}
                   >
                     <CardContent>
-                      <Stack direction="row" spacing={2} alignItems="center">
+                      <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                         <Avatar
                           src={band.imageUrl}
                           alt={band.name}
@@ -274,14 +274,14 @@ export default function SafetyReports() {
                           {band.name[0]}
                         </Avatar>
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="h6" fontWeight="bold">
+                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                             {band.name}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             {band.genres.join(', ')}
                           </Typography>
                         </Box>
-                        <Stack spacing={1} alignItems="flex-end">
+                        <Stack spacing={1} sx={{ alignItems: 'flex-end' }}>
                           <Chip
                             icon={getSafetyIcon(band.safetyStatus)}
                             label={band.safetyStatus.toUpperCase()}
@@ -306,7 +306,7 @@ export default function SafetyReports() {
           <Stack spacing={3}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <RateReviewIcon color="primary" />
-              <Typography variant="h5" fontWeight="bold">
+              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                 Latest Community Reviews
               </Typography>
             </Box>
@@ -319,7 +319,7 @@ export default function SafetyReports() {
                   <Card key={review.id}>
                     <CardContent>
                       <Stack spacing={2}>
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                           <Avatar
                             src={review.userAvatarUrl}
                             alt={review.userDisplayName}
@@ -327,7 +327,7 @@ export default function SafetyReports() {
                             {review.userDisplayName[0]}
                           </Avatar>
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle1" fontWeight="bold">
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                               {review.userDisplayName}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">

@@ -37,10 +37,10 @@ export default function PrivacyPolicy() {
           <Paper elevation={0} sx={{ p: 4, border: '1px solid', borderColor: 'divider' }}>
             <Stack spacing={3}>
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   1. Introduction
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   BandCheck ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
                 </Typography>
               </Box>
@@ -48,13 +48,13 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   2. Information We Collect
                 </Typography>
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                   2.1 Account Information
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   When you create an account through our authentication provider (Auth0), we collect:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -67,7 +67,7 @@ export default function PrivacyPolicy() {
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                   2.2 Content You Provide
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   When you use BandCheck, we collect:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -79,7 +79,7 @@ export default function PrivacyPolicy() {
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                   2.3 Automatically Collected Information
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We may collect:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -93,10 +93,10 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   3. How We Use Your Information
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We use your information to:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -113,10 +113,10 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   4. Data Sharing and Disclosure
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We do not sell your personal information. We may share your information with:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -129,10 +129,10 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   5. Your Rights (GDPR)
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   Under GDPR, you have the right to:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -143,7 +143,7 @@ export default function PrivacyPolicy() {
                   <li>Data portability</li>
                   <li>Withdraw consent at any time</li>
                 </Typography>
-                <Typography variant="body1" paragraph sx={{ mt: 2 }}>
+                <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
                   To exercise these rights, please contact us at the email provided in our Imprint.
                 </Typography>
               </Box>
@@ -151,10 +151,10 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   6. Data Security
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We implement appropriate technical and organizational measures to protect your personal data, including:
                 </Typography>
                 <Typography component="ul" variant="body1" sx={{ pl: 4 }}>
@@ -168,10 +168,10 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   7. Data Retention
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We retain your personal data only as long as necessary to provide our services and fulfill the purposes outlined in this policy. You may request deletion of your account and associated data at any time.
                 </Typography>
               </Box>
@@ -179,10 +179,10 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   8. Cookies and Data Storage
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We use <strong>strictly necessary cookies and local storage only</strong>, which are essential for the platform to function. 
                   No consent is required for these as they are technically necessary.
                 </Typography>
@@ -203,7 +203,7 @@ export default function PrivacyPolicy() {
                   <li>No user behavior profiling</li>
                   <li>No cross-site tracking</li>
                 </Typography>
-                <Typography variant="body1" paragraph sx={{ mt: 2 }}>
+                <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
                   You can clear authentication data at any time by logging out or clearing your browser's local storage.
                 </Typography>
               </Box>
@@ -211,10 +211,10 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   9. Children's Privacy
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   Our service is not intended for users under 16 years of age. We do not knowingly collect personal information from children under 16.
                 </Typography>
               </Box>
@@ -222,10 +222,10 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   10. Changes to This Policy
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.
                 </Typography>
               </Box>
@@ -233,10 +233,10 @@ export default function PrivacyPolicy() {
               <Divider />
 
               <Box>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                   11. Contact Us
                 </Typography>
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" sx={{ mb: 2 }}>
                   If you have questions about this Privacy Policy, please contact us through the information provided in our Imprint page.
                 </Typography>
               </Box>

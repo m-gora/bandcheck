@@ -295,7 +295,7 @@ export default function ArtistDetail() {
           {/* Artist Info */}
           <Box sx={{ p: { xs: 3, md: 4 } }}>
             <Stack spacing={3}>
-              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+              <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
                   <Typography
                     variant="h3"
@@ -309,7 +309,7 @@ export default function ArtistDetail() {
                     {band.name}
                   </Typography>
                   
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
                     <LocationOnIcon sx={{ color: 'text.secondary', fontSize: '20px' }} />
                     <Typography variant="body1" color="text.secondary">
                       {band.location}
@@ -346,7 +346,7 @@ export default function ArtistDetail() {
               </Stack>
 
               {/* Genres */}
-              <Stack direction="row" flexWrap="wrap" gap={1}>
+              <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                 {band.genres.slice(0, 3).map((genre) => (
                   <Chip
                     key={genre}
@@ -428,7 +428,7 @@ export default function ArtistDetail() {
                 <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                   <Stack spacing={3}>
                     {/* Review Header */}
-                    <Stack direction="row" spacing={2} alignItems="flex-start">
+                    <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
                       <Avatar
                         src={review.reviewerAvatar}
                         alt={review.reviewerName}
@@ -436,8 +436,8 @@ export default function ArtistDetail() {
                       />
                       
                       <Box sx={{ flexGrow: 1 }}>
-                        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
-                          <Typography variant="subtitle1" fontWeight="bold">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                             {review.reviewerName}
                           </Typography>
                           
@@ -468,7 +468,7 @@ export default function ArtistDetail() {
                         
 
                         
-                        <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                           {review.title}
                         </Typography>
                       </Box>
@@ -487,7 +487,7 @@ export default function ArtistDetail() {
 
                     {/* Evidence Section */}
                     <Box>
-                      <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 2 }}>
                         Supporting Evidence:
                       </Typography>
                       <Stack spacing={1}>
@@ -521,7 +521,7 @@ export default function ArtistDetail() {
                     <Divider />
 
                     {/* Review Actions */}
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
                       <Typography variant="body2" color="text.secondary">
                         {review.helpful} people found this helpful
                       </Typography>

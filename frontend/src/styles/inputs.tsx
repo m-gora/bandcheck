@@ -50,53 +50,6 @@ export const inputsCustomizations: Components<Theme> = {
         padding: '16px 32px',
         fontSize: '1rem',
       },
-      containedPrimary: ({ theme: _theme }) => ({
-        backgroundColor: brand[500],
-        color: 'white',
-        border: 'none',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        '&:hover': {
-          backgroundColor: brand[600],
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          transform: 'translateY(-1px)',
-        },
-        '&:active': {
-          backgroundColor: brand[700],
-          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)',
-          transform: 'translateY(0)',
-        },
-        '&:disabled': {
-          backgroundColor: gray[300],
-          color: gray[500],
-          boxShadow: 'none',
-        },
-      }),
-      containedSecondary: ({ theme }) => ({
-        backgroundColor: gray[100],
-        color: gray[800],
-        border: 'none',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-        '&:hover': {
-          backgroundColor: gray[200],
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
-          transform: 'translateY(-1px)',
-        },
-        '&:active': {
-          backgroundColor: gray[300],
-          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)',
-          transform: 'translateY(0)',
-        },
-        ...theme.applyStyles('dark', {
-          backgroundColor: gray[700],
-          color: gray[100],
-          '&:hover': {
-            backgroundColor: gray[600],
-          },
-          '&:active': {
-            backgroundColor: gray[800],
-          },
-        }),
-      }),
       outlined: ({ theme }) => ({
         backgroundColor: 'transparent',
         color: theme.palette.text.primary,
@@ -121,18 +74,6 @@ export const inputsCustomizations: Components<Theme> = {
           },
         }),
       }),
-      outlinedPrimary: ({ theme: _theme }) => ({
-        color: brand[600],
-        borderColor: brand[300],
-        '&:hover': {
-          backgroundColor: alpha(brand[100], 0.5),
-          borderColor: brand[400],
-        },
-        '&:active': {
-          backgroundColor: alpha(brand[200], 0.5),
-          borderColor: brand[500],
-        },
-      }),
       text: ({ theme }) => ({
         backgroundColor: 'transparent',
         color: theme.palette.text.primary,
@@ -153,16 +94,89 @@ export const inputsCustomizations: Components<Theme> = {
           },
         }),
       }),
-      textPrimary: {
-        color: brand[600],
-        '&:hover': {
-          backgroundColor: alpha(brand[100], 0.8),
-        },
-        '&:active': {
-          backgroundColor: alpha(brand[200], 0.8),
+    },
+    variants: [
+      {
+        props: { variant: 'contained', color: 'primary' },
+        style: {
+          backgroundColor: brand[500],
+          color: 'white',
+          border: 'none',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          '&:hover': {
+            backgroundColor: brand[600],
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            transform: 'translateY(-1px)',
+          },
+          '&:active': {
+            backgroundColor: brand[700],
+            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0)',
+          },
+          '&:disabled': {
+            backgroundColor: gray[300],
+            color: gray[500],
+            boxShadow: 'none',
+          },
         },
       },
-    },
+      {
+        props: { variant: 'contained', color: 'secondary' },
+        style: ({ theme }: { theme: Theme }) => ({
+          backgroundColor: gray[100],
+          color: gray[800],
+          border: 'none',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+          '&:hover': {
+            backgroundColor: gray[200],
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
+            transform: 'translateY(-1px)',
+          },
+          '&:active': {
+            backgroundColor: gray[300],
+            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)',
+            transform: 'translateY(0)',
+          },
+          ...theme.applyStyles('dark', {
+            backgroundColor: gray[700],
+            color: gray[100],
+            '&:hover': {
+              backgroundColor: gray[600],
+            },
+            '&:active': {
+              backgroundColor: gray[800],
+            },
+          }),
+        }),
+      },
+      {
+        props: { variant: 'outlined', color: 'primary' },
+        style: {
+          color: brand[600],
+          borderColor: brand[300],
+          '&:hover': {
+            backgroundColor: alpha(brand[100], 0.5),
+            borderColor: brand[400],
+          },
+          '&:active': {
+            backgroundColor: alpha(brand[200], 0.5),
+            borderColor: brand[500],
+          },
+        },
+      },
+      {
+        props: { variant: 'text', color: 'primary' },
+        style: {
+          color: brand[600],
+          '&:hover': {
+            backgroundColor: alpha(brand[100], 0.8),
+          },
+          '&:active': {
+            backgroundColor: alpha(brand[200], 0.8),
+          },
+        },
+      },
+    ],
   },
   MuiIconButton: {
     styleOverrides: {

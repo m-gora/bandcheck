@@ -21,7 +21,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: backend
-        image: ghcr.io/m-gora/bandcheck/backend:v1.0.1
+        image: ghcr.io/m-gora/bandcheck/backend:1.0.1
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
