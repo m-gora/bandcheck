@@ -24,6 +24,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ secrets.SEMVER_PAT }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -56,6 +57,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ secrets.SEMVER_PAT }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
