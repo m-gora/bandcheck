@@ -1,11 +1,5 @@
 #!/usr/bin/env sh
 set -e
 
-# Initialize database schema if database doesn't exist
-if [ ! -f /app/data/bandcheck.db ]; then
-  echo "Initializing database schema..."
-  bun run db:push
-fi
-
-# Start the server
+# Start the server (migrations run automatically on startup via server.ts)
 exec bun run src/server.ts
