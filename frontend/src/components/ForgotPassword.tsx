@@ -24,7 +24,7 @@ export default function ForgotPassword({ open, handleClose }: Readonly<ForgotPas
           onSubmit: ((event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
             handleClose();
-          }) as any,
+          }) as unknown as React.FormEventHandler<HTMLDivElement>,
           sx: { backgroundImage: 'none' },
         },
       }}
