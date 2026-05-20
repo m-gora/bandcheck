@@ -20,6 +20,24 @@ spec:
         fsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+      - name: fix-permissions
+        image: busybox:1.37
+        command: ["sh", "-c", "chown -R 65532:65532 /app/data && chmod 755 /app/data"]
+        securityContext:
+          runAsUser: 0
+          runAsNonRoot: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - CHOWN
+              - DAC_OVERRIDE
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
       containers:
       - name: backend
         image: ghcr.io/m-gora/bandcheck/backend:1.0.1
