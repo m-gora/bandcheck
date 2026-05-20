@@ -47,3 +47,12 @@ updates:
       frontend-docker:
         patterns:
           - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/k8s"
+    schedule:
+      interval: "daily"
+    groups:
+      k8s-docker:
+        patterns:
+          - "*"

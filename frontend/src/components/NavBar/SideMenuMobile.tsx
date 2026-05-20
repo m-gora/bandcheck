@@ -20,7 +20,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 interface SideMenuMobileProps {
   open: boolean | undefined;

@@ -21,7 +21,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShieldIcon from '@mui/icons-material/Shield';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 // Sample band data (in real app, this would come from an API)
 const sampleBands = [

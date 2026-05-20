@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useCreateBand } from '../hooks/useBands';
 
 // Metal subgenre options for the form

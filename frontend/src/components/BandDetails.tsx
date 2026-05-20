@@ -39,7 +39,7 @@ import {
   Delete,
 } from '@mui/icons-material';
 import { useBandDetails, useCreateReview } from '../hooks/useBands';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
 
 const BandDetails: React.FC = () => {

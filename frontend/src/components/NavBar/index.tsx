@@ -21,7 +21,7 @@ import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
 import ThemeToggle from '../ThemeToggle';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 
 const Toolbar = styled(MuiToolbar)({

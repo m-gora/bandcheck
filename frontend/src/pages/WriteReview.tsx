@@ -26,7 +26,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningIcon from '@mui/icons-material/Warning';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 // Sample band data (same as used elsewhere - in real app would come from API)
 const sampleBands = [

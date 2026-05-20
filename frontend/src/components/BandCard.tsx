@@ -12,7 +12,7 @@ import {
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShieldIcon from '@mui/icons-material/Shield';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 interface Band {

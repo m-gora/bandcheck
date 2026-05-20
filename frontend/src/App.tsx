@@ -1,6 +1,6 @@
 import { Auth0Provider } from '@auth0/auth0-react';
 import AppRoutes from './routes/AppRoutes';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './context/AuthProvider';
 
 export default function App() {
   const domain = import.meta.env.VITE_AUTH0_DOMAIN;

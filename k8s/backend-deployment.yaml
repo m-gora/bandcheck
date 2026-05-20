@@ -15,12 +15,13 @@ spec:
       labels:
         app: bandcheck-backend
     spec:
+      automountServiceAccountToken: false
       securityContext:
         seccompProfile:
           type: RuntimeDefault
       containers:
       - name: backend
-        image: ghcr.io/m-gora/bandcheck/backend:latest
+        image: ghcr.io/m-gora/bandcheck/backend:sha-44c9483
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
@@ -73,9 +74,11 @@ spec:
           requests:
             memory: "256Mi"
             cpu: "250m"
+            ephemeral-storage: "256Mi"
           limits:
             memory: "512Mi"
             cpu: "500m"
+            ephemeral-storage: "512Mi"
         livenessProbe:
           httpGet:
             path: /health
