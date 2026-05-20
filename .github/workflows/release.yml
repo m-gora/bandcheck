@@ -33,7 +33,7 @@ jobs:
       - name: Release
         working-directory: ./backend
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SEMVER_PAT }}
         run: |
           npm install -g \
             semantic-release \
@@ -65,7 +65,7 @@ jobs:
       - name: Release
         working-directory: ./frontend
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SEMVER_PAT }}
         run: |
           npm install -g \
             semantic-release \
