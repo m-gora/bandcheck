@@ -30,7 +30,7 @@ COPY . .
 RUN bun run build
 
 # Production stage
-FROM nginx:1.31-alpine
+FROM nginx:1.31.1-alpine
 
 # Update Alpine packages to fix known OS CVEs
 RUN apk upgrade --no-cache
