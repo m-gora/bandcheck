@@ -6,4 +6,6 @@ data/
 *.db-wal
 .env
 .env.local
-drizzle/
+drizzle/*
+!drizzle/postgres/
+!drizzle/postgres/**

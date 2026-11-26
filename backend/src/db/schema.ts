@@ -1,24 +1,28 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
-export const bands = sqliteTable('bands', {
+export const bands = pgTable('bands', {
   id: text('id').primaryKey(),
   maId: text('ma_id'),
   name: text('name').notNull(),
   description: text('description').notNull().default(''),
-  genres: text('genres').notNull(), // JSON array
+  genres: jsonb('genres').$type<string[]>().notNull(),
   location: text('location'),
   formed: text('formed'),
   website: text('website'),
   imageUrl: text('image_url'),
-  members: text('members'), // JSON array
+  members: jsonb('members').$type<string[]>(),
   safetyStatus: text('safety_status').notNull().default('pending'), // 'safe' | 'unsafe' | 'controversial' | 'pending'
   reviewCount: integer('review_count').notNull().default(0),
-  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const reviews = sqliteTable('reviews', {
+export const reviews = pgTable('reviews', {
   id: text('id').primaryKey(),
   bandId: text('band_id').notNull().references(() => bands.id),
   userId: text('user_id').notNull(),
@@ -26,7 +30,11 @@ export const reviews = sqliteTable('reviews', {
   userAvatarUrl: text('user_avatar_url'),
   safetyAssessment: text('safety_assessment').notNull(), // 'safe' | 'unsafe' | 'controversial'
   comment: text('comment').notNull(),
-  evidence: text('evidence'), // JSON array
-  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  evidence: jsonb('evidence').$type<string[]>(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });

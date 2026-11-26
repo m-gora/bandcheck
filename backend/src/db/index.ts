@@ -1,12 +1,18 @@
-import { drizzle } from 'drizzle-orm/bun-sqlite';
-import { Database } from 'bun:sqlite';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from './schema';
 
-const DATABASE_URL = process.env.DATABASE_URL || './data/bandcheck.db';
+const databaseUrl = process.env.DATABASE_URL;
 
-// Create database connection using Bun's built-in SQLite
-export const sqlite = new Database(DATABASE_URL, { create: true });
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL must be set to connect to PostgreSQL');
+}
 
-export const db = drizzle(sqlite, { schema });
+export const client = postgres(databaseUrl, {
+  max: Number(process.env.DATABASE_POOL_MAX ?? 5),
+  connect_timeout: 10,
+});
+
+export const db = drizzle(client, { schema });
 
 export * from './schema';

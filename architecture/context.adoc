@@ -39,7 +39,7 @@ Metal Archives::
 graph TB
     U[Users] -- HTTPS --> CF[Cloudflare<br/>DNS + CDN]
     CF -- HTTPS --> BC[Bandcheck Platform<br/>Frontend + Backend]
-    BC -- storage/retrieval --> DB[(SQLite Database<br/>PersistentVolume)]
+    BC -- storage/retrieval --> DB[(PostgreSQL<br/>Hetzner k3s)]
     BC -- OpenID Connect --> Auth0[Auth0<br/>Identity Provider]
     BC -- bot verification --> Turnstile[Cloudflare Turnstile<br/>Bot Protection]
     BC -- data import --> MA[Metal Archives]
@@ -55,8 +55,8 @@ Cloudflare::
 Bandcheck Platform::
     The main application consisting of frontend (React SPA) and backend (Bun API) running on Kubernetes. Processes user requests, manages business logic, and interfaces with other system components.
 
-SQLite Database::
-    A persistent storage system on Kubernetes PersistentVolume that holds user data, reviews, content warnings, and band information. Embedded database without separate server process.
+PostgreSQL Database::
+    The existing PostgreSQL service in the Hetzner k3s cluster stores user data, reviews, content warnings, and band information. Bandcheck uses a dedicated database and role.
 
 Auth0 (Identity Provider)::
     Provides authentication services via OAuth 2.0 / OpenID Connect, allowing users to securely log in using social providers (GitHub, Google, etc.) and access their accounts.

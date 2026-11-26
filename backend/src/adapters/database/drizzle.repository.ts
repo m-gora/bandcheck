@@ -1,4 +1,4 @@
-import { eq, and, like, or, desc } from 'drizzle-orm';
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import { db, bands, reviews } from '../../db';
 import type { Band, Review, GetBandsQuery, GetBandsResult } from '../../core/domain/entities';
 import type { BandRepository, ReviewRepository } from '../../core/ports/repositories';
@@ -12,20 +12,26 @@ export class DrizzleBandRepository implements BandRepository {
     if (search) {
       conditions.push(
         or(
-          like(bands.name, `%${search}%`),
-          like(bands.description, `%${search}%`)
+          ilike(bands.name, `%${search}%`),
+          ilike(bands.description, `%${search}%`)
         )
       );
     }
     if (genre) {
-      conditions.push(like(bands.genres, `%${genre}%`));
+      conditions.push(
+        sql`EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements_text(${bands.genres}) AS item(value)
+          WHERE item.value ILIKE ${`%${genre}%`}
+        )`
+      );
     }
     
     let allBands;
     if (conditions.length > 0) {
-      allBands = await db.select().from(bands).where(and(...conditions)).all();
+      allBands = await db.select().from(bands).where(and(...conditions));
     } else {
-      allBands = await db.select().from(bands).all();
+      allBands = await db.select().from(bands);
     }
     
     // Parse JSON fields and sort
@@ -41,7 +47,7 @@ export class DrizzleBandRepository implements BandRepository {
   }
 
   async findById(id: string): Promise<Band | null> {
-    const band = await db.select().from(bands).where(eq(bands.id, id)).get();
+    const [band] = await db.select().from(bands).where(eq(bands.id, id)).limit(1);
     if (!band) return null;
     return this.toDomain(band);
   }
@@ -52,13 +58,10 @@ export class DrizzleBandRepository implements BandRepository {
   }
 
   async update(id: string, bandData: Partial<Band>): Promise<Band> {
-    const updateData: Record<string, unknown> = { ...bandData };
-    if (updateData.genres) {
-      updateData.genres = JSON.stringify(updateData.genres);
-    }
-    if (updateData.members) {
-      updateData.members = JSON.stringify(updateData.members);
-    }
+    const { createdAt, updatedAt, ...fields } = bandData;
+    const updateData: Partial<typeof bands.$inferInsert> = { ...fields };
+    if (createdAt) updateData.createdAt = new Date(createdAt);
+    if (updatedAt) updateData.updatedAt = new Date(updatedAt);
 
     await db.update(bands)
       .set(updateData)
@@ -80,20 +83,20 @@ export class DrizzleBandRepository implements BandRepository {
     const existing = await db.select()
       .from(bands)
       .where(eq(bands.name, name))
-      .get();
-    return !!existing;
+      .limit(1);
+    return existing.length > 0;
   }
 
   async existsByMaId(maId: string): Promise<boolean> {
     const existing = await db.select()
       .from(bands)
       .where(eq(bands.maId, maId))
-      .get();
-    return !!existing;
+      .limit(1);
+    return existing.length > 0;
   }
 
   async getStatistics(): Promise<{ safe: number; unsafe: number; controversial: number; pending: number; total: number }> {
-    const allBands = await db.select().from(bands).all();
+    const allBands = await db.select().from(bands);
     
     const stats = {
       safe: 0,
@@ -118,17 +121,18 @@ export class DrizzleBandRepository implements BandRepository {
       .from(bands)
       .orderBy(desc(bands.createdAt))
       .limit(limit)
-      .all();
     
     return latestBands.map(band => this.toDomain(band));
   }
 
-  private toDomain(band: Record<string, unknown>): Band {
+  private toDomain(band: typeof bands.$inferSelect): Band {
     return {
       ...band,
       maId: (band.maId as string | null) ?? undefined,
-      genres: typeof band.genres === 'string' ? JSON.parse(band.genres) : band.genres,
-      members: typeof band.members === 'string' ? JSON.parse(band.members) : (band.members || []),
+      genres: this.parseJsonArray(band.genres),
+      members: this.parseJsonArray(band.members),
+      createdAt: band.createdAt.toISOString(),
+      updatedAt: band.updatedAt.toISOString(),
     } as Band;
   }
 
@@ -138,17 +142,30 @@ export class DrizzleBandRepository implements BandRepository {
       maId: band.maId ?? null,
       name: band.name,
       description: band.description ?? '',
-      genres: JSON.stringify(band.genres),
+      genres: band.genres,
       location: band.location ?? null,
       formed: band.formed ?? null,
       website: band.website ?? null,
       imageUrl: band.imageUrl ?? null,
-      members: JSON.stringify(band.members ?? []),
+      members: band.members ?? [],
       safetyStatus: band.safetyStatus,
       reviewCount: band.reviewCount,
-      createdAt: band.createdAt,
-      updatedAt: band.updatedAt,
+      createdAt: new Date(band.createdAt),
+      updatedAt: new Date(band.updatedAt),
     };
+  }
+
+  private parseJsonArray(value: unknown): string[] {
+    if (Array.isArray(value)) return value as string[];
+    if (typeof value === 'string') {
+      try {
+        const parsed: unknown = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed as string[] : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
   }
 }
 
@@ -157,8 +174,7 @@ export class DrizzleReviewRepository implements ReviewRepository {
     const allReviews = await db.select()
       .from(reviews)
       .where(eq(reviews.bandId, bandId))
-      .orderBy(desc(reviews.createdAt))
-      .all();
+      .orderBy(desc(reviews.createdAt));
     
     return allReviews.map(review => this.toDomain(review));
   }
@@ -180,8 +196,7 @@ export class DrizzleReviewRepository implements ReviewRepository {
       .from(reviews)
       .leftJoin(bands, eq(reviews.bandId, bands.id))
       .orderBy(desc(reviews.createdAt))
-      .limit(limit)
-      .all();
+      .limit(limit);
     
     return latestReviews.map(({ review, bandName }) => ({
       ...this.toDomain(review),
@@ -189,10 +204,16 @@ export class DrizzleReviewRepository implements ReviewRepository {
     }));
   }
 
-  private toDomain(review: Record<string, unknown>): Review {
+  private toDomain(review: typeof reviews.$inferSelect): Review {
     return {
       ...review,
-      evidence: typeof review.evidence === 'string' ? JSON.parse(review.evidence) : (review.evidence || []),
+      createdAt: review.createdAt.toISOString(),
+      updatedAt: review.updatedAt.toISOString(),
+      evidence: Array.isArray(review.evidence)
+        ? review.evidence
+        : typeof review.evidence === 'string'
+          ? JSON.parse(review.evidence)
+          : [],
     } as Review;
   }
 
@@ -205,9 +226,9 @@ export class DrizzleReviewRepository implements ReviewRepository {
       userAvatarUrl: review.userAvatarUrl ?? null,
       safetyAssessment: review.safetyAssessment,
       comment: review.comment,
-      evidence: JSON.stringify(review.evidence),
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt,
+      evidence: review.evidence,
+      createdAt: new Date(review.createdAt),
+      updatedAt: new Date(review.updatedAt),
     };
   }
 }

@@ -18,7 +18,7 @@ The comprehensive architecture documentation is located in the [`architecture/`]
 - **Technology Stack:** React, TypeScript, Bun, SQLite, Kubernetes
 - **Architecture Pattern:** Hexagonal architecture (ports & adapters)
 - **Infrastructure:** Kubernetes, Docker, Cloudflare (DNS + CDN)
-- **CI/CD:** GitHub Actions (build) + ArgoCD (deployment)
+- **CI/CD:** GitHub Actions (build) + Flux CD (deployment)
 - **Security:** Auth0 authentication, Cloudflare Turnstile bot protection
 - **Compliance:** GDPR, German TMG, EU E-Commerce Directive
 
@@ -39,6 +39,7 @@ Opens on http://localhost:5173
 ```bash
 cd backend
 bun install
+# Configure backend/.env with a PostgreSQL DATABASE_URL
 bun dev
 ```
 
@@ -55,18 +56,17 @@ Runs on http://localhost:3000
 ```
 bandcheck/
 ├── architecture/          # Complete architecture documentation (AsciiDoc)
-├── backend/              # Backend API (Bun + TypeScript)
+├── backend/              # Backend API (Bun + TypeScript, PostgreSQL)
 │   ├── src/
 │   │   ├── core/        # Business logic (hexagonal architecture)
 │   │   ├── adapters/    # HTTP, database adapters
-│   │   └── db/          # Database schema
-│   └── k8s/             # Kubernetes manifests
+│   │   └── db/          # PostgreSQL schema
 ├── frontend/            # Frontend SPA (React + TypeScript)
 │   ├── src/
 │   │   ├── pages/       # Page components
 │   │   ├── components/  # Reusable components
 │   │   └── services/    # API client
-│   └── k8s/             # Kubernetes manifests
+├── k8s/                  # Flux-ready app manifests (Dependabot updates image tags)
 └── infrastructure/      # Terraform configuration
 ```
 

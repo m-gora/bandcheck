@@ -15,72 +15,41 @@ graph TB
     end
     
     subgraph Kubernetes Cluster
-        Ingress[NGINX Ingress<br/>SSL Termination]
+        Gateway[Traefik Gateway<br/>TLS Termination]
         FE[Frontend Deployment<br/>nginx serving SPA]
         BE[Backend Deployment<br/>Bun Runtime]
-        PV[(PersistentVolume<br/>SQLite Database)]
+        PG[(PostgreSQL<br/>postgres namespace)]
         
-        Ingress --> FE
-        Ingress --> BE
-        BE --> PV
+        Gateway --> FE
+        Gateway --> BE
+        BE --> PG
     end
     
     subgraph External Services
         Auth0[Auth0<br/>Authentication]
         GHCR[GitHub Container Registry<br/>Docker Images]
-        ArgoCD[ArgoCD<br/>GitOps CD]
+        Flux[Flux CD<br/>GitOps]
     end
     
     Users --> CF
-    CF --> Ingress
+    CF --> Gateway
     FE --> Auth0
     BE --> Auth0
     FE --> CF
     
     GHCR -.->|Pull Images| FE
     GHCR -.->|Pull Images| BE
-    ArgoCD -.->|Deploy| Ingress
+    Flux -.->|Reconcile| Gateway
 ....
 
 == Deployment Environments
 
-=== Development Environment
-
-Automatically deploys on push to `dev` branch.
-
-**Frontend:**
-
-* Deployed to Kubernetes development namespace
-* Uses latest Docker image from `dev` branch
-* ArgoCD monitors Git repository for changes
-* Exposed via Ingress with dev subdomain
-
-**Backend:**
-
-* Deployed to Kubernetes development namespace
-* Uses latest Docker image from `dev` branch
-* Connects to development Auth0 tenant
-* ArgoCD manages deployment
-
 === Production Environment
 
-Triggered by merges to `main` branch or version tags.
-
-**Frontend:**
-
-* Deployed to Kubernetes production namespace
-* Uses versioned Docker images (e.g., `v1.0.0`)
-* Custom domain via Cloudflare DNS
-* SSL/TLS certificates via cert-manager or Cloudflare
-* ArgoCD with manual approval for production
-
-**Backend:**
-
-* Deployed to Kubernetes production namespace
-* Uses versioned Docker images
-* High availability with multiple replicas
-* Production Auth0 tenant
-* ArgoCD manages deployment with approval gates
+Bandcheck is deployed to the Hetzner k3s cluster in the `bandcheck`
+namespace. Flux reconciles the Kubernetes manifests from Git. GitHub Actions
+builds versioned images. Dependabot opens PRs to update the semver image tags
+in the Kubernetes manifests; Flux reconciles merged changes.
 
 == Container Strategy
 
@@ -93,12 +62,8 @@ Triggered by merges to `main` branch or version tags.
 
 **Image Tags:**
 
-* `latest` - Latest build from main branch
-* `main` - Latest build from main branch
-* `dev` - Latest build from dev branch
-* `v1.0.0` - Semver tags from git tags
-* `main-sha-abc123` - Branch + commit SHA
-* `pr-42` - Pull request builds
+* `latest` - Latest release build
+* `1.0.0` - Semver tags generated from release tags
 
 **Build Process:**
 
@@ -133,10 +98,10 @@ docker pull ghcr.io/marcodoes/bandcheck/backend:dev
 
 === Prerequisites
 
-* Kubernetes cluster (K3s recommended for cost-efficiency)
-* NGINX Ingress Controller
-* cert-manager for TLS certificates (optional)
-* Storage provisioner for PersistentVolumes
+* Hetzner k3s cluster with Flux CD already bootstrapped
+* Traefik Gateway API with the existing `cluster` Gateway
+* cert-manager and external-dns
+* Existing PostgreSQL 16 service in the `postgres` namespace
 
 === Kubernetes Resources
 
@@ -146,14 +111,14 @@ docker pull ghcr.io/marcodoes/bandcheck/backend:dev
 
 **Backend Deployment:**
 
-* Replicas: 2 (configurable)
+* Replicas: 1
 * Resource limits: CPU and memory constraints
 * Health checks: Liveness and readiness probes
-* Volume mounts: PersistentVolume for SQLite database
+* PostgreSQL connection from a SOPS-encrypted Kubernetes Secret
 
 **Frontend Deployment:**
 
-* Replicas: 2 (configurable)
+* Replicas: 1
 * nginx-based static file server
 * Custom routing for SPA
 
@@ -162,76 +127,33 @@ docker pull ghcr.io/marcodoes/bandcheck/backend:dev
 * `bandcheck-backend` - ClusterIP service for backend pods
 * `bandcheck-frontend` - ClusterIP service for frontend pods
 
-**Ingress:**
+**HTTPRoutes:**
 
-* HTTPS with TLS certificates
-* Routes `/api/*` to backend service
-* Routes `/*` to frontend service
-* CORS configuration via middleware
-
-**PersistentVolumeClaim:**
-
-* Size: 10Gi
-* Access Mode: ReadWriteOnce
-* Storage for SQLite database
+* HTTPS on the Gateway's `websecure` listener; TLS terminates at the Gateway
+* `bandcheck.cloud.marcodoes.tech` routes to the frontend
+* `bandcheck-api.cloud.marcodoes.tech` routes to the backend
+* API prefix supplied by the Traefik middleware
 
 === Setup Commands
 
-[source,bash]
-----
-# Create namespace
-kubectl apply -f k8s/namespace.yaml
-
-# Create secrets
-kubectl create secret generic bandcheck-secrets \
-  --namespace bandcheck \
-  --from-literal=auth0-domain="auth.marcodoes.tech" \
-  --from-literal=auth0-audience="https://api.bandcheck.marcodoes.tech"
-
-# Create PersistentVolumeClaim
-kubectl apply -f k8s/pvc.yaml
-
-# Deploy application
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-kubectl apply -f k8s/ingress.yaml
-----
+Flux applies the application manifests from `k8s/`. The Flux bootstrap and
+root reconciliation are managed separately in the `cluster-config` repository.
+See `k8s/README.md` for the SOPS secret and Flux source requirements.
 
 === Database Management
 
-SQLite database is stored on a PersistentVolume for data persistence across pod restarts.
-
-**Backup:**
-
-[source,bash]
-----
-# Backup database
-kubectl exec -n bandcheck deployment/bandcheck-backend -- \
-  cat /app/data/bandcheck.db > backup.db
-
-# Copy database from pod
-kubectl cp bandcheck/POD_NAME:/app/data/bandcheck.db ./backup.db
-----
-
-**Restore:**
-
-[source,bash]
-----
-# Scale down deployment
-kubectl scale deployment/bandcheck-backend --replicas=0 -n bandcheck
-
-# Copy backup to pod
-kubectl cp ./backup.db bandcheck/POD_NAME:/app/data/bandcheck.db
-
-# Scale up deployment
-kubectl scale deployment/bandcheck-backend --replicas=2 -n bandcheck
-----
+Bandcheck connects to the existing PostgreSQL service at
+`postgres-rw.postgres.svc.cluster.local:5432`. It uses a dedicated database and
+role; there is no application database PVC. The PostgreSQL service's persistent
+volume is not a substitute for verified backups, so confirm its backup and
+restore procedure separately. Drizzle migrations are applied at backend startup.
 
 == CI/CD Pipeline
 
 === Overview
 
-The deployment pipeline uses **GitHub Actions** for continuous integration and **ArgoCD** for continuous deployment.
+The deployment pipeline uses **GitHub Actions** for continuous integration and
+**Flux CD** for continuous deployment.
 
 **GitHub Actions:**
 
@@ -240,83 +162,56 @@ The deployment pipeline uses **GitHub Actions** for continuous integration and *
 * Pushes images to GitHub Container Registry (GHCR)
 * Tags images based on branch/version
 
-**ArgoCD:**
+**Flux CD:**
 
 * Monitors Git repository for Kubernetes manifest changes
-* Automatically syncs changes to cluster
-* Provides UI for deployment visibility
-* Manages rollbacks and deployment history
-* Can require manual approval for production
+* Reconciles changes to the cluster
+* Reports reconciliation status through Kubernetes resources
+* Uses Git reverts for rollbacks
 
 === GitHub Actions Workflows
 
 **CI Workflow (`ci.yml`):**
 
-* **Triggers:** Push to main/dev branches, PRs
+* **Triggers:** Push to `main` and pull requests targeting `main`
 * **Purpose:** Linting, type checking, building, testing
 * **Runs:** On every push and PR
 
 **Backend Build (`backend-build.yml`):**
 
-* **Triggers:** Push to main/dev, PRs, manual dispatch
+* **Triggers:** Backend release tags and manual dispatch
 * **Actions:**
 ** Build multi-platform Docker images (amd64, arm64)
 ** Run tests
 ** Push to GitHub Container Registry
-** Tag images: `latest`, `main`, `dev`, `v1.0.0`, `sha-abc123`
+** Tag images with semver and `latest`
 
 **Frontend Build (`frontend-build.yml`):**
 
-* **Triggers:** Push to main/dev, PRs, manual dispatch
+* **Triggers:** Frontend release tags and manual dispatch
 * **Actions:**
 ** Build React application
 ** Create nginx-based Docker image
 ** Push to GitHub Container Registry
 ** Tag appropriately based on branch/version
 
-=== ArgoCD Configuration
+=== Flux Configuration
 
-**Application Setup:**
-
-[source,yaml]
-----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: bandcheck-backend
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: https://github.com/marcodoes/bandcheck
-    targetRevision: main
-    path: backend/k8s
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: bandcheck
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-----
+Flux is bootstrapped from the separate `m-gora/cluster-config` repository.
+That repository defines a `GitRepository` and a Flux `Kustomization` for
+Bandcheck's `./k8s` path, with SOPS decryption enabled. Dependabot monitors the
+Kubernetes manifests for image tag updates.
 
 **Deployment Process:**
 
 1. Developer pushes code to Git repository
 2. GitHub Actions builds Docker images
 3. Images pushed to GHCR with appropriate tags
-4. Developer updates Kubernetes manifests with new image tags
-5. Commits manifest changes to Git
-6. ArgoCD detects changes in Git repository
-7. ArgoCD syncs changes to Kubernetes cluster
-8. New pods deployed with updated images
-9. Health checks verify deployment success
-
-**Manual Sync for Production:**
-
-* Production ArgoCD application configured with manual sync
-* Requires approval via ArgoCD UI or CLI
-* Allows for change review before production deployment
+4. Dependabot opens a PR when a newer semver image tag is available
+5. A reviewed PR is merged
+6. Flux detects the Git revision and reconciles the cluster
+7. New pods deploy with the updated images
+8. Health checks verify deployment success
 
 === GitHub Secrets Configuration
 
@@ -335,12 +230,10 @@ spec:
 
 **Runtime Secrets (Kubernetes):**
 
-Stored in Kubernetes Secrets, managed by ArgoCD:
+Stored in a SOPS-encrypted Kubernetes Secret and reconciled by Flux:
 
-* `auth0-domain` - Auth0 tenant domain
-* `auth0-audience` - Auth0 API identifier
-* `turnstile-secret-key` - Cloudflare Turnstile secret
-----
+* `DATABASE_URL` - Bandcheck PostgreSQL connection URL
+* `TURNSTILE_KEY` - Cloudflare Turnstile secret
 
 == Environment Configuration
 
@@ -361,7 +254,7 @@ Environment variables baked into the Docker image at build time via GitHub Actio
 VITE_AUTH0_DOMAIN=your-domain.auth0.com
 VITE_AUTH0_CLIENT_ID=your-auth0-client-id
 VITE_AUTH0_REDIRECT_URI=https://bandcheck.example.com
-VITE_API_BASE_URL=https://api.bandcheck.example.com/api
+VITE_API_BASE_URL=https://bandcheck-api.cloud.marcodoes.tech
 VITE_TURNSTILE_SITE_KEY=your-cloudflare-site-key
 ----
 
@@ -376,14 +269,15 @@ Frontend is built into a static bundle and served via nginx in a Docker containe
 * `AUTH0_DOMAIN` - Auth0 tenant domain
 * `AUTH0_AUDIENCE` - Auth0 API audience/identifier
 * `PORT` - Server port (default: 3000)
-* `DATABASE_URL` - SQLite database path
+* `DATABASE_URL` - PostgreSQL connection URL
 * `ALLOWED_ORIGINS` - Comma-separated CORS origins
-* `TURNSTILE_SECRET_KEY` - Cloudflare Turnstile secret key
+* `TURNSTILE_KEY` - Cloudflare Turnstile secret key
 * `NODE_ENV` - Environment (production/development)
 
 **Kubernetes Configuration:**
 
-Configured via ConfigMap and Secrets in the `bandcheck` namespace, managed by ArgoCD.
+Configured via ConfigMap and a SOPS-encrypted Secret in the `bandcheck`
+namespace, managed by Flux.
 
 [source,yaml]
 ----
@@ -394,7 +288,6 @@ metadata:
   namespace: bandcheck
 data:
   PORT: "3000"
-  DATABASE_URL: "/app/data/bandcheck.db"
   ALLOWED_ORIGINS: "https://bandcheck.example.com"
   NODE_ENV: "production"
 ----
@@ -443,12 +336,11 @@ kubectl autoscale deployment bandcheck-backend \
 * Logs: `kubectl logs -f deployment/bandcheck-backend -n bandcheck`
 * Resource usage: `kubectl top pods -n bandcheck`
 
-**ArgoCD:**
+**Flux CD:**
 
-* Deployment status in ArgoCD UI
-* Sync history and deployment timeline
-* Resource health checks
-* Application logs and events
+* Reconciliation status: `flux get kustomizations -A`
+* Source status: `flux get sources git -A`
+* Pod health and events: Kubernetes commands below
 
 **Cloudflare:**
 
@@ -469,14 +361,14 @@ Ensure GitHub Container Registry authentication is configured:
 echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 ----
 
-**Database Persistence:**
+**Database Connectivity:**
 
-Verify PersistentVolumeClaim is bound:
+Verify the PostgreSQL service and Bandcheck database Secret:
 
 [source,bash]
 ----
-kubectl get pvc -n bandcheck
-kubectl describe pvc bandcheck-data -n bandcheck
+kubectl -n postgres get svc postgres-rw
+kubectl -n bandcheck describe pod -l app=bandcheck-backend
 ----
 
 **Service Not Accessible:**
@@ -502,11 +394,11 @@ kubectl describe pod -l app=bandcheck-backend -n bandcheck
 
 === Rollback Strategy
 
-**ArgoCD:**
+**Flux CD:**
 
-* Rollback via ArgoCD UI to previous synced state
-* Select specific Git commit to deploy
-* ArgoCD maintains full deployment history
+* Revert the Git commit that changed the manifests or image tags
+* Flux reconciles the reverted Git revision
+* Suspend the Flux Kustomization before any temporary manual rollback
 
 **Kubernetes:**
 
@@ -525,14 +417,14 @@ kubectl rollout history deployment/bandcheck-backend -n bandcheck
 **Git-based Rollback:**
 
 * Revert Git commits containing Kubernetes manifest changes
-* ArgoCD automatically syncs to previous state
+* Flux automatically reconciles the reverted state
 * Most reliable approach as it maintains Git as source of truth
 
 == Security Considerations
 
 * All traffic uses HTTPS/TLS via Cloudflare
 * Secrets managed via Kubernetes Secrets
-* RBAC configured for ArgoCD and Kubernetes access
+* RBAC configured for Flux and Kubernetes access
 * Service accounts follow principle of least privilege
 * CORS configured to allow only trusted origins
 * Auth0 JWT validation on all protected endpoints

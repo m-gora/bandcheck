@@ -16,9 +16,8 @@ Pricing::
     
     Cost-optimization strategies:
     
-    * Use Azure Static Web Apps free tier for frontend hosting
-    * Deploy backend on cost-effective Kubernetes (K3s)
-    * Use SQLite for database to avoid managed database costs
+    * Deploy frontend and backend on cost-effective Kubernetes (k3s)
+    * Reuse the existing PostgreSQL service instead of provisioning another database
     * Leverage GitHub Container Registry for free container storage
     * Utilize Cloudflare Turnstile's free tier for bot protection
 

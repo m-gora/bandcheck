@@ -17,27 +17,8 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
-      initContainers:
-      - name: fix-permissions
-        image: busybox:1.37
-        command: ["sh", "-c", "chown -R 65532:65532 /app/data"]
-        securityContext:
-          runAsUser: 0
-          runAsNonRoot: false
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-              - ALL
-            add:
-              - CHOWN
-              - DAC_OVERRIDE
-        volumeMounts:
-        - name: data
-          mountPath: /app/data
       containers:
       - name: backend
         image: ghcr.io/m-gora/bandcheck/backend:1.0.2
@@ -73,7 +54,10 @@ spec:
               name: bandcheck-backend-config
               key: AUTH0_AUDIENCE
         - name: DATABASE_URL
-          value: "/app/data/bandcheck.db"
+          valueFrom:
+            secretKeyRef:
+              name: bandcheck-secret
+              key: DATABASE_URL
         - name: ALLOWED_ORIGINS
           valueFrom:
             configMapKeyRef:
@@ -85,14 +69,12 @@ spec:
               name: bandcheck-secret
               key: TURNSTILE_KEY
         volumeMounts:
-        - name: data
-          mountPath: /app/data
         - name: tmp
           mountPath: /tmp
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
+            memory: "128Mi"
+            cpu: "100m"
             ephemeral-storage: "256Mi"
           limits:
             memory: "512Mi"
@@ -111,8 +93,5 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10
       volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: bandcheck-backend-data
       - name: tmp
         emptyDir: {}

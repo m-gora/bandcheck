@@ -1,54 +1,42 @@
 # BandCheck Backend Development
 
-This backend uses Azure Functions with TypeScript and Azure Table Storage (via Azurite for local development).
+The backend is a Bun/TypeScript HTTP API. It uses Drizzle ORM with PostgreSQL.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- Docker & Docker Compose
-- Azure Functions Core Tools (`npm install -g azure-functions-core-tools@4`)
+- Bun 1.x
+- PostgreSQL, with a `bandcheck` database and user
 
 ### Local Development Setup
 
-1. **Start Azurite (Local Azure Storage Emulator)**
+1. **Install dependencies**
    ```bash
-   npm run azurite:start
+   bun install
    ```
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+2. **Configure the database**
 
-3. **Start the Functions Runtime**
-   ```bash
-   npm run dev
-   ```
+   Copy `.env.example` to `.env` and set `DATABASE_URL` to your PostgreSQL URL.
+   The application applies Drizzle migrations at startup.
 
-4. **Seed Test Data** (Optional)
+3. **Start the API**
    ```bash
-   node scripts/seed-test-data.js
-   ```
-
-5. **Test the API**
-   ```bash
-   ./scripts/test-api.sh
+   bun run dev
    ```
 
 ## 📋 Available Scripts
 
-- `npm run dev` - Start Azure Functions locally with hot reload
-- `npm run azurite:start` - Start Azurite container
-- `npm run azurite:stop` - Stop Azurite container
-- `npm run docker:up` - Start full Docker Compose stack
-- `npm run docker:down` - Stop Docker Compose stack
-- `npm run build` - Build TypeScript code
-- `npm run watch` - Watch TypeScript files for changes
+- `bun run dev` - Start the API with hot reload
+- `bun run start` - Start the API
+- `bun run db:generate` - Generate PostgreSQL migrations from the schema
+- `bun run db:migrate` - Apply migrations
+- `bun run lint` - Lint the backend source
+- `bun run type-check` - Type-check the backend
 
 ## 🌐 API Endpoints
 
-All endpoints run on `http://localhost:7071/api/` when developing locally.
+API endpoints run on `http://localhost:3000/api/` during local development.
 
 ### Public Endpoints
 
@@ -148,71 +136,40 @@ The backend checks for roles in the JWT token under the `roles` claim. Make sure
 
 ## 🗃️ Data Storage
 
-### Local Development
-- Uses Azurite (Azure Storage Emulator)
-- Tables: `bands`, `reviews`
-- Connection string in `local.settings.json`
-
-### Production
-- Uses Azure Table Storage
-- Managed identity authentication
-- Environment variables for configuration
+PostgreSQL stores the `bands` and `reviews` tables. The connection URL is
+provided through `DATABASE_URL`; Kubernetes supplies it from a SOPS-encrypted
+Secret. Drizzle migrations run before the HTTP server starts.
 
 ## 🧪 Testing
 
-1. **Start the services:**
-   ```bash
-   npm run azurite:start
-   npm run dev
-   ```
+Smoke-test the API with:
 
-2. **Run API tests:**
-   ```bash
-   ./scripts/test-api.sh
-   ```
-
-3. **Manual testing with curl:**
-   ```bash
-   # Get all bands
-   curl http://localhost:7071/api/bands
-   
-   # Get specific band
-   curl http://localhost:7071/api/bands/test-band-1
-   ```
+```bash
+curl http://localhost:3000/health
+curl http://localhost:3000/api/bands
+```
 
 ## 🐳 Docker Development
 
-You can also run everything in Docker:
+Build and run the API container with a reachable PostgreSQL instance:
 
 ```bash
-# Start full stack (Azurite + Functions)
-npm run docker:up
-
-# View logs
-npm run docker:logs
-
-# Stop stack
-npm run docker:down
+docker build -t bandcheck-backend .
+docker run --rm -p 3000:3000 \
+  -e DATABASE_URL="$DATABASE_URL" \
+  bandcheck-backend
 ```
 
 ## 📂 Project Structure
 
 ```
 src/
-├── functions/           # Azure Function endpoints
-│   ├── GetBands.ts     # GET /bands
-│   ├── GetBandDetails.ts # GET /bands/{id}
-│   ├── SubmitBand.ts   # POST /bands
-│   └── ReviewBand.ts   # POST /bands/{id}/review
-└── shared/             # Shared utilities
-    ├── types.ts        # TypeScript interfaces
-    ├── utils.ts        # Helper functions
-    └── Tables.ts       # Azure Table Storage clients
+├── adapters/           # HTTP API and PostgreSQL repository
+├── core/               # Domain entities, ports, and services
+└── db/                 # Drizzle PostgreSQL schema and connection
 ```
 
 ## 🔧 Configuration Files
 
-- `local.settings.json` - Azure Functions local settings
-- `docker-compose.yml` - Multi-container setup
-- `.env` - Environment variables
-- `host.json` - Azure Functions host configuration
+- `.env` - Local runtime configuration (`DATABASE_URL`, Auth0, Turnstile)
+- `drizzle.config.ts` - PostgreSQL migration configuration

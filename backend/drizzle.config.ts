@@ -2,9 +2,9 @@ import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
   schema: './src/db/schema.ts',
-  out: './drizzle',
-  dialect: 'sqlite',
+  out: './drizzle/postgres',
+  dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL || './data/bandcheck.db',
+    url: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/bandcheck',
   },
 });

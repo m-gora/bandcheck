@@ -2,7 +2,7 @@
  * Import scraped bands from bands.ndjson into the live bandcheck API.
  *
  * Required env vars:
- *   API_BASE_URL        – e.g. https://bandcheck-api.marcodoes.tech
+ *   API_BASE_URL        – e.g. https://bandcheck-api.cloud.marcodoes.tech
  *   AUTH0_DOMAIN        – e.g. yourtenant.auth0.com
  *   AUTH0_CLIENT_ID     – M2M app client ID
  *   AUTH0_CLIENT_SECRET – M2M app client secret

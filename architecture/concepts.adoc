@@ -70,7 +70,7 @@ ALLOWED_ORIGINS=https://bandcheck.example.com,https://dev.bandcheck.example.com
 * Kubernetes Secrets for sensitive configuration
 * Environment variables never in source code
 * Separate secrets per environment (dev/prod)
-* ArgoCD manages secret deployment
+* Flux reconciles SOPS-encrypted Kubernetes Secrets
 
 **Encryption:**
 
@@ -279,7 +279,7 @@ The platform uses **only strictly necessary cookies**, exempt from consent requi
 
 **Monitoring:**
 
-* View in ArgoCD for deployment events
+* View Flux reconciliation status and Kubernetes events
 * Cloudflare analytics for traffic patterns
 * Kubernetes metrics for resource usage
 
@@ -302,7 +302,7 @@ The platform uses **only strictly necessary cookies**, exempt from consent requi
 
 **Test Database:**
 
-* Separate SQLite file for tests
+* Separate PostgreSQL test database
 * Fresh database per test suite
 * Automatic cleanup after tests
 
@@ -373,7 +373,7 @@ The platform uses **only strictly necessary cookies**, exempt from consent requi
 
 **Database:**
 
-* SQLite indexes on frequently queried fields
+* PostgreSQL indexes on frequently queried fields
 * Pagination for list endpoints
 * Limit query result size
 * Connection pooling (Drizzle handles this)
@@ -397,7 +397,7 @@ The platform uses **only strictly necessary cookies**, exempt from consent requi
 **Tools:**
 
 * Kubernetes metrics: `kubectl top`
-* ArgoCD dashboard for deployment health
+* Flux reconciliation status for deployment health
 * Cloudflare analytics for traffic patterns
 * Future: Prometheus + Grafana
 
@@ -516,8 +516,8 @@ bun dev
 
 * GitHub Actions builds images
 * Push to GHCR
-* ArgoCD syncs to cluster
-* Manual approval for production
+* Flux reconciles the cluster
+* Image automation commits version updates to Git
 
 == Maintainability
 

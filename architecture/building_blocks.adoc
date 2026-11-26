@@ -15,7 +15,7 @@ graph TB
     Frontend --> Auth0[Auth0<br/>Authentication]
     Frontend --> Turnstile[Cloudflare Turnstile<br/>Bot Protection]
     Backend --> Auth0
-    Backend --> Database[(SQLite Database<br/>PersistentVolume)]
+    Backend --> Database[(PostgreSQL<br/>Hetzner k3s)]
 ....
 
 **Users:**
@@ -53,9 +53,9 @@ graph TB
 
 **Database:**
 
-* SQLite embedded SQL database
-* Stored on Kubernetes PersistentVolume
-* No separate database server required
+* PostgreSQL 16 on the existing k3s cluster
+* Dedicated database and role for Bandcheck
+* Connection details supplied through a SOPS-encrypted Secret
 
 == Level 2: Backend Building Blocks
 
@@ -192,24 +192,21 @@ These adapters are driven by the core domain and implement integration with exte
 
 [source,typescript]
 ----
-export const bands = sqliteTable('bands', {
+export const bands = pgTable('bands', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
-  genres: text('genres', { mode: 'json' }).$type<string[]>(),
+  genres: jsonb('genres').$type<string[]>().notNull(),
   description: text('description'),
-  createdBy: text('created_by').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
 });
 
-export const reviews = sqliteTable('reviews', {
+export const reviews = pgTable('reviews', {
   id: text('id').primaryKey(),
   bandId: text('band_id').notNull().references(() => bands.id),
-  rating: integer('rating').notNull(),
-  contentWarnings: text('content_warnings', { mode: 'json' })
-    .$type<ContentWarning[]>(),
+  safetyAssessment: text('safety_assessment').notNull(),
+  evidence: jsonb('evidence').$type<string[]>(),
   comment: text('comment'),
-  createdBy: text('created_by').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
 });
 ----
 
@@ -425,7 +422,7 @@ const handleRequest = createApiRouter(bandService, reviewService);
 6. Backend router routes to BandsController
 7. Controller calls BandService
 8. Service calls BandRepository
-9. Repository queries SQLite database via Drizzle
+9. Repository queries PostgreSQL via Drizzle
 10. Data flows back through layers
 11. Frontend displays bands in UI
 12. Static assets cached by Cloudflare CDN
@@ -441,6 +438,6 @@ const handleRequest = createApiRouter(bandService, reviewService);
 7. Controller calls BandService
 8. Service validates business rules
 9. Service calls BandRepository
-10. Repository inserts into SQLite database
+10. Repository inserts into PostgreSQL
 11. Success response returned to frontend
 12. Frontend redirects to new band page

@@ -56,15 +56,14 @@ This section describes the fundamental decisions and solution strategies that sh
 * Lightweight with minimal overhead
 * Great TypeScript integration
 * Schema migrations built-in
-* Works with SQLite, PostgreSQL, MySQL
+* PostgreSQL dialect and migrations
 
-**SQLite:**
+**PostgreSQL:**
 
-* Zero-configuration embedded database
-* No separate database server required
-* Excellent for read-heavy workloads
-* Simple backup (single file)
-* Perfect for cost-conscious deployment
+* Uses the PostgreSQL service already operated in the cluster
+* Supports structured data and transactional writes
+* Avoids a second database instance or application PVC
+* Drizzle ORM provides typed queries and schema migrations
 
 === Infrastructure
 
@@ -150,7 +149,7 @@ The backend API follows REST principles:
 **Strategies:**
 
 * **Free Services:** Auth0 free tier, Cloudflare free tier (DNS, CDN, Turnstile), GitHub Container Registry
-* **SQLite:** Eliminates database hosting costs completely
+* **PostgreSQL:** Reuses the existing cluster database with no additional database instance
 * **Kubernetes:** Can run on cheap VPS ($5-10/month) or on-premises hardware
 * **Platform Independence:** No vendor lock-in, can choose cheapest provider
 * **Efficient Runtime:** Bun's performance reduces resource requirements
@@ -179,7 +178,7 @@ The backend API follows REST principles:
 * **Error Handling:** User-friendly error messages
 * **Deployment Automation:** GitHub Actions for CI/CD
 * **Container Orchestration:** Kubernetes for resilience and scaling
-* **Database Backups:** Simple file-based SQLite backups
+* **Database Backups:** Managed with the existing PostgreSQL service
 
 **Result:** Easy to deploy, monitor, and troubleshoot in production
 
@@ -242,22 +241,17 @@ Initially planned for Azure cloud services (Static Web Apps, Azure Functions), b
 
 * Both frontend and backend on Kubernetes
 * Cloudflare for DNS, CDN, and bot protection
-* ArgoCD for GitOps-based continuous deployment
+* Flux CD for GitOps-based continuous deployment
 * No cloud provider lock-in
 
-=== SQLite Over Managed Databases
+=== Reuse Existing PostgreSQL
 
 **Rationale:**
 
-* Zero hosting costs
-* Sufficient for expected scale (thousands of bands/reviews)
-* Simple backups and migrations
-* Excellent for read-heavy workloads
-* Easy development/production parity
-
-**Migration Path:**
-
-Hexagonal architecture allows easy migration to PostgreSQL if needed without changing business logic.
+* PostgreSQL is already operated in the Hetzner k3s cluster
+* Bandcheck uses its own database and least-privilege role
+* No additional database deployment or application PVC is needed
+* Drizzle migrations are applied by the backend at startup
 
 === Bot Protection Strategy
 
@@ -300,7 +294,7 @@ Hexagonal architecture allows easy migration to PostgreSQL if needed without cha
 * **Automated:** Triggered on push to main/dev branches
 * **Fast:** Parallel builds for frontend and backend
 
-**ArgoCD:**
+**Flux CD:**
 
 * **GitOps Continuous Deployment:** Git as single source of truth
 * **Automated Sync:** Monitors Git repository, auto-deploys changes
@@ -314,8 +308,8 @@ Hexagonal architecture allows easy migration to PostgreSQL if needed without cha
 2. GitHub Actions runs tests and builds images
 3. Push images to GHCR
 4. Update Kubernetes manifests with new image tags
-5. ArgoCD detects manifest changes
-6. ArgoCD syncs changes to cluster
+5. Flux detects manifest changes
+6. Flux reconciles changes to the cluster
 7. Kubernetes rolls out new pods
 
 === Monitoring and Observability
@@ -357,9 +351,8 @@ bun dev  # Starts backend with hot reload on port 3000
 
 **Database:**
 
-* SQLite file created automatically on first run
+* PostgreSQL service must be available and `DATABASE_URL` configured
 * Migrations run via `bun run db:migrate`
-* Seeding via `bun run db:seed`
 
 === Testing Strategy
 
@@ -411,7 +404,7 @@ The architecture is designed to support future enhancements:
 
 **Search Improvements:**
 
-* Add full-text search (SQLite FTS or external search service)
+* Add PostgreSQL full-text search or an external search service
 * Implement in repository adapter
 * Core services remain unchanged
 
@@ -420,4 +413,3 @@ The architecture is designed to support future enhancements:
 * Add Redis for caching frequently accessed data
 * Implement as decorator around repository
 * Transparent to business logic
-

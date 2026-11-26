@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: bandcheck-frontend
+  namespace: bandcheck
+  labels:
+    externaldns.kubernetes.io/enabled: "true"
+  annotations:
+    external-dns.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.kubernetes.io/cloudflare-custom-hostname: bandcheck.cloud.marcodoes.tech
+spec:
+  parentRefs:
+    - name: cluster
+      namespace: kube-system
+      sectionName: websecure
+  hostnames:
+    - bandcheck.cloud.marcodoes.tech
+  rules:
+    - backendRefs:
+        - name: bandcheck-frontend
+          port: 80

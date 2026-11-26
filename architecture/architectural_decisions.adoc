@@ -66,7 +66,7 @@ We have decided to use **Kubernetes with nginx** for delivering the frontend of 
 * Packaged in nginx Docker container
 * Deployed to Kubernetes alongside backend
 * Cloudflare handles DNS and acts as CDN
-* ArgoCD manages continuous deployment
+* Flux CD manages continuous deployment
 
 == Backend Hosting
 
@@ -123,8 +123,8 @@ After initial experimentation with Azure Functions, we **completely moved away f
 * Images hosted on GitHub Container Registry (free)
 * Multi-platform support (amd64, arm64)
 * CI: GitHub Actions builds and pushes images to GHCR
-* CD: ArgoCD manages deployment to Kubernetes
-* SQLite database on PersistentVolume
+* CD: Flux CD manages deployment to Kubernetes
+* PostgreSQL database on the existing Hetzner k3s cluster
 
 **Why We Left Azure Functions:**
 
@@ -162,36 +162,29 @@ Option 4: Azure Table Storage::
 
 Option 5: SQLite with PersistentVolume::
     SQLite is a self-contained, serverless SQL database engine that stores data in a single file.
-    It requires no separate database server process, eliminating database hosting costs entirely.
-    When combined with Kubernetes PersistentVolumes, it provides data persistence across pod restarts while maintaining simplicity.
+    It avoids running a separate database service, but limits high availability and makes data tied to a persistent volume.
+
+Option 6: Existing PostgreSQL service::
+    Reuse the PostgreSQL 16 service already operated in the Hetzner k3s cluster.
+    A dedicated Bandcheck database and role isolate the application's data and permissions without running another database instance.
 
 === Decision
 
-We have decided to use **SQLite with PersistentVolume** for the Bandcheck database. This decision reflects the project's cost-conscious approach and actual usage patterns.
+We use the existing **PostgreSQL service** in the Hetzner k3s cluster for Bandcheck. SQLite was previously used by the local deployment to avoid operating a separate database server; the cloud cluster already provides PostgreSQL.
 
 **Rationale:**
 
-* **Zero Database Costs:** No managed database service fees
-* **Simplicity:** Single file database, no connection pooling complexity
-* **Performance:** Excellent for read-heavy workloads with moderate write volume
-* **Backup:** Simple file-based backups via `kubectl cp`
-* **Development/Production Parity:** Same database engine in all environments
-* **Sufficient Scale:** Handles thousands of bands and reviews without issues
+* **Reuse Existing Service:** No additional PostgreSQL instance or database PVC
+* **Isolation:** Dedicated database and least-privilege role for Bandcheck
+* **Durability:** PostgreSQL data is stored on the existing Hetzner volume
+* **Scale:** Standard PostgreSQL connection pooling and transactional behavior
 
 **Implementation:**
 
-* SQLite database file stored on Kubernetes PersistentVolume (10Gi)
+* PostgreSQL 16 service at `postgres-rw.postgres.svc.cluster.local:5432`
 * Drizzle ORM for type-safe database access
-* Migrations managed via Drizzle Kit
-* Regular backups to external storage
-
-**Migration Path:**
-
-The hexagonal architecture allows easy migration to PostgreSQL or another database if needed:
-
-* Change Drizzle configuration to use PostgreSQL driver
-* Update connection string in environment variables
-* No changes required to business logic or service layer
+* PostgreSQL migrations generated with Drizzle Kit and applied at startup
+* Connection URL supplied through a SOPS-encrypted Kubernetes Secret
 
 == Bot Protection
 
@@ -316,7 +309,7 @@ src/
 
 **Benefits Demonstrated:**
 
-* Migrated from Azure Table Storage to SQLite by changing only the database adapter
+* The hexagonal database adapter can use PostgreSQL without changing business logic
 * Business logic remained untouched during infrastructure changes
 * Tests run against mock repositories without needing a database
 * Can run the same code on Azure Functions, Kubernetes, or locally

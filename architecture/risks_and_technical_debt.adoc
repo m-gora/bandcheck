@@ -4,9 +4,10 @@ This section documents known risks and technical debt items, their potential imp
 
 == Technical Risks
 
-=== Risk 1: Single Database Instance (SQLite)
+=== Risk 1: Single PostgreSQL Instance
 
-**Description:** SQLite is a single-file database without replication or high availability.
+**Description:** Bandcheck uses the existing single PostgreSQL instance. Database
+availability and recovery depend on that service and its Hetzner volume.
 
 **Impact:** HIGH
 
@@ -14,15 +15,14 @@ This section documents known risks and technical debt items, their potential imp
 * No automatic failover
 * Single point of failure
 
-**Probability:** LOW (SQLite is very reliable, but hardware failures happen)
+**Probability:** LOW to MEDIUM (the service is healthy, but it is a single instance)
 
 **Mitigation Strategies:**
 
-* ✅ Regular automated backups (currently: manual kubectl cp)
+* ✅ PostgreSQL runs on a persistent Hetzner volume
 * ⚠️ Implement automated daily backups to external storage
 * ⚠️ Test restore procedure quarterly
-* ⚠️ Consider PostgreSQL migration if data becomes critical
-* ✅ PersistentVolume provides some durability
+* ⚠️ Document and validate PostgreSQL recovery procedures
 
 **Risk Acceptance:**
 
@@ -30,8 +30,8 @@ Accepted for now due to:
 
 * Non-commercial platform (data loss not catastrophic)
 * Community can re-contribute content
-* Cost savings significant
-* Can migrate to PostgreSQL if needed (architecture supports this)
+* The database service is shared with other applications
+* A dedicated database and role isolate Bandcheck access
 
 === Risk 2: No Real-Time Monitoring/Alerting
 
@@ -48,7 +48,7 @@ Accepted for now due to:
 **Mitigation Strategies:**
 
 * ✅ Basic health checks via Kubernetes probes
-* ✅ ArgoCD shows deployment status
+* ✅ Flux CD reports reconciliation status
 * ⚠️ Add uptime monitoring (e.g., UptimeRobot free tier)
 * ⚠️ Implement Prometheus + Grafana for metrics
 * ⚠️ Add error tracking (e.g., Sentry free tier)
@@ -134,7 +134,7 @@ Accepted because:
 **Mitigation Strategies:**
 
 * ⚠️ Implement basic load testing (k6, Artillery)
-* ⚠️ Test SQLite concurrent write limits
+* ⚠️ Load-test PostgreSQL query and connection-pool behavior
 * ✅ Horizontal pod autoscaling configured
 * ✅ Cloudflare provides DDoS protection
 * ⚠️ Document expected user limits
@@ -389,7 +389,7 @@ Common for open source projects:
 **Mitigation Strategies:**
 
 * ✅ Infrastructure as Code (Kubernetes manifests)
-* ✅ ArgoCD for GitOps deployment
+* ✅ Flux CD for GitOps deployment
 * ✅ Environment variables documented
 * ⚠️ Configuration management review
 * ⚠️ Automated drift detection
@@ -398,7 +398,7 @@ Common for open source projects:
 
 Manageable with GitOps:
 
-* ArgoCD ensures Git is source of truth
+* Flux ensures Git is the source of truth
 * Manual changes detected and reverted
 * Documentation helps maintain consistency
 
