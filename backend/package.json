@@ -8,6 +8,7 @@
     "start": "bun src/server.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:import-crawler": "bun scripts/import-crawler-data.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "build": "echo 'No build step needed for Bun'",

@@ -140,6 +140,38 @@ PostgreSQL stores the `bands` and `reviews` tables. The connection URL is
 provided through `DATABASE_URL`; Kubernetes supplies it from a SOPS-encrypted
 Secret. Drizzle migrations run before the HTTP server starts.
 
+### Importing the crawler snapshot
+
+The crawler snapshot stays local; the import tool streams it into PostgreSQL
+and stores the full source record in `bands.source_metadata`. The public API
+does not expose that metadata. `ma_id` is the idempotency key, so rerunning a
+partial import skips records already present.
+
+First run the dry-run report:
+
+```bash
+bun run db:import-crawler
+```
+
+The PostgreSQL migration adds a partial unique index on `ma_id` and a
+`source_metadata` JSONB column. Apply migrations first. To connect from the
+workstation, keep this port-forward running in one terminal:
+
+```bash
+kubectl -n postgres port-forward svc/postgres-rw 15432:5432
+```
+
+In another terminal, set `DATABASE_URL` to the same credentials with host
+`127.0.0.1` and port `15432`, then apply migrations and try a small batch:
+
+```bash
+bun run db:migrate
+bun run db:import-crawler -- --apply --limit=100
+```
+
+After validating the inserted rows, run without `--limit` to import the full
+file. The tool commits batches of 500 by default; `--batch-size=N` adjusts that.
+
 ## 🧪 Testing
 
 Smoke-test the API with:

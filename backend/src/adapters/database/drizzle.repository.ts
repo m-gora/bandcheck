@@ -127,13 +127,21 @@ export class DrizzleBandRepository implements BandRepository {
 
   private toDomain(band: typeof bands.$inferSelect): Band {
     return {
-      ...band,
-      maId: (band.maId as string | null) ?? undefined,
+      id: band.id,
+      maId: band.maId ?? undefined,
+      name: band.name,
+      description: band.description,
       genres: this.parseJsonArray(band.genres),
+      location: band.location ?? undefined,
+      formed: band.formed ?? undefined,
+      website: band.website ?? undefined,
+      imageUrl: band.imageUrl ?? undefined,
       members: this.parseJsonArray(band.members),
+      safetyStatus: band.safetyStatus as Band['safetyStatus'],
+      reviewCount: band.reviewCount,
       createdAt: band.createdAt.toISOString(),
       updatedAt: band.updatedAt.toISOString(),
-    } as Band;
+    };
   }
 
   private toPersistence(band: Band): typeof bands.$inferInsert {

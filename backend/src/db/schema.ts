@@ -1,4 +1,4 @@
-import { integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const bands = pgTable('bands', {
@@ -12,6 +12,7 @@ export const bands = pgTable('bands', {
   website: text('website'),
   imageUrl: text('image_url'),
   members: jsonb('members').$type<string[]>(),
+  sourceMetadata: jsonb('source_metadata').$type<Record<string, unknown>>(),
   safetyStatus: text('safety_status').notNull().default('pending'), // 'safe' | 'unsafe' | 'controversial' | 'pending'
   reviewCount: integer('review_count').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true })
@@ -20,7 +21,9 @@ export const bands = pgTable('bands', {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
-});
+}, (table) => [
+  uniqueIndex('bands_ma_id_unique').on(table.maId).where(sql`${table.maId} IS NOT NULL`),
+]);
 
 export const reviews = pgTable('reviews', {
   id: text('id').primaryKey(),
