@@ -50,8 +50,11 @@ docs/
 k8s/
 K8S_DEPLOYMENT.md
 
-# Drizzle migrations (generated during Docker build stage)
-drizzle/
+# Keep the checked-in PostgreSQL migrations, but exclude any local SQLite
+# migration output.
+drizzle/*
+!drizzle/postgres/
+!drizzle/postgres/**
 
 # Database files (don't include local DB in image)
 data/
