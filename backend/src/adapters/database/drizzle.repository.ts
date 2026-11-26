@@ -1,7 +1,42 @@
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import { db, bands, reviews } from '../../db';
 import type { Band, Review, GetBandsQuery, GetBandsResult } from '../../core/domain/entities';
 import type { BandRepository, ReviewRepository } from '../../core/ports/repositories';
+
+type PublicBandRow = Pick<
+  typeof bands.$inferSelect,
+  | 'id'
+  | 'maId'
+  | 'name'
+  | 'description'
+  | 'genres'
+  | 'location'
+  | 'formed'
+  | 'website'
+  | 'imageUrl'
+  | 'members'
+  | 'safetyStatus'
+  | 'reviewCount'
+  | 'createdAt'
+  | 'updatedAt'
+>;
+
+const publicBandColumns = {
+  id: bands.id,
+  maId: bands.maId,
+  name: bands.name,
+  description: bands.description,
+  genres: bands.genres,
+  location: bands.location,
+  formed: bands.formed,
+  website: bands.website,
+  imageUrl: bands.imageUrl,
+  members: bands.members,
+  safetyStatus: bands.safetyStatus,
+  reviewCount: bands.reviewCount,
+  createdAt: bands.createdAt,
+  updatedAt: bands.updatedAt,
+};
 
 export class DrizzleBandRepository implements BandRepository {
   async findAll(query: GetBandsQuery): Promise<GetBandsResult> {
@@ -27,27 +62,25 @@ export class DrizzleBandRepository implements BandRepository {
       );
     }
     
-    let allBands;
-    if (conditions.length > 0) {
-      allBands = await db.select().from(bands).where(and(...conditions));
-    } else {
-      allBands = await db.select().from(bands);
-    }
-    
-    // Parse JSON fields and sort
-    const parsedBands = allBands.map(band => this.toDomain(band));
-    parsedBands.sort((a, b) => a.name.localeCompare(b.name));
-    
-    const paginatedBands = parsedBands.slice(offset, offset + limit);
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+    const [countRows, rows] = await Promise.all([
+      db.select({ total: count() }).from(bands).where(where),
+      db.select(publicBandColumns)
+        .from(bands)
+        .where(where)
+        .orderBy(asc(bands.name))
+        .limit(limit)
+        .offset(offset),
+    ]);
     
     return {
-      bands: paginatedBands,
-      total: parsedBands.length,
+      bands: rows.map((band) => this.toDomain(band)),
+      total: countRows[0]?.total ?? 0,
     };
   }
 
   async findById(id: string): Promise<Band | null> {
-    const [band] = await db.select().from(bands).where(eq(bands.id, id)).limit(1);
+    const [band] = await db.select(publicBandColumns).from(bands).where(eq(bands.id, id)).limit(1);
     if (!band) return null;
     return this.toDomain(band);
   }
@@ -80,7 +113,7 @@ export class DrizzleBandRepository implements BandRepository {
   }
 
   async existsByName(name: string): Promise<boolean> {
-    const existing = await db.select()
+    const existing = await db.select({ id: bands.id })
       .from(bands)
       .where(eq(bands.name, name))
       .limit(1);
@@ -88,7 +121,7 @@ export class DrizzleBandRepository implements BandRepository {
   }
 
   async existsByMaId(maId: string): Promise<boolean> {
-    const existing = await db.select()
+    const existing = await db.select({ id: bands.id })
       .from(bands)
       .where(eq(bands.maId, maId))
       .limit(1);
@@ -96,28 +129,19 @@ export class DrizzleBandRepository implements BandRepository {
   }
 
   async getStatistics(): Promise<{ safe: number; unsafe: number; controversial: number; pending: number; total: number }> {
-    const allBands = await db.select().from(bands);
-    
-    const stats = {
-      safe: 0,
-      unsafe: 0,
-      controversial: 0,
-      pending: 0,
-      total: allBands.length,
-    };
+    const [stats] = await db.select({
+      safe: sql<number>`count(*) FILTER (WHERE ${bands.safetyStatus} = 'safe')::int`,
+      unsafe: sql<number>`count(*) FILTER (WHERE ${bands.safetyStatus} = 'unsafe')::int`,
+      controversial: sql<number>`count(*) FILTER (WHERE ${bands.safetyStatus} = 'controversial')::int`,
+      pending: sql<number>`count(*) FILTER (WHERE ${bands.safetyStatus} = 'pending')::int`,
+      total: count(),
+    }).from(bands);
 
-    for (const band of allBands) {
-      if (band.safetyStatus === 'safe') stats.safe++;
-      else if (band.safetyStatus === 'unsafe') stats.unsafe++;
-      else if (band.safetyStatus === 'controversial') stats.controversial++;
-      else stats.pending++;
-    }
-
-    return stats;
+    return stats ?? { safe: 0, unsafe: 0, controversial: 0, pending: 0, total: 0 };
   }
 
   async findLatest(limit: number): Promise<Band[]> {
-    const latestBands = await db.select()
+    const latestBands = await db.select(publicBandColumns)
       .from(bands)
       .orderBy(desc(bands.createdAt))
       .limit(limit)
@@ -125,7 +149,7 @@ export class DrizzleBandRepository implements BandRepository {
     return latestBands.map(band => this.toDomain(band));
   }
 
-  private toDomain(band: typeof bands.$inferSelect): Band {
+  private toDomain(band: PublicBandRow): Band {
     return {
       id: band.id,
       maId: band.maId ?? undefined,

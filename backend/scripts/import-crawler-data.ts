@@ -77,7 +77,7 @@ async function insertBatch(
   client: ReturnType<typeof postgres>,
   batch: ImportedBand[],
 ): Promise<number> {
-  const payload = JSON.stringify(batch.map((band) => ({
+  const payload = batch.map((band) => ({
     id: band.id,
     ma_id: band.maId,
     name: band.name,
@@ -89,7 +89,7 @@ async function insertBatch(
     image_url: band.imageUrl,
     members: band.members,
     source_metadata: band.sourceMetadata,
-  })));
+  }));
 
   const inserted = await client.begin((transaction) => transaction`
     INSERT INTO bands (
@@ -117,7 +117,7 @@ async function insertBatch(
       input.image_url,
       input.members,
       input.source_metadata
-    FROM jsonb_to_recordset(${payload}::jsonb) AS input(
+    FROM jsonb_to_recordset(${transaction.json(JSON.parse(JSON.stringify(payload)))}::jsonb) AS input(
       id text,
       ma_id text,
       name text,

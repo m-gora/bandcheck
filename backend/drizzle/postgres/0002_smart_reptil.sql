@@ -1,0 +1,1 @@
+CREATE INDEX "bands_name_idx" ON "bands" USING btree ("name");

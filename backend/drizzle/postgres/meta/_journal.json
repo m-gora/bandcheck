@@ -15,6 +15,13 @@
       "when": 1795734767766,
       "tag": "0001_woozy_agent_brand",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795735049887,
+      "tag": "0002_smart_reptil",
+      "breakpoints": true
     }
   ]
 }

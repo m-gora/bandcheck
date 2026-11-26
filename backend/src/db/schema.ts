@@ -1,4 +1,4 @@
-import { integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const bands = pgTable('bands', {
@@ -22,6 +22,7 @@ export const bands = pgTable('bands', {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
+  index('bands_name_idx').on(table.name),
   uniqueIndex('bands_ma_id_unique').on(table.maId).where(sql`${table.maId} IS NOT NULL`),
 ]);
 
